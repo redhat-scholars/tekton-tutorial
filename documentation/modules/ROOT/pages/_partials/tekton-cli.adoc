@@ -1,0 +1,15 @@
+Verify the Tekton cli
+
+[#tekton-install-cli]
+[source,bash,subs="+macros,attributes+"]
+----
+tkn version
+----
+copyToClipboard::tekton-install-cli[]
+
+The command should show a result like:
+
+[source,bash,subs="+macros,attributes+"]
+----
+Client version: {tekton-cli-version}
+----

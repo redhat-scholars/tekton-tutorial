@@ -1,0 +1,73 @@
+[IMPORTANT]
+======
+This installation assumes that the xref:knative-tutorial-basics:ROOT:01-setup.adoc#kubernetes-cluster[install knative on OpenShift] have been installed and verified.
+======
+
+The following section details on how to install openshift-pipeline(Tekton on OpenShift).
+
+**Login as admin**
+
+Login to OpenShift console using the cluster admin credentials.
+
+Open a new terminal and start a watch on the command `oc get csv -n openshift-operators`. For further reference in the setup we will call this terminal as **WATCH_WINDOW**.
+
+[#tkn-check-operators-status]
+[source,bash,subs="+macros,+attributes"]
+----
+watch 'oc get csv -n openshift-operators -ocustom-columns-file=$TUTORIAL_HOME/install/csv-columns.txt'
+----
+copyToClipboard::tkn-check-operators-status[]
+
+[NOTE]
+=====
+You can terminate the watch using the command kbd:[Ctrl+c]
+=====
+
+[#install-pipelines]
+[source,bash,subs="+macros,+attributes"]
+----
+oc apply -f "pass:[$TUTORIAL_HOME]/install/tektoncd-pipelines/subscription.yaml"
+----
+copyToClipboard::install-pipelines[]
+
+[IMPORTANT]
+======
+Wait for the subscription **PHASE** to be **Installed** before proceeding to next step. You can watch the status in the WATCH_WINDOW.
+======
+
+A successful openshift-pipelines subscription install should show the output in WATCH_WINDOW like:
+
+[source,bash]
+-----
+NAME                                         VERSION               PHASE
+elasticsearch-operator.4.1.20-201910102034   4.1.20-201910102034   Succeeded
+jaeger-operator.v1.13.1                      1.13.1                Succeeded
+kiali-operator.v1.0.6                        1.0.6                 Succeeded
+knative-eventing-operator.v0.8.0             0.8.0                 Succeeded
+openshift-pipelines-operator.v0.5.2          0.5.2                 Succeeded
+serverless-operator.v1.0.0                   1.0.0                 Succeeded
+servicemeshoperator.v1.0.1                   1.0.1                 Succeeded
+-----
+
+It will take few minutes for the openshift-pipelines components to be installed,you can watch the status using:
+
+[#check-pipelines]
+[source,bash,subs="+macros,+attributes"]
+----
+oc get pods -n openshift-pipelines -w 
+----
+copyToClipboard::check-pipelines[]
+
+NOTE: You can terminate the watch using the command kbd:[Ctrl+c]
+
+A successful OpenShift pipelines install will show the following pods in openshift-pipelines namespace:
+
+[source,bash]
+-----
+NAME                                           READY   STATUS    RESTARTS   AGE
+tekton-pipelines-controller-855f895846-jgh99   1/1     Running   0          2m20s
+tekton-pipelines-webhook-c98b564d5-dtt5z       1/1     Running   0          2m21s
+-----
+
+**Congratulations!** You have now installed all the OpenShift pipelines components to run the tutorial exercises. You can terminate the WATCH_WINDOW using kbd:[Ctrl+c].
+

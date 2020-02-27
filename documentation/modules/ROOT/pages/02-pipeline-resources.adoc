@@ -1,0 +1,116 @@
+= Pipeline Resources
+include::_attributes.adoc[]
+:k8s-resource: build-resources.yaml
+
+At the end of this chapter you will be able to :
+
+* Understand what is a https://github.com/tektoncd/pipeline/blob/master/docs/resources.md[pipeline resource] ?
+* Create a pipeline resource
+
+[#tekton-res-prerequisite]
+== Prerequisite
+
+include::knative-tutorial-basics:ROOT:partial$prereq-cli.adoc[]
+
+include::partial$tekton-api.adoc[]
+
+include::partial$tekton-cli.adoc[]
+
+[#tekton-res-create]
+== Create a pipeline resource
+
+include::partial$tekton-nav-to-folder.adoc[]
+
+The following snippet shows what a Knative service YAML looks like:
+
+.link:{github-repo}/{pipelines-repo}/build-resources.yaml[build-resources.yaml]
+[source,yaml,subs="+macros,attributes+"]
+----
+include::ROOT:example$build-resources.yaml[]
+----
+
+Each pipeline resource has:
+
+* **name**: the name using which it will be referred in other places
+* **type**: the type of the pipeline resource, in this example we have two types
+    **  __git__ - this type of resource refers to a GitHub repository
+    **  __image__ - this type of resource is linux container image 
+* **params**: each type can have one or more parameters that will be used to configure the underlying type. In the above example for the `git-source` pipeline resource, the parameters `url` and `revision` are used  to identify the GitHub repository url and revision of the sources respectively.
+
+More details on other types of pipeline resource types is available https://github.com/tektoncd/pipeline/blob/master/docs/resources.md#resource-types[here].
+ 
+[#tekton-res-deploy]
+== Deploy a pipeline resource
+
+The pipeline resource could be created using the command:
+
+ifndef::workshop[]
+[tabs]
+====
+Kubernetes::
++
+--
+[#tekton-build-res-deploy-to-k8s]
+[source,bash,subs="+macros,attributes+"]
+----
+kubectl create -n {tutorial-namespace} -f link:{github-repo}/{pipelines-repo}/build-resources.yaml[build-resources.yaml]
+----
+copyToClipboard::tekton-build-res-deploy-to-k8s[]
+--
+OpenShift::
++
+--
+endif::[]
+[#tekton-build-res-deploy-to-oc]
+[source,bash,subs="+macros,attributes+"]
+----
+oc create -n {tutorial-namespace} -f link:{github-repo}/{pipelines-repo}/build-resources.yaml[build-resources.yaml]
+----
+copyToClipboard::tekton-build-res-deploy-to-oc[]
+ifndef::workshop[]
+--
+====
+endif::[]
+
+[#tkn-see-what-you-have-deployed]
+== See what you have deployed
+
+We will use the Tekton cli to inspect the created resources
+
+[#tekton-inspect-pipeline-res]
+[source,bash,subs="+macros,attributes+"]
+----
+tkn res ls
+----
+copyToClipboard::tekton-inspect-pipeline-res[]
+
+The above command should list two resources as shown below:
+
+[source,bash]
+----
+NAME                             TYPE    DETAILS
+git-source                       git     url: https://github.com/redhat-developer-demos/knative-tutorial
+knative-tutorial-greeter-image   image   url: registry.kube-system:80/rhdevelopers/knative-tutorial-greeter
+----
+
+[TIP]
+====
+Use the command **help** via `tkn res --help`
+
+e.g. Running a command `tkn res describe git-source` will return an output like:
+
+[source,bash]
+----
+Name:                    git-source
+Namespace:               knativetutorial
+PipelineResource Type:   git
+
+Params
+NAME       VALUE
+url        https://github.com/redhat-developer-demos/knative-tutorial
+revision   release/0.7.x
+
+Secret Params
+No secret params
+----
+====

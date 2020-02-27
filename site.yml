@@ -1,0 +1,27 @@
+runtime:
+  cache_dir: ./.cache/antora
+
+site:
+  title: Tekton Tutorial
+  url: https://redhat-developer-demos.github.io/tekton-tutorial
+  start_page: tekton-tutorial::index.adoc
+
+content:
+  sources:
+    - url: git@github.com:redhat-developer-demos/tekton-tutorial.git
+      tags: []
+      start_path: documentation
+asciidoc:
+  attributes:
+    tutorial-namespace: tektontutorial
+    title: Tekton Tutorial
+    release-version: master
+  extensions:
+    - ./lib/copy-to-clipboard.js
+    - ./lib/tab-block.js
+ui:
+  bundle:
+    url: https://github.com/redhat-developer-demos/rhd-tutorial-ui/releases/download/v0.0.4/ui-bundle.zip
+  supplemental_files: ./supplemental-ui
+output:
+  dir: ./gh-pages

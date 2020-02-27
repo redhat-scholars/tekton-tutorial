@@ -1,0 +1,370 @@
+= Tasks
+include::_attributes.adoc[]
+
+At the end of this chapter you will be able to :
+
+* Understand what is a https://github.com/tektoncd/pipeline/blob/master/docs/pipelines.md[Pipeline] ?
+* Add Tasks from Catalog
+* Create a Pipeline
+* Execute a Pipeline to build and deploy a Knative service 
+
+[#tekton-task-prerequisite]
+== Prerequisite
+
+include::knative-tutorial-basics:ROOT:partial$prereq-cli.adoc[]
+
+include::partial$tekton-api.adoc[]
+
+include::partial$tekton-cli.adoc[]
+
+Ensure the pipeline Resources and Tasks are available:
+
+[#tekton-prerreq-resources]
+[source,bash,subs="+macros,attributes+"]
+----
+tkn res ls 
+----
+copyToClipboard::tekton-prerreq-resources[]
+
+The command above should show an output like:
+
+[source,bash]
+----
+NAME                             TYPE    DETAILS
+git-source                       git     url: https://github.com/redhat-developer-demos/knative-tutorial
+knative-tutorial-greeter-image   image   url: localhost:5000/rhdevelopers/knative-tutorial-greeter:v0.1.1
+----
+
+
+[#tekton-prerreq-task-resources]
+[source,bash,subs="+macros,attributes+"]
+----
+tkn task ls 
+----
+copyToClipboard::tekton-prerreq-task-resources[]
+
+[source,bash]
+----
+NAME        AGE
+build-app   5 hours ago
+----
+
+If you don't see the output as above please ensure you have completed all the exercises of xref::02-pipeline-resources.adoc[Chapter 2] and xref::03-tasks.adoc[Chapter 3] before proceeding further.
+
+[#tekton-add-tasks]
+== Add Tasks from catalog
+
+The Tekton Pipelines catalog allows you to reuse the catalog from community repositories. Here is list of repositories which from where you can add tasks:
+
+* https://github.com/tektoncd/catalog[Tekton Pipelines Catalog]
+* https://github.com/openshift/pipelines-catalog[OpenShift Pipelines Catalog]
+
+For the exercise of this chapter we need https://github.com/knative/client[kn] client task that will be used to deploy the built container image as serverless service. 
+
+The `kn` Task can be installed from https://github.com/tektoncd/catalog[Tekton Pipelines Catalog] repository:
+
+ifndef::workshop[]
+[tabs]
+====
+Kubernetes::
++
+--
+[#tekton-pipeline-add-tasks-k8s]
+[source,bash,subs="+macros,attributes+"]
+----
+kubectl create -n {tutorial-namespace} \
+  -f https://raw.githubusercontent.com/tektoncd/catalog/master/kn/kn.yaml
+----
+copyToClipboard::tekton-pipeline-add-tasks-k8s[]
+--
+OpenShift::
++
+--
+endif::[]
+[#tekton-pipeline-add-tasks-oc]
+[source,bash,subs="+macros,attributes+"]
+----
+oc create -n {tutorial-namespace} \
+  -f https://raw.githubusercontent.com/tektoncd/catalog/master/kn/kn.yaml
+----
+copyToClipboard::tekton-pipeline-add-tasks-oc[]
+--
+====
+
+Check the created tasks using the command:
+[#tekton-task-ls]
+[source,bash]
+----
+tkn task ls
+----
+copyToClipboard::tekton-task-ls[] 
+
+The Task list should now list the following two Tasks:
+
+[source,bash,subs="+macros,attributes+"]
+----
+NAME        AGE
+build-app   5 hours ago
+kn          3 minutes ago
+----
+
+
+[#tekton-pipeline-create]
+== Create a Pipeline
+
+Using a Pipeline we can run multiple Task together in a user defined sequence or order.
+
+Let us use the `build-app` task that we created in xref:03-tasks.adoc.adoc#tekton-task-create[previous chapter] and `kn` task that we deployed in previous step to make Pipeline that will build the application from sources and deploy the built linux container image as Knative serverless service.
+
+include::partial$tekton-nav-to-folder.adoc[]
+
+The following snippet shows what a Tekton Pipeline YAML looks like:
+
+.link:{github-repo}/{pipelines-repo}/kn-svc-deploy.yaml[kn-svc-deploy.yaml]
+[source,yaml,subs="+macros,attributes+"]
+----
+include::ROOT:example$kn-svc-deploy.yaml[]
+----
+
+Each Pipeline has the following:
+
+* **name** - the unique name using which the Pipeline can be referred
+** **resources** - the pipeline resources that will be used in the Pipeline e.g. appImage, appSource
+*** **name** - the name of the input resource using which it can be referenced and bound via <<tekton-pipeline-run>>
+*** **type** - the type of the input resource, typically the pipeline resource type
+
+**tasks** has one or more Tasks that needs to be executed as part of the Pipeline. In this example we have two Tasks `build-java-app` and `deploy-kn-service` that will be run to build the application from sources and deploy the built linux container image as knative service.
+
+By default all Tasks of the Pipeline runs in parallel, you can control the execution via `runAfter` attribute. In this example we make the `deploy-kn-service` to run after the `build-java-app`.
+
+Each Task in the Pipeline has 
+
+** **taskRef** - the reference to an existing defined task via `name`
+** **params** - the Task parameters to define or override
+*** **name** - the name of the parameter
+*** **value** - the value of the parameter
+** **resources** - used to bind the Pipeline inputs and output resource to Task's input and output resource. 
+** **name** - the local name of the resource
+** **resource** - the Pipeline resource (defined under `resources`) name
+
+In this demo the `build-app` Task needs bind two resources namely `source` and `builtImage`. The Pipeline `kn-svc-deploy` defines two resources `appSource` and `appImage` that can be configured via <<tekton-pipeline-run>>. 
+
+The binding between the Pipeline resource and Task resources is done via the task's `resources` attribute. In this demo we bind `appSource` -> `source` and `appImage` -> `builtImage`.
+
+IMPORTANT: Only pipeline resources of same type can be bound. e.g. resource of type `git` with `git` or `image` with `image`
+
+[#tekton-pipeline-deploy]
+== Deploy Pipeline
+
+The Knative service deployment Pipeline could be created using the command:
+
+ifndef::workshop[]
+[tabs]
+====
+Kubernetes::
++
+--
+[#tekton-pipeline-deploy-to-k8s]
+[source,bash,subs="+macros,attributes+"]
+----
+kubectl create -n {tutorial-namespace} -f link:{github-repo}/{pipelines-repo}/kn-svc-deploy.yaml[kn-svc-deploy.yaml]
+----
+copyToClipboard::tekton-pipeline-deploy-to-k8s[]
+--
+OpenShift::
++
+--
+endif::[]
+[#tekton-pipeline-deploy-to-oc]
+[source,bash,subs="+macros,attributes+"]
+----
+oc create -n {tutorial-namespace} -f link:{github-repo}/{pipelines-repo}/kn-svc-deploy.yaml[kn-svc-deploy.yaml]
+----
+copyToClipboard::tekton-pipeline-deploy-to-oc[]
+ifndef::workshop[]
+--
+====
+endif::[]
+
+We will use the Tekton cli to inspect the created resources
+
+[#tekton-inspect-pipeline]
+[source,bash,subs="+macros,attributes+"]
+----
+tkn pipeline ls
+----
+copyToClipboard::tekton-inspect-pipeline[]
+
+The above command should list one Pipeline as shown below:
+
+[source,bash]
+----
+NAME            AGE             LAST RUN   STARTED   DURATION   STATUS
+kn-svc-deploy   4 seconds ago   ---        ---       ---        ---
+----
+
+[TIP]
+====
+Use the command **help** via `tkn pipeline --help` to see more options
+====
+
+[#tekton-pipeline-run]
+== Run Pipeline
+
+Unlike xref:03-tasks.adoc.adoc#tekton-task-run-run[TaskRun] we will not be using YAML to trigger PipelineRun, instead we will use the Tekton cli to trigger the pipeline:
+
+[#tekton-trigger-pipelinerun]
+[source,bash,subs="+macros,attributes+"]
+----
+tkn pipeline start kn-svc-deploy \
+ --resource="appSource=git-source" \#<1>
+ --resource="appImage=knative-tutorial-greeter-image" \#<2>
+ --serviceaccount='pipeline' #<3>
+----
+copyToClipboard::tekton-trigger-pipelinerun[]
+
+<1> The resources of the Pipeline could be bound via `--resource` option, here we bind the Pipeline `appSource` to pipeline resource `git-source`
+<2> Bind the Pipeline `appImage` to pipeline resource `knative-tutorial-greeter-image`
+<3> The service account to use with Pipeline run
+
+[TIP]
+====
+If you have maven mirror available then you can modify the above command to use maven mirror:
+[#tekton-trigger-pipelinerun-maven-mirror]
+[source,bash,subs="+macros,attributes+"]
+----
+tkn pipeline start kn-svc-deploy \
+ --param="mavenMirrorUrl=http://nexus:8081/nexus/content/groups/public" \
+ --resource="appSource=git-source" \#<1>
+ --resource="appImage=knative-tutorial-greeter-image" \#<2>
+ --serviceaccount='pipeline' #<3>
+  
+----
+copyToClipboard::tekton-trigger-pipelinerun-maven-mirror[]
+====
+
+We will use the Tekton cli to inspect the created resources:
+
+[#tekton-inspect-pipelinerun]
+[source,bash,subs="+macros,attributes+"]
+----
+tkn pipelinerun ls
+----
+copyToClipboard::tekton-inspect-pipelinerun[]
+
+The above command should list one PipelineRun as shown below:
+
+[source,bash]
+----
+NAME                      STARTED          DURATION    STATUS                        
+kn-svc-deploy-run-4896t   4 seconds ago    ---         Running 
+----
+
+NOTE: It will take few seconds for the PipelineRun to show status as `Running` as it needs to download the container images.
+
+[TIP]
+====
+* Use the command **help** via `tkn pipelinerun --help`
+* Use `pr` as shorcut for pipelinerun commands e.g to list pipelinerun run the command `tkn pr ls`
+====
+
+To check the status of the PipelineRun use the `logs` command of pipelinerun like:
+
+[#tekton-pipelinerun-logs]
+[source,bash,subs="+macros,attributes+"]
+----
+#list running using the command tkn pr ls
+tkn pr ls
+# use one task run for which you need the log from list above
+tkn pr logs -f -a <pipeline-run-name> #<1>
+----
+copyToClipboard::tekton-pipelinerun-logs[]
+<1> The `-f` or `-a` allows to tail the logs from all the containers of the pipeline tasks. For more options run `tkn pr --help`
+
+If you see the PipelineRun status as `Failed` or `Error` use the following command to check the reason for error:
+
+[#tekton-desc-pipelinerun]
+[source,bash,subs="+macros,attributes+"]
+----
+tkn pipelinerun describe <pipelinerun-name>
+----
+copyToClipboard::tekton-desc-pipelinerun[]
+
+[#tekton-test-pipeline]
+== Invoke Service
+ifndef::workshop[]
+[tabs]
+====
+Kubernetes::
++
+--
+:k8s-env: minikube
+:k8s-cli: kubectl
+:doc-sec: tkn
+include::knative-tutorial-basics:ROOT:partial$invoke-service.adoc[tags=**;!workshop-call;!workshop-call-params]
+--
+OpenShift::
++
+--
+:k8s-env: openshift
+:k8s-cli: oc
+:doc-sec: tkn
+include::knative-tutorial-basics:ROOT:partial$invoke-service.adoc[tag=workshop-call]
+--
+====
+endif::[]
+
+ifdef::workshop[]
+:k8s-env: openshift
+:k8s-cli: oc
+:doc-sec: tkn-01
+include::knative-tutorial-basics:ROOT:partial$invoke-service.adoc[tag=workshop-call]
+endif::[]
+
+The `http` command should return a response containing a line similar to **Hi  greeter => '6fee83923a9f' : 1**
+
+NOTE: Sometimes the response might not be returned immediately especially when the pod is coming up from dormant state. In that case, repeat service invocation.
+
+[#tekton-pipeline-cleanup]
+== Cleanup
+
+Delete the pipeline service account and its related permissions:
+
+ifndef::workshop[]
+[tabs]
+====
+Kubernetes::
++
+--
+[#tekton-pipeline-cleanup-sa-k8s]
+[source,bash,subs="+macros,attributes+"]
+----
+tkn res ls | awk 'NR!=1{print $1}' | xargs kubectl delete pipelineresources &&\
+tkn task ls | awk 'NR!=1{print $1}' | xargs kubectl delete tasks &&\
+tkn tr ls | awk 'NR!=1{print $1}' | xargs kubectl delete taskruns  &&\
+tkn pipeline ls | awk 'NR!=1{print $1}' | xargs kubectl delete pipeline &&\
+tkn pr ls | awk 'NR!=1{print $1}' | xargs kubectl delete pipelineruns &&\
+kubectl delete -n {tutorial-namespace} -f pipeline-sa-role.yaml &&\
+kubectl delete -n {tutorial-namespace} ksvc greeter
+----
+copyToClipboard::tekton-pipeline-cleanup-sa-k8s[]
+--
+OpenShift::
++
+--
+endif::[]
+[#tekton-pipeline-cleanup-sa-oc]
+[source,bash,subs="+macros,attributes+"]
+----
+tkn res ls | awk 'NR!=1{print $1}' | xargs oc delete pipelineresources &&\
+tkn task ls | awk 'NR!=1{print $1}' | xargs oc delete tasks &&\
+tkn tr ls | awk 'NR!=1{print $1}' | xargs oc delete taskruns  &&\
+tkn pipeline ls | awk 'NR!=1{print $1}' | xargs oc pipeline &&\
+tkn pr ls | awk 'NR!=1{print $1}' | xargs oc delete pipelineruns &&\
+oc delete -n {tutorial-namespace} -f pipeline-sa-role.yaml &&\
+oc delete -n {tutorial-namespace} ksvc greeter
+----
+copyToClipboard::tekton-pipeline-cleanup-sa-oc[]
+ifndef::workshop[]
+--
+====

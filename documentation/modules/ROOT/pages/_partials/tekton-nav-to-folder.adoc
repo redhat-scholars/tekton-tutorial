@@ -1,0 +1,8 @@
+If you are not in tutorial chapter folder, then navigate to the folder:
+
+[#tekton-res-nav-folder]
+[source,bash,subs="+macros,+attributes"]
+----
+cd pass:[$TUTORIAL_HOME]/{pipelines-repo}
+----
+copyToClipboard::tekton-res-nav-folder[]

@@ -1,0 +1,404 @@
+= Tasks
+include::_attributes.adoc[]
+
+At the end of this chapter you will be able to :
+
+* Understand what is a https://github.com/tektoncd/pipeline/blob/master/docs/tasks.md[Task] ?
+* Create a Task
+* Create a TaskRun
+* Use the pipeline resource with TaskRun
+
+[#tekton-task-prerequisite]
+== Prerequisite
+
+include::knative-tutorial-basics:ROOT:partial$prereq-cli.adoc[]
+
+include::partial$tekton-api.adoc[]
+
+include::partial$tekton-cli.adoc[]
+
+[#tekton-task-create]
+== Create a Task
+
+include::partial$tekton-nav-to-folder.adoc[]
+
+The following snippet shows what a Tekton Task YAML looks like:
+
+.link:{github-repo}/{pipelines-repo}/build-app-task.yaml[build-app-task.yaml]
+[source,yaml,subs="+macros,attributes+"]
+----
+include::ROOT:example$build-app-task.yaml[]
+----
+
+Each Task has the following:
+
+* **name** - the unique name using which the task can be referred
+* **inputs** - the inputs to the task
+** **resources** - the pipeline resources that will be used in the task e.g. git-source
+*** **name** - the name of the input resource using which it can be referenced and bound via <<tekton-task-run>>
+*** **type** - the type of the input resource, typically the pipeline resource type
+** **params** - the parameters that will be used in the task steps. Each parameter has 
+*** **name** - the name of the parameter
+*** **description** - the description of the parameter
+*** **default** - the default value of parameter
+
+NOTE: The <<tekton-task-run>> could override the parameter values, if no parameter value is passed then the **default** value will be used.
+
+* **outputs** the pipeline resource that will end artifact of the task. In the above example the build will produce a container image artifact.
+** **resources** - the pipeline resources that will be used in the task e.g. builtImage
+*** **name** - the name of the input resource using which it can be referenced and bound via <<tekton-task-run>>
+*** **type** - the type of the input resource, typically the pipeline resource type
+* **steps** - One or more sub-tasks that will be executed in the defined order. The step has all the attributes like a https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.14/#pod-v1-core[Pod spec]
+* **stepTemplate** - when there is a need to have similar container configuration across all steps of a the task, we can have them defined in the stepTemplate, the task steps will inherit them implicitly in all steps. In the example above we define the resources and securityContext for all the steps
+* **volumes** - the task can also mount external volumes using the **volumes** attribute.
+
+The parameters that were part of the menu:spec[inputs > params] can be used in the steps using the notation `$(<variable-name>)`.
+
+The task `build-app` is used to build the https://github.com/redhat-developer-demos/knative-tutorial/tree/master/apps/greeter/java/quarkus[Java application] that is part of the tutorial. As a step one(`build-sources`) the application will be built using https://apache.maven.org[Apache Maven], then the step two (`build-image`) the application artifacts a **jar** in this case will be used to built the linux container image using https://buildah.io[buildah], the https://github.com/redhat-developer-demos/knative-tutorial/tree/master/apps/greeter/java/quarkus/Dockerfile.jvm[Dockerfile] in the sources will be used as base to build the linux container image and as part of the last step(`build-push`) the built linux container image will be pushed to the container registry.
+
+[TIP]
+=====
+If you plan to do the build Task multiple times then its better to have a maven repository manager like Nexus to cache the maven artifacts for faster builds. You can deploy nexus using:
+
+ifndef::workshop[]
+[tabs]
+====
+Kubernetes::
++
+--
+[#tekton-nexus-deploy-k8s]
+[source,bash,subs="+macros,attributes+"]
+----
+kubectl create -n {tutorial-namespace} \
+  -f $TUTORIAL_HOME/apps/nexus/link:{github-repo}/apps/nexus/skaffold.yaml[skaffold.yaml]
+----
+copyToClipboard::tekton-nexus-deploy-k8s[]
+
+It might take few minutes for nexus to be deployed, you can watch the status using the command `kubectl get pods -n {tutorial-namespace} -w`.
+--
+OpenShift::
++
+--
+endif::[]
+[#tekton-nexus-deploy-oc]
+[source,bash,subs="+macros,attributes+"]
+----
+oc create -n {tutorial-namespace} \
+  -f $TUTORIAL_HOME/apps/nexus/link:{github-repo}/apps/nexus/skaffold.yaml[skaffold.yaml]
+----
+copyToClipboard::tekton-nexus-deploy-oc[]
+
+It might take few minutes for nexus to be deployed, you can watch the status using the command `oc get pods -n {tutorial-namespace} -w`.
+ifndef::workshop[]
+--
+====
+endif::[]
+=====
+ 
+[#tekton-task-deploy]
+== Deploy a task 
+
+The application build task could be created using the command:
+
+ifndef::workshop[]
+[tabs]
+====
+Kubernetes::
++
+--
+[#tekton-task-deploy-to-k8s]
+[source,bash,subs="+macros,attributes+"]
+----
+kubectl create -n {tutorial-namespace} -f link:{github-repo}/{pipelines-repo}/build-app-task.yaml[build-app-task.yaml]
+----
+copyToClipboard::tekton-task-deploy-to-k8s[]
+--
+OpenShift::
++
+--
+endif::[]
+[#tekton-task-deploy-to-oc]
+[source,bash,subs="+macros,attributes+"]
+----
+oc create -n {tutorial-namespace} -f link:{github-repo}/{pipelines-repo}/build-app-task.yaml[build-app-task.yaml]
+----
+copyToClipboard::tekton-task-deploy-to-oc[]
+ifndef::workshop[]
+--
+====
+endif::[]
+
+We will use the Tekton cli to inspect the created resources
+
+[#tekton-inspect-task]
+[source,bash,subs="+macros,attributes+"]
+----
+tkn task ls
+----
+copyToClipboard::tekton-inspect-task[]
+
+The above command should list one Task as shown below:
+
+[source,bash]
+----
+NAME        AGE
+build-app   12 seconds ago
+----
+
+[TIP]
+====
+* Use the command **help** `tkn task --help`
+====
+
+[#tekton-task-run]
+== TaskRun
+
+The https://github.com/tektoncd/pipeline/blob/master/docs/taskruns.md[TaskRun] is used to run a specific task independently. In the following section we will run the `build-app` task created in the previous step
+
+[#tekton-task-run-create]
+=== Create TaskRun
+
+The following snippet shows what a Tekton TaskRun YAML looks like:
+
+.link:{github-repo}/{pipelines-repo}/build-app-task-run.yaml[build-app-task-run.yaml]
+[source,yaml,subs="+macros,attributes+"]
+----
+include::ROOT:example$build-app-task-run.yaml[]
+----
+
+* **generateName** - since the TaskRun can be run many times, in order to have unqiue name across the TaskRun ( helpful when checking the TaskRun history) we use this **generateName** instead of **name**. When Kubernetes sees **generateName** it will generate unquie set of characters and suffix the same to `build-app-`, similar to how pod names are generated
+* **serviceAccount** - it is always recommended to have a service account associated with TaskRun, which can then be used to define fine grained roles.
+* **taskRef** - this is used to refer to the Task by its name that will be run as part of this TaskRun. In this example we use **build-app** Task.
+
+As described in the earlier section that the Task inputs and outputs could be overridden via TaskRun. When executing TaskRun the menu:spec[inputs>resources] and menu:spec[outputs>resources] can refer to the <<02-pipeline-resources.adoc#tkn-see-what-you-have-deployed,pipeline resources>> that already defined in the same namespace.
+
+In this example we make the Task's menu:spec[inputs>resources>source] to refer to pipeline resource `git-source` via the **resourceRef**. Similarly menu:spec[outputs>resources>builtImage] to refer to pipeline resource `knative-tutorial-greeter-image` via the **resourceRef**.
+
+[NOTE]
+====
+The menu:spec[inputs>resources>source] and menu:spec[outputs>resources>builtImage] were defined as part of the <<tekton-task-create,Task>> specification.
+====
+
+Before we run the Task using TaskRun let us create the Kubernetes service account and attach the needed permissions to the service account, the following Kubernetes resource defines a service account called `pipeline` in namespace `{tutorial-namespace}` who will have administrative role within the `{tutorial-namespace}` namespace.
+
+.link:{github-repo}/{pipelines-repo}/pipeline-sa-role.yaml[pipeline-sa-role.yaml]
+[source,yaml,subs="+macros,attributes+"]
+----
+include::ROOT:example$pipeline-sa-role.yaml[]
+----
+
+ifndef::workshop[]
+[tabs]
+====
+Kubernetes::
++
+--
+[#tekton-taskrun-sa-to-k8s]
+[source,bash,subs="+macros,attributes+"]
+----
+kubectl create -n {tutorial-namespace} -f link:{github-repo}/{pipelines-repo}/pipeline-sa-role.yaml[pipeline-sa-role.yaml]
+----
+copyToClipboard::tekton-taskrun-sa-to-k8s[]
+--
+OpenShift::
++
+--
+endif::[]
+[#tekton-taskrun-sa-to-oc]
+[source,bash,subs="+macros,attributes+"]
+----
+oc create -n {tutorial-namespace} -f link:{github-repo}/{pipelines-repo}/pipeline-sa-role.yaml[pipeline-sa-role.yaml]
+----
+copyToClipboard::tekton-taskrun-sa-to-oc[]
+ifndef::workshop[]
+--
+====
+endif::[]
+
+The application build task(`build-app`) could be run using the command:
+
+ifndef::workshop[]
+[tabs]
+====
+Kubernetes::
++
+--
+[#tekton-taskrun-run-to-k8s]
+[source,bash,subs="+macros,attributes+"]
+----
+kubectl create -n {tutorial-namespace} -f link:{github-repo}/{pipelines-repo}/build-app-task-run.yaml[build-app-task-run.yaml]
+----
+copyToClipboard::tekton-taskrun-run-to-k8s[]
+
+IMPORTANT: As tasks will use generated name, never use `kubectl **apply** -f build-app-task-run.yaml`
+--
+OpenShift::
++
+--
+endif::[]
+[#tekton-taskrun-run-to-oc]
+[source,bash,subs="+macros,attributes+"]
+----
+oc create -n {tutorial-namespace} -f link:{github-repo}/{pipelines-repo}/build-app-task-run.yaml[build-app-task-run.yaml]
+----
+copyToClipboard::tekton-taskrun-run-to-oc[]
+IMPORTANT: As tasks will use generated name, never use `oc **apply** -f build-app-task-run.yaml`
+ifndef::workshop[]
+--
+====
+endif::[]
+
+We will use the Tekton cli to inspect the created resources:
+
+[#tekton-inspect-taskrun]
+[source,bash,subs="+macros,attributes+"]
+----
+tkn taskrun ls
+----
+copyToClipboard::tekton-inspect-taskrun[]
+
+The above command should list one TaskRun as shown below:
+
+[source,bash]
+----
+NAME              STARTED   DURATION   STATUS
+NAME              STARTED        DURATION   STATUS
+build-app-skgpq   1 minute ago   ---        Running(Pending)
+----
+
+NOTE: It will take few seconds for the TaskRun to show status as `Running` as it needs to download the container images.
+
+[TIP]
+====
+* Use the command **help** via `tkn taskrun --help` 
+* Use `tr` as shorcut for taskrun commands e.g to list taskruns run the command `tkn tr ls`
+====
+
+To check the status of the TaskRun use the `logs` command of taskrun like:
+
+[#tekton-taskrun-logs]
+[source,bash,subs="+macros,attributes+"]
+----
+#list running using the command tkn tr ls
+tkn tr ls
+# use one task run for which you need the log from list above
+tkn tr logs -f -a <task-run-name> #<1>
+----
+copyToClipboard::tekton-taskrun-logs[]
+<1> The `-f` or `-a` allows to tail the logs from all the containers of the task. For more options run `tkn tr --help`
+
+IMPORTANT: Each task step will be run within a container of its own.
+
+If you see the TaskRun status as `Failed` or `Error` use the following command to check the reason for error:
+
+[#tekton-desc-taskrun]
+[source,bash,subs="+macros,attributes+"]
+----
+tkn taskrun describe <taskrun-name>
+----
+copyToClipboard::tekton-desc-taskrun[]
+
+[#tekton-test-task-output]
+=== Test Task output
+
+Lets try running the image build using the `build-app` task:
+
+ifndef::workshop[]
+[tabs]
+====
+Kubernetes::
++
+--
+[#tekton-app-run-to-k8s]
+[source,bash,subs="+macros,attributes+"]
+----
+kubectl run demo-greeter -n {tutorial-namespace} \
+ --generator='run-pod/v1' \
+ --image='dev.local/rhdevelopers/knative-tutorial-greeter' && \
+kubectl expose pod demo-greeter -n {tutorial-namespace} --port 8080 --type=NodePort
+----
+copyToClipboard::tekton-app-run-to-k8s[]
+--
+OpenShift::
++
+--
+endif::[]
+[#tekton-app-run-to-oc]
+[source,bash,subs="+macros,attributes+"]
+----
+oc run demo-greeter -n {tutorial-namespace} --generator='run-pod/v1' --image='dev.local/rhdevelopers/knative-tutorial-greeter' && \
+oc expose pod demo-greeter -n {tutorial-namespace} --port 8080 --type=NodePort && \
+oc expose svc -n {tutorial-namespace} demo-greeter
+----
+copyToClipboard::tekton-app-run-to-oc[]
+ifndef::workshop[]
+--
+====
+endif::[]
+
+Lets try checking the application:
+
+ifndef::workshop[]
+[tabs]
+====
+Kubernetes::
++
+--
+[#tekton-invoke-app-k8s]
+[source,bash,subs="+macros,attributes+"]
+----
+SVC_URL=$(minikube ip):$(kubectl get svc -n {tutorial-namespace} demo-greeter -o yaml | yq r - 'spec.ports[0].nodePort') && \
+http --body $SVC_URL
+----
+copyToClipboard::tekton-invoke-app-k8s[]
+--
+OpenShift::
++
+--
+endif::[]
+[#tekton-invoke-app-oc]
+[source,bash,subs="+macros,attributes+"]
+----
+SVC_URL=$(oc get routes -o yaml | yq r - 'spec.url.host' )
+http --body $SVC_URL
+----
+copyToClipboard::tekton-invoke-app-oc[]
+ifndef::workshop[]
+--
+====
+endif::[]
+
+The above command should show an output like **Hi  greeter => 'demo-greeter' : 1**
+
+[#tekton-task-cleanup]
+== Cleanup
+
+ifndef::workshop[]
+[tabs]
+====
+Kubernetes::
++
+--
+[#tekton-task-cleanup-k8s]
+[source,bash,subs="+macros,attributes+"]
+----
+kubectl delete pod -n {tutorial-namespace} demo-greeter &&\
+kubectl delete svc -n {tutorial-namespace} demo-greeter
+----
+copyToClipboard::tekton-task-cleanup-k8s[]
+--
+OpenShift::
++
+--
+endif::[]
+[#tekton-task-cleanup-oc]
+[source,bash,subs="+macros,attributes+"]
+----
+oc delete pod -n {tutorial-namespace} demo-greeter &&\
+oc delete svc -n {tutorial-namespace} demo-greeter &&\
+oc delete route -n {tutorial-namespace} demo-greeter
+----
+copyToClipboard::tekton-task-cleanup-oc[]
+ifndef::workshop[]
+--
+====

@@ -1,0 +1,43 @@
+Ensure Tekton piplines is deployed and the API is available for use
+
+ifndef::workshop[]
+[tabs]
+====
+Kubernetes::
++
+--
+[#tekton-api-kind-k8s]
+[source,bash,subs="+macros,attributes+"]
+----
+kubectl api-resources --api-group='tekton.dev'
+----
+copyToClipboard::tekton-api-kind-k8s[]
+--
+OpenShift::
++
+--
+endif::[]
+[#tekton-api-kind-oc]
+[source,bash,subs="+macros,attributes+"]
+----
+oc api-resources --api-group='tekton.dev'
+----
+copyToClipboard::tekton-api-kind-oc[]
+ifndef::workshop[]
+--
+====
+endif::[]
+
+The command show an output like:
+
+[source,bash]
+----
+NAME                SHORTNAMES   APIGROUP     NAMESPACED   KIND
+clustertasks                     tekton.dev   false        ClusterTask
+conditions                       tekton.dev   true         Condition
+pipelineresources                tekton.dev   true         PipelineResource
+pipelineruns        pr,prs       tekton.dev   true         PipelineRun
+pipelines                        tekton.dev   true         Pipeline
+taskruns            tr,trs       tekton.dev   true         TaskRun
+tasks                            tekton.dev   true         Task
+----
