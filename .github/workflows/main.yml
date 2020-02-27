@@ -37,11 +37,15 @@ jobs:
        with:
          name: site
          path: "${{ github.workspace }}/${{ env.SITE_DIR }}"
+     - name: Setup Node.js for use with actions
+       uses: actions/setup-node@v1.1.0
+       with:        
+        version: "12.x"
      - name: Deploy to GitHub Pages
-       uses: JamesIves/github-pages-deploy-action@3.2.1
-       with:
-        # ACCESS_TOKEN: # optional
-        GITHUB_TOKEN: "${{ github.token}}"
-        FOLDER: "${{ env.SITE_DIR }}"
-        BRANCH: 'gh-pages'
-        COMMIT_MESSAGE: "[CI] Publish Documentation for ${{ github.sha }}"
+       run: |
+         npm -g install gh-pages@2.2.0
+         touch $SITE_DIR/.nojekyll
+         gh-pages --dist=$SITE_DIR \
+         --dotfiles='true' \
+         --message="Publish Staging Site, Build run: ${{github.run_number}} "
+
