@@ -3,7 +3,7 @@ kind: TaskRun
 metadata:
   generateName: build-app-
 spec:
-  serviceAccount: pipeline
+  serviceAccountName: pipeline
   taskRef:
     name:  build-app
   inputs:

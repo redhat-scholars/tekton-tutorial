@@ -169,7 +169,7 @@ include::ROOT:example$build-app-task-run.yaml[]
 ----
 
 * **generateName** - since the TaskRun can be run many times, in order to have unqiue name across the TaskRun ( helpful when checking the TaskRun history) we use this **generateName** instead of **name**. When Kubernetes sees **generateName** it will generate unquie set of characters and suffix the same to `build-app-`, similar to how pod names are generated
-* **serviceAccount** - it is always recommended to have a service account associated with TaskRun, which can then be used to define fine grained roles.
+* **serviceAccountName** - it is always recommended to have a service account associated with TaskRun, which can then be used to define fine grained roles.
 * **taskRef** - this is used to refer to the Task by its name that will be run as part of this TaskRun. In this example we use **build-app** Task.
 
 As described in the earlier section that the Task inputs and outputs could be overridden via TaskRun. When executing TaskRun the menu:spec[inputs>resources] and menu:spec[outputs>resources] can refer to the <<02-pipeline-resources.adoc#tkn-see-what-you-have-deployed,pipeline resources>> that already defined in the same namespace.

@@ -5,7 +5,7 @@ metadata:
 spec:
   pipelineRef:
     name: kn-svc-deploy
-  serviceAccount: "pipeline"
+  serviceAccountName: "pipeline"
   params:
     - name: mavenMirrorUrl
       value: http://nexus:8081/nexus/content/groups/public
