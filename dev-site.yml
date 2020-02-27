@@ -4,7 +4,7 @@ runtime:
 site:
   title: Tekton Tutorial
   url: https://redhat-developer-demos.github.io/tekton-tutorial
-  start_page: ROOT::index.adoc
+  start_page: tekton-tutorial::index.adoc
 
 content:
   sources:
@@ -14,7 +14,7 @@ content:
 asciidoc:
   attributes:
     tutorial-namespace:  tektontutorial
-    title: Knative Tutorial
+    title: Tekton Tutorial
     workshop-domain: guru.devx.red
     kubernetes-version: v1.15.0
     release-version: master

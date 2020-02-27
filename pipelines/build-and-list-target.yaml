@@ -24,7 +24,7 @@ spec:
       runAsUser: 10001
   steps:
     - name: maven-build
-      image: quay.io/rhdevelopers/tutorial-tools:0.0.2
+      image: quay.io/rhdevelopers/tutorial-tools:0.0.3
       workingDir: "/workspace/source/$(inputs.params.contextDir)"
       args:
         - mvn

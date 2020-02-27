@@ -1,4 +1,4 @@
-= Pipeline Resources
+== Pipeline Resources
 include::_attributes.adoc[]
 :k8s-resource: build-resources.yaml
 
@@ -10,7 +10,7 @@ At the end of this chapter you will be able to :
 [#tekton-res-prerequisite]
 == Prerequisite
 
-include::knative-tutorial-basics:ROOT:partial$prereq-cli.adoc[]
+include::ROOT:partial$prereq-cli.adoc[]
 
 include::partial$tekton-api.adoc[]
 
@@ -89,8 +89,8 @@ The above command should list two resources as shown below:
 [source,bash]
 ----
 NAME                             TYPE    DETAILS
-git-source                       git     url: https://github.com/redhat-developer-demos/knative-tutorial
-knative-tutorial-greeter-image   image   url: registry.kube-system:80/rhdevelopers/knative-tutorial-greeter
+git-source                       git     url: https://github.com/redhat-developer-demos/tekton-tutorial
+tekton-tutorial-greeter-image   image   url: registry.kube-system:80/rhdevelopers/tekton-tutorial-greeter
 ----
 
 [TIP]
@@ -102,13 +102,13 @@ e.g. Running a command `tkn res describe git-source` will return an output like:
 [source,bash]
 ----
 Name:                    git-source
-Namespace:               knativetutorial
+Namespace:               tektontutorial
 PipelineResource Type:   git
 
 Params
 NAME       VALUE
-url        https://github.com/redhat-developer-demos/knative-tutorial
-revision   release/0.7.x
+url        https://github.com/redhat-developer-demos/tekton-tutorial
+revision   master
 
 Secret Params
 No secret params

@@ -15,4 +15,4 @@ spec:
         name: git-source
     - name: appImage
       resourceRef:
-        name: knative-tutorial-greeter-image
+        name: tekton-tutorial-greeter-image

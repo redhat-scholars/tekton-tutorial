@@ -1,4 +1,4 @@
-= Tasks
+== Pipelines
 include::_attributes.adoc[]
 
 At the end of this chapter you will be able to :
@@ -11,7 +11,7 @@ At the end of this chapter you will be able to :
 [#tekton-task-prerequisite]
 == Prerequisite
 
-include::knative-tutorial-basics:ROOT:partial$prereq-cli.adoc[]
+include::ROOT:partial$prereq-cli.adoc[]
 
 include::partial$tekton-api.adoc[]
 
@@ -31,8 +31,8 @@ The command above should show an output like:
 [source,bash]
 ----
 NAME                             TYPE    DETAILS
-git-source                       git     url: https://github.com/redhat-developer-demos/knative-tutorial
-knative-tutorial-greeter-image   image   url: localhost:5000/rhdevelopers/knative-tutorial-greeter:v0.1.1
+git-source                       git     url: https://github.com/redhat-developer-demos/tekton-tutorial
+tekton-tutorial-greeter-image   image   url: localhost:5000/rhdevelopers/tekton-tutorial-greeter:v0.1.1
 ----
 
 
@@ -218,13 +218,13 @@ Unlike xref:03-tasks.adoc.adoc#tekton-task-run-run[TaskRun] we will not be using
 ----
 tkn pipeline start kn-svc-deploy \
  --resource="appSource=git-source" \#<1>
- --resource="appImage=knative-tutorial-greeter-image" \#<2>
+ --resource="appImage=tekton-tutorial-greeter-image" \#<2>
  --serviceaccount='pipeline' #<3>
 ----
 copyToClipboard::tekton-trigger-pipelinerun[]
 
 <1> The resources of the Pipeline could be bound via `--resource` option, here we bind the Pipeline `appSource` to pipeline resource `git-source`
-<2> Bind the Pipeline `appImage` to pipeline resource `knative-tutorial-greeter-image`
+<2> Bind the Pipeline `appImage` to pipeline resource `tekton-tutorial-greeter-image`
 <3> The service account to use with Pipeline run
 
 [TIP]
@@ -236,7 +236,7 @@ If you have maven mirror available then you can modify the above command to use 
 tkn pipeline start kn-svc-deploy \
  --param="mavenMirrorUrl=http://nexus:8081/nexus/content/groups/public" \
  --resource="appSource=git-source" \#<1>
- --resource="appImage=knative-tutorial-greeter-image" \#<2>
+ --resource="appImage=tekton-tutorial-greeter-image" \#<2>
  --serviceaccount='pipeline' #<3>
   
 ----
@@ -301,7 +301,7 @@ Kubernetes::
 :k8s-env: minikube
 :k8s-cli: kubectl
 :doc-sec: tkn
-include::knative-tutorial-basics:ROOT:partial$invoke-service.adoc[tags=**;!workshop-call;!workshop-call-params]
+include::ROOT:partial$invoke-service.adoc[tags=**;!workshop-call;!workshop-call-params]
 --
 OpenShift::
 +
@@ -309,7 +309,7 @@ OpenShift::
 :k8s-env: openshift
 :k8s-cli: oc
 :doc-sec: tkn
-include::knative-tutorial-basics:ROOT:partial$invoke-service.adoc[tag=workshop-call]
+include::ROOT:partial$invoke-service.adoc[tag=workshop-call]
 --
 ====
 endif::[]
@@ -318,7 +318,7 @@ ifdef::workshop[]
 :k8s-env: openshift
 :k8s-cli: oc
 :doc-sec: tkn-01
-include::knative-tutorial-basics:ROOT:partial$invoke-service.adoc[tag=workshop-call]
+include::ROOT:partial$invoke-service.adoc[tag=workshop-call]
 endif::[]
 
 The `http` command should return a response containing a line similar to **Hi  greeter => '6fee83923a9f' : 1**

@@ -3,8 +3,8 @@ runtime:
 
 site:
   title: Knative Tutorial
-  url: https://redhat-developer-demos.github.io/knative-tutorial
-  start_page: knative-tutorial::index.adoc
+  url: https://redhat-developer-demos.github.io/tekton-tutorial
+  start_page: tekton-tutorial::index.adoc
 
 content:
   sources: []

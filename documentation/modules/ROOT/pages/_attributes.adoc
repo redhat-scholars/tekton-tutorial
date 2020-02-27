@@ -4,10 +4,9 @@
 :github-repo: https://github.com/redhat-developer-demos/tekton-tutorial/blob/{branch}
 :experimental:
 :minikube-version: v1.7.2
-:knative-version: v0.7.1
 :openshift-version: v4.2+
 
 :tekton-repo: https://github.com/tektoncd/pipeline/releases/download
-:tekton-version: v0.7.0
-:tekton-cli-version: 0.4.0
+:tekton-version: v0.10.1
+:tekton-cli-version: 0.7.1
 :pipelines-repo: pipelines

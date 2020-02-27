@@ -6,7 +6,7 @@ projects:
     source:
       type: git
       location: 'https://github.com/redhat-developer-demos/tekton-tutorial.git'
-      branch: "release/0.7.x"
+      branch: master
 components:
   - id: redhat/vscode-yaml/latest
     type: chePlugin
@@ -52,12 +52,12 @@ components:
                   cp /tmp/kubeconfig/config config
                   KUBE_API_SERVER_URL="$(kubectl cluster-info | awk 'NR==1{print $6}'|sed -r 's/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[mGK]//g')"
                   echo "Using Kube API Server form $KUBE_API_SERVER_URL"
-                  kubectl config --kubeconfig=config set-cluster knativetutorial \
+                  kubectl config --kubeconfig=config set-cluster tektontutorial \
                   --server=$KUBE_API_SERVER_URL \
                   --certificate-authority=/var/run/secrets/kubernetes.io/serviceaccount/ca.crt
                   kubectl config --kubeconfig=config set-credentials tutorial-tools --token=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
-                  kubectl config --kubeconfig=config set-context knativetutorial --cluster=knativetutorial --namespace=knativetutorial --user=tutorial-tools
-                  kubectl config --kubeconfig=config use-context knativetutorial
+                  kubectl config --kubeconfig=config set-context tektontutorial --cluster=tektontutorial --namespace=tektontutorial --user=tutorial-tools
+                  kubectl config --kubeconfig=config use-context tektontutorial
                   echo "Done."
           containers:
           - name: tutorial-tools

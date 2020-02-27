@@ -30,7 +30,7 @@ data:
     preferences: {}
     clusters:
     - cluster:
-      name: knativetutorial
+      name: tektontutorial
     users:
     - name: tutorial-tools
     contexts: []

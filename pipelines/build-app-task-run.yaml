@@ -21,4 +21,4 @@ spec:
    resources:
     - name: builtImage
       resourceRef:
-        name: knative-tutorial-greeter-image
+        name: tekton-tutorial-greeter-image

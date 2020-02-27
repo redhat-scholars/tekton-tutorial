@@ -1,4 +1,4 @@
-= Tasks
+== Tasks
 include::_attributes.adoc[]
 
 At the end of this chapter you will be able to :
@@ -11,7 +11,7 @@ At the end of this chapter you will be able to :
 [#tekton-task-prerequisite]
 == Prerequisite
 
-include::knative-tutorial-basics:ROOT:partial$prereq-cli.adoc[]
+include::ROOT:partial$prereq-cli.adoc[]
 
 include::partial$tekton-api.adoc[]
 
@@ -54,7 +54,7 @@ NOTE: The <<tekton-task-run>> could override the parameter values, if no paramet
 
 The parameters that were part of the menu:spec[inputs > params] can be used in the steps using the notation `$(<variable-name>)`.
 
-The task `build-app` is used to build the https://github.com/redhat-developer-demos/knative-tutorial/tree/master/apps/greeter/java/quarkus[Java application] that is part of the tutorial. As a step one(`build-sources`) the application will be built using https://apache.maven.org[Apache Maven], then the step two (`build-image`) the application artifacts a **jar** in this case will be used to built the linux container image using https://buildah.io[buildah], the https://github.com/redhat-developer-demos/knative-tutorial/tree/master/apps/greeter/java/quarkus/Dockerfile.jvm[Dockerfile] in the sources will be used as base to build the linux container image and as part of the last step(`build-push`) the built linux container image will be pushed to the container registry.
+The task `build-app` is used to build the https://github.com/redhat-developer-demos/tekton-tutorial/tree/master/apps/greeter/java/quarkus[Java application] that is part of the tutorial. As a step one(`build-sources`) the application will be built using https://apache.maven.org[Apache Maven], then the step two (`build-image`) the application artifacts a **jar** in this case will be used to built the linux container image using https://buildah.io[buildah], the https://github.com/redhat-developer-demos/tekton-tutorial/tree/master/apps/greeter/java/quarkus/Dockerfile.jvm[Dockerfile] in the sources will be used as base to build the linux container image and as part of the last step(`build-push`) the built linux container image will be pushed to the container registry.
 
 [TIP]
 =====
@@ -172,7 +172,7 @@ include::ROOT:example$build-app-task-run.yaml[]
 
 As described in the earlier section that the Task inputs and outputs could be overridden via TaskRun. When executing TaskRun the menu:spec[inputs>resources] and menu:spec[outputs>resources] can refer to the <<02-pipeline-resources.adoc#tkn-see-what-you-have-deployed,pipeline resources>> that already defined in the same namespace.
 
-In this example we make the Task's menu:spec[inputs>resources>source] to refer to pipeline resource `git-source` via the **resourceRef**. Similarly menu:spec[outputs>resources>builtImage] to refer to pipeline resource `knative-tutorial-greeter-image` via the **resourceRef**.
+In this example we make the Task's menu:spec[inputs>resources>source] to refer to pipeline resource `git-source` via the **resourceRef**. Similarly menu:spec[outputs>resources>builtImage] to refer to pipeline resource `tekton-tutorial-greeter-image` via the **resourceRef**.
 
 [NOTE]
 ====
@@ -314,7 +314,7 @@ Kubernetes::
 ----
 kubectl run demo-greeter -n {tutorial-namespace} \
  --generator='run-pod/v1' \
- --image='dev.local/rhdevelopers/knative-tutorial-greeter' && \
+ --image='dev.local/rhdevelopers/tekton-tutorial-greeter' && \
 kubectl expose pod demo-greeter -n {tutorial-namespace} --port 8080 --type=NodePort
 ----
 copyToClipboard::tekton-app-run-to-k8s[]
@@ -326,7 +326,7 @@ endif::[]
 [#tekton-app-run-to-oc]
 [source,bash,subs="+macros,attributes+"]
 ----
-oc run demo-greeter -n {tutorial-namespace} --generator='run-pod/v1' --image='dev.local/rhdevelopers/knative-tutorial-greeter' && \
+oc run demo-greeter -n {tutorial-namespace} --generator='run-pod/v1' --image='dev.local/rhdevelopers/tekton-tutorial-greeter' && \
 oc expose pod demo-greeter -n {tutorial-namespace} --port 8080 --type=NodePort && \
 oc expose svc -n {tutorial-namespace} demo-greeter
 ----

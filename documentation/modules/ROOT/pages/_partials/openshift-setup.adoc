@@ -1,6 +1,6 @@
 [IMPORTANT]
 ======
-This installation assumes that the xref:knative-tutorial-basics:ROOT:01-setup.adoc#kubernetes-cluster[install knative on OpenShift] have been installed and verified.
+This installation assumes that the xref:ROOT:01-setup.adoc#kubernetes-cluster[install knative on OpenShift] have been installed and verified.
 ======
 
 The following section details on how to install openshift-pipeline(Tekton on OpenShift).

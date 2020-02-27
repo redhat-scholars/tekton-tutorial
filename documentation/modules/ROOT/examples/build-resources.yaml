@@ -6,18 +6,18 @@ spec:
   type: git
   params: 
   - name: url
-    value: https://github.com/redhat-developer-demos/knative-tutorial
+    value: https://github.com/redhat-developer-demos/tekton-tutorial
   - name: revision
-    value: release/0.7.x
+    value: master
 ---
 apiVersion: tekton.dev/v1alpha1
 kind: PipelineResource
 metadata:
-  name: knative-tutorial-greeter-image
+  name: tekton-tutorial-greeter-image
 spec:
   type: image
   params: 
   - name: url
-    value: "dev.local/rhdevelopers/knative-tutorial-greeter"
+    value: "dev.local/rhdevelopers/tekton-tutorial-greeter"
     # if you are on OpenShift uncomment the line below
     #value: "image-registry.openshift-image-registry.svc:5000/tutorial/helloworld"
