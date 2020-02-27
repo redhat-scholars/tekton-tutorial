@@ -17,9 +17,6 @@ jobs:
         uses: kameshsampath/antora-site-action@master
         with:
          antora_playbook: site.yml
-      - name: Add .nojekyll to site root
-        run: |
-          touch $GITHUB_WORKSPACE/$SITE_DIR/.nojekyll
       - name: "Upload generated site"
         uses: actions/upload-artifact@v1.0.0
         with:
