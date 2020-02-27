@@ -32,11 +32,20 @@ jobs:
     steps:
      - name: Checkout
        uses: actions/checkout@v2
+     - name: Install SSH Client
+       uses: webfactory/ssh-agent@v0.2.0
+       with:
+        ssh-private-key: ${{ secrets.TKN_SITE_DEPLOY }}
      - name: Download generated site
        uses: actions/download-artifact@v1
        with:
          name: site
          path: "${{ github.workspace }}/${{ env.SITE_DIR }}"
+     - name: Deploy to GitHub Pages       
+       working-directory: "${{ github.workspace }}/knative-tutorial-staging"
+       run: |
+         git config --global user.email "kamesh.sampath@hotmail.com"
+         git config --global user.name "Kamesh Sampath"
      - name: Setup Node.js for use with actions
        uses: actions/setup-node@v1.1.0
        with:        
