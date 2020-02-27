@@ -12,6 +12,6 @@ As part of this tutorial and its chapter you will learn about Tekton components 
 
 This content is brought to you by [Red Hat Developer Program](http://developers.redhat.com) - Register today!
 
-== Contributing
+## Contributing
 
-Please refer to the link:./CONTRIBUTING.adoc[how to contribute?] on how you can contribute to the tutorial
+Please refer to the [how to contribute?](./CONTRIBUTING.md) on how you can contribute to the tutorial
