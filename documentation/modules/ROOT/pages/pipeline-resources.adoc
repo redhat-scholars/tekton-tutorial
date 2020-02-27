@@ -1,3 +1,5 @@
+= {title}
+
 == Pipeline Resources
 include::_attributes.adoc[]
 :k8s-resource: build-resources.yaml
