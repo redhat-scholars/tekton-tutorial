@@ -17,9 +17,9 @@ jobs:
         uses: kameshsampath/antora-site-action@master
         with:
          antora_playbook: site.yml
-#       - name: "List folder"
-#         run: |
-#            ls -ltr $GITHUB_WORKSPACE/
+      - name: Add .nojekyll to site root
+        run: |
+          touch $GITHUB_WORKSPACE/$SITE_DIR/.nojekyll
       - name: "Upload generated site"
         uses: actions/upload-artifact@v1.0.0
         with:
@@ -41,21 +41,12 @@ jobs:
        with:
          name: site
          path: "${{ github.workspace }}/${{ env.SITE_DIR }}"
-     - name: Deploy to GitHub Pages       
-       working-directory: "${{ github.workspace }}/tekton-tutorial"
-       run: |
-         git config --global user.email "kamesh.sampath@hotmail.com"
-         git config --global user.name "Kamesh Sampath"
-     - name: Setup Node.js for use with actions
-       uses: actions/setup-node@v1.1.0
-       with:        
-        version: "12.x"
      - name: Deploy to GitHub Pages
-       working-directory: "${{ github.workspace }}/tekton-tutorial"
-       run: |
-         npm -g install gh-pages@2.2.0
-         touch $SITE_DIR/.nojekyll
-         gh-pages --dist=$SITE_DIR \
-         --dotfiles='true' \
-         --message="Publish Staging Site, Build run: ${{github.run_number}} "
+       uses: JamesIves/github-pages-deploy-action@3.2.1
+       with:
+        # ACCESS_TOKEN: # optional
+        GITHUB_TOKEN: "${{ github.token}}"
+        FOLDER: "${{ env.SITE_DIR }}"
+        BRANCH: 'gh-pages'
+        COMMIT_MESSAGE: "[CI] Publish Documentation for ${{ github.sha }}"
 
