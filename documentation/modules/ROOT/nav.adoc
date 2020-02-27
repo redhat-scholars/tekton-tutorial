@@ -1,7 +1,6 @@
 * xref:setup.adoc[Setup]
 ** xref:setup.adoc#tekton-prerequisites[Prerequisites]
 ** xref:setup.adoc#download-tutorial-sources[Download Tutorial Sources]
-endif::[]
 ** xref:setup.adoc#kubernetes-cluster[Choose your Kubernetes Cluster]
 ** xref:setup.adoc#tutorial-dev-env[Development Environment]
 ** xref:setup.adoc#deploy-tekton[Install Tekton]
