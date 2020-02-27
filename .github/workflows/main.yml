@@ -42,7 +42,7 @@ jobs:
          name: site
          path: "${{ github.workspace }}/${{ env.SITE_DIR }}"
      - name: Deploy to GitHub Pages       
-       working-directory: "${{ github.workspace }}/knative-tutorial-staging"
+       working-directory: "${{ github.workspace }}/tekton-tutorial"
        run: |
          git config --global user.email "kamesh.sampath@hotmail.com"
          git config --global user.name "Kamesh Sampath"
@@ -51,6 +51,7 @@ jobs:
        with:        
         version: "12.x"
      - name: Deploy to GitHub Pages
+       working-directory: "${{ github.workspace }}/tekton-tutorial"
        run: |
          npm -g install gh-pages@2.2.0
          touch $SITE_DIR/.nojekyll
