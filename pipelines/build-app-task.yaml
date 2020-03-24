@@ -13,7 +13,7 @@ spec:
         default: .
       - name: mavenMirrorUrl
         description: the maven mirrror url
-        default: http://repo1.maven.apache.org/maven2
+        default: https://repo.maven.apache.org/maven2/
       - name: destinationImage
         description: the fully qualified image name
         default: "$(outputs.resources.builtImage.url)"
@@ -36,15 +36,46 @@ spec:
       env:
         - name: MAVEN_MIRROR_URL
           value: "$(inputs.params.mavenMirrorUrl)"
-    - name: build-and-push
-      image: gcr.io/kaniko-project/executor:v0.19.0
-      # specifying DOCKER_CONFIG is required to allow kaniko to detect docker credential
-      env:
-        - name: "DOCKER_CONFIG"
-          value: "/tekton/home/.docker/"
+        - name: HOME
+          value: /home/quarkus
+    - name: build-image
+      image: quay.io/buildah/stable
+      workingDir: "/workspace/source/$(inputs.params.contextDir)"
       command:
-        - /kaniko/executor
-      args:
-        - --dockerfile=$(params.pathToDockerFile)
-        - --destination=$(params.destinationImage)
-        - --context=$(params.contextDir)
+        [
+          "buildah",
+          "bud",
+          "--tls-verify=false",
+          "--layers",
+          "-f",
+          "$(inputs.params.dockerFile)",
+          "-t",
+          "$(inputs.params.destinationImage)",
+          ".",
+        ]
+      securityContext:
+        privileged: true
+        runAsUser: 0
+      volumeMounts:
+        - name: varlibc
+          mountPath: /var/lib/containers
+    - name: build-push
+      image: quay.io/buildah/stable
+      workingDir: "/workspace/source/$(inputs.params.contextDir)"
+      command:
+        [
+          "buildah",
+          "push",
+          "--tls-verify=false",
+          "$(inputs.params.destinationImage)",
+          "docker://$(inputs.params.destinationImage)",
+        ]
+      securityContext:
+        privileged: true
+        runAsUser: 0
+      volumeMounts:
+        - name: varlibc
+          mountPath: /var/lib/containers
+  volumes:
+    - name: varlibc
+      emptyDir: {}

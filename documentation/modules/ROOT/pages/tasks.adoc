@@ -288,6 +288,38 @@ Service Account *pipeline* will be created automatically by OpenShift Pipelines 
 --
 ====
 
+[IMPORTANT]
+====
+Since the TaskRun pod will be run as an underprivleged user with uid `1001`, its required that `fsGroup` of the pod is set correctly. This done by configuring the ConfigMap `config-defaults` of the `tekton-pipelines` namespace. In OpenShift the namespace is called `openshift-pipelines`.
+====
+
+Run the following command to patch the ConfigMap `config-defaults`:
+
+[tabs]
+====
+kubectl::
++
+--
+[#patch-tekton-config-defaults-k8s]
+[source,bash,subs="+macros,+attributes"]
+-----
+kubectl patch -n tekton-pipelines cm config-defaults \
+      --patch  "$(cat $TUTORIAL_HOME/pipelines/pod-template-patch.yaml)"
+-----
+copyToClipboard::patch-tekton-config-defaults-k8s[]
+--
+oc::
++
+--
+[#patch-tekton-config-defaults]
+[source,bash,subs="+macros,+attributes"]
+-----
+oc patch -n openshift-pipelines cm config-defaults \
+    --patch "$(cat $TUTORIAL_HOME/pipelines/pod-template-patch.yaml)"
+-----
+copyToClipboard::patch-tekton-config-defaults[]
+--
+====
 
 The application build task(`build-app`) could be run using the command:
 
@@ -296,7 +328,8 @@ The application build task(`build-app`) could be run using the command:
 ----
 tkn task start -n {tutorial-namespace} build-app \
   --inputresource='source=git-source' \
-  --outputresource='builtImage=tekton-tutorial-greeter-image'
+  --outputresource='builtImage=tekton-tutorial-greeter-image' \
+  --param contextDir='apps/greeter/java/springboot'
 ----
 copyToClipboard::tekton-taskrun-sa-to-k8s[]
 
