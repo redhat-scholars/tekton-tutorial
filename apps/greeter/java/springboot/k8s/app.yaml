@@ -1,0 +1,31 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: helloworld-sb
+spec:
+  selector:
+    app: helloworld-sb
+  ports:
+  - port: 8080
+    targetPort: 8080
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: helloworld-sb
+spec:
+  selector:
+    matchLabels:
+      app: helloworld-sb
+  template:
+    metadata:
+      labels:
+        app: helloworld-sb
+    spec:
+      containers:
+      - name: helloworld-sb
+        image: dev.local/rhdevelopers/helloworld-sb:0.0.1
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8080
+

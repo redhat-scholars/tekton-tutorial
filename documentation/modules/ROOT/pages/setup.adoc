@@ -21,10 +21,10 @@ The following CLI tools are required for running the exercises in this tutorial.
 | `dnf install docker`
 | https://docs.docker.com/docker-for-windows/install[Docker for Windows]
 
-| `kubectl {kubernetes-version}`
-| https://storage.googleapis.com/kubernetes-release/release/{kubernetes-version}/bin/darwin/amd64/kubectl[Download]
-| https://storage.googleapis.com/kubernetes-release/release/{kubernetes-version}/bin/linux/amd64/kubectl[Download]
-| https://storage.googleapis.com/kubernetes-release/release/{kubernetes-version}/bin/windows/amd64/kubectl.exe[Download]
+| `kubectl`
+| https://kubernetes.io/docs/tasks/tools/install-kubectl/[Install]
+| https://kubernetes.io/docs/tasks/tools/install-kubectl/[Install]
+| https://kubernetes.io/docs/tasks/tools/install-kubectl/[Install]
 
 | https://github.com/wercker/stern[stern]
 | `brew install stern`
@@ -40,11 +40,6 @@ The following CLI tools are required for running the exercises in this tutorial.
 | `brew install httpie`
 | `dnf install httpie`
 | https://httpie.org/doc#windows-etc
-
-| https://github.com/rakyll/hey[hey]
-| https://storage.googleapis.com/hey-release/hey_darwin_amd64[Download]
-| https://storage.googleapis.com/jblabs/dist/hey_linux_v0.1.2[Download]
-| https://storage.googleapis.com/jblabs/dist/hey_win_v0.1.2.exe[Download]
 
 | watch
 | `brew install watch`
@@ -81,6 +76,7 @@ This tutorial was developed and tested with:
 - Tekton `{tekton-version}`
 - Minikube `{minikube-version}`
 - OpenShift `{openshift-version}`
+- Tekton CLI `{tekton-cli-version}`
 ====
 endif::[]
 

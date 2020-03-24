@@ -3,10 +3,10 @@
 :branch: master
 :github-repo: https://github.com/redhat-developer-demos/tekton-tutorial/blob/{branch}
 :experimental:
-:minikube-version: v1.7.2
+:minikube-version: v1.8.2+
 :openshift-version: v4.2+
 
 :tekton-repo: https://github.com/tektoncd/pipeline/releases/download
-:tekton-version: v0.10.1
-:tekton-cli-version: 0.7.1
+:tekton-version: v0.10.2
+:tekton-cli-version: 0.8.0
 :pipelines-repo: pipelines

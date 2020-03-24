@@ -35,7 +35,7 @@ copyToClipboard::setup-minikube-start[]
 [#minikube-enable-registry-run]
 [source,bash,subs="+macros,attributes+"]
 ----
-minikube addons enable registry
+minikube -p {tutorial-namespace} addons enable registry
 ----
 copyToClipboard::minikube-enable-registry-run[]
 
@@ -89,7 +89,7 @@ Check if the entries are added to minikube node host file
 [#minikube-check-host-entry]
 [source,bash,subs="attributes+,+macros"]
 ----
-watch minikube ssh -- sudo cat /etc/hosts
+watch minikube -p {tutorial-namespace} ssh -- sudo cat /etc/hosts
 ----
 copyToClipboard::minikube-check-host-entry[]
 
@@ -99,13 +99,15 @@ A successful daemonset run will show the minikube node `/etc/hosts` file with th
 ----
 127.0.0.1       localhost
 127.0.1.1 demo
-10.111.151.121  dev.local
 10.111.151.121  example.com
+10.111.151.121  example.org
+10.111.151.121  test.com
+10.111.151.121  test.org
 ----
 
 [NOTE]
 ======
-The IP for `dev.local` and `example.com` will match the **CLUSTER-IP** of the internal registry. To know the Cluster IP run the command:
+The IP for `test.com` and `example.com` will match the **CLUSTER-IP** of the internal registry. To know the Cluster IP run the command:
 
 [#minikube-check-registry-ip]
 [source,bash,subs="attributes+,+macros"]
@@ -149,8 +151,10 @@ data:
     .:53 {
         errors
         health
-        rewrite name dev.local registry.kube-system.svc.cluster.local
-        rewrite name example.com registry.kube-system.svc.cluster.local
+        rewrite name exampe.com registry.kube-system.svc.cluster.local
+        rewrite name exampe.org registry.kube-system.svc.cluster.local
+        rewrite name test.com registry.kube-system.svc.cluster.local
+        rewrite name test.org registry.kube-system.svc.cluster.local
         kubernetes cluster.local in-addr.arpa ip6.arpa {
            pods insecure
            upstream
@@ -177,7 +181,7 @@ To deploy the Tekton pipelines:
 [source,bash,subs="+macros,attributes+"]
 ----
 kubectl apply --filename \
-  https://storage.googleapis.com/tekton-releases/previous/{tekton-version}/release.yaml
+https://github.com/tektoncd/pipeline/releases/download/{tekton-version}/release.yaml
 ----
 copyToClipboard::tekton-deploy-pipelines[]
 

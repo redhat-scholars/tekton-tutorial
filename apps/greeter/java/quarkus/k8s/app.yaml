@@ -1,0 +1,31 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: helloworld-quarkus
+spec:
+  selector:
+    app: helloworld-quarkus
+  ports:
+  - port: 8080
+    targetPort: 8080
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: helloworld-quarkus
+spec:
+  selector:
+    matchLabels:
+      app: helloworld-quarkus
+  template:
+    metadata:
+      labels:
+        app: helloworld-quarkus
+    spec:
+      containers:
+      - name: helloworld-quarkus
+        image: dev.local/rhdevelopers/helloworld-sb-quarkus:0.0.1
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8080
+

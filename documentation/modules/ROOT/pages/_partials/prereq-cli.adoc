@@ -27,7 +27,7 @@ copyToClipboard::kubectl-version[]
 OpenShift::
 +
 --
-* OpenShift CLI should be v4.1+
+* OpenShift CLI should be v4.3+
 
 [#oc-version]
 [source,bash,subs="+macros,+attributes"]

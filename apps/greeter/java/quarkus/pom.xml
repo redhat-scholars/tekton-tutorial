@@ -1,53 +1,60 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<?xml version="1.0" ?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
-
-  <groupId>com.redhat.developer.demos</groupId>
-  <artifactId>greeter</artifactId>
-  <version>1.0-SNAPSHOT</version>
-
-  <name>Quarkus Greeter</name>
-  <description>The greeter demo using quarkus.io</description>
-
+  <groupId>com.redhat.developers.demo</groupId>
+  <artifactId>greeter-sb-quarkus</artifactId>
+  <version>0.0.1</version>
   <properties>
-    <quarkus.version>0.23.2</quarkus.version>
-    <surefire.version>2.22.0</surefire.version>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <compiler-plugin.version>3.8.1</compiler-plugin.version>
+    <maven.compiler.parameters>true</maven.compiler.parameters>
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
-    <rest-assured.version>3.3.0</rest-assured.version>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    <quarkus-plugin.version>1.3.0.Final</quarkus-plugin.version>
+    <quarkus.platform.artifact-id>quarkus-universe-bom</quarkus.platform.artifact-id>
+    <quarkus.platform.group-id>io.quarkus</quarkus.platform.group-id>
+    <quarkus.platform.version>1.3.0.Final</quarkus.platform.version>
+    <surefire-plugin.version>2.22.1</surefire-plugin.version>
   </properties>
-
   <dependencyManagement>
     <dependencies>
       <dependency>
-        <groupId>io.quarkus</groupId>
-        <artifactId>quarkus-bom</artifactId>
-        <version>${quarkus.version}</version>
+        <groupId>${quarkus.platform.group-id}</groupId>
+        <artifactId>${quarkus.platform.artifact-id}</artifactId>
+        <version>${quarkus.platform.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
     </dependencies>
   </dependencyManagement>
-
+  <dependencies>
+    <dependency>
+      <groupId>io.quarkus</groupId>
+      <artifactId>quarkus-resteasy</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.quarkus</groupId>
+      <artifactId>quarkus-junit5</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.rest-assured</groupId>
+      <artifactId>rest-assured</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.quarkus</groupId>
+      <artifactId>quarkus-spring-web</artifactId>
+    </dependency>
+  </dependencies>
   <build>
-    <finalName>${project.artifactId}</finalName>
+    <finalName>greeter</finalName>
     <plugins>
-      <plugin>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <version>${surefire.version}</version>
-        <configuration>
-          <systemProperties>
-            <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
-          </systemProperties>
-        </configuration>
-      </plugin>
       <plugin>
         <groupId>io.quarkus</groupId>
         <artifactId>quarkus-maven-plugin</artifactId>
-        <version>${quarkus.version}</version>
+        <version>${quarkus-plugin.version}</version>
         <executions>
           <execution>
             <goals>
@@ -56,61 +63,53 @@
           </execution>
         </executions>
       </plugin>
+      <plugin>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>${compiler-plugin.version}</version>
+      </plugin>
+      <plugin>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>${surefire-plugin.version}</version>
+        <configuration>
+          <systemProperties>
+            <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
+          </systemProperties>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
-
-  <dependencies>
-    <dependency>
-      <groupId>io.quarkus</groupId>
-      <artifactId>quarkus-resteasy</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>io.quarkus</groupId>
-      <artifactId>quarkus-arc</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>io.quarkus</groupId>
-      <artifactId>quarkus-junit5</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-log4j12</artifactId>
-      <version>1.7.25</version>
-    </dependency>
-    <dependency>
-      <groupId>io.vertx</groupId>
-      <artifactId>vertx-core</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>io.rest-assured</groupId>
-      <artifactId>rest-assured</artifactId>
-      <version>${rest-assured.version}</version>
-      <scope>test</scope>
-    </dependency>
-  </dependencies>
-
   <profiles>
     <profile>
       <id>native</id>
+      <activation>
+        <property>
+          <name>native</name>
+        </property>
+      </activation>
       <build>
         <plugins>
           <plugin>
-            <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-maven-plugin</artifactId>
-            <version>${quarkus.version}</version>
+            <artifactId>maven-failsafe-plugin</artifactId>
+            <version>${surefire-plugin.version}</version>
             <executions>
               <execution>
                 <goals>
-                  <goal>native-image</goal>
+                  <goal>integration-test</goal>
+                  <goal>verify</goal>
                 </goals>
                 <configuration>
-                  <enableHttpUrlHandler>true</enableHttpUrlHandler>
+                  <systemProperties>
+                    <native.image.path>${project.build.directory}/${project.build.finalName}-runner</native.image.path>
+                  </systemProperties>
                 </configuration>
               </execution>
             </executions>
           </plugin>
         </plugins>
       </build>
+      <properties>
+        <quarkus.package.type>native</quarkus.package.type>
+      </properties>
     </profile>
   </profiles>
 </project>

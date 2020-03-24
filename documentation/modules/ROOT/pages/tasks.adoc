@@ -6,8 +6,10 @@ include::_attributes.adoc[]
 At the end of this chapter you will be able to :
 
 * Understand what is a https://github.com/tektoncd/pipeline/blob/master/docs/tasks.md[Task] ?
-* Create a Task
-* Create a TaskRun
+* Understand how to clone your build resources using Task
+* Understand where cloned sources reside i.e. Workspace
+* Create a Task that can build the sources
+* How to run a Task 
 * Use the pipeline resource with TaskRun
 
 [#tekton-task-prerequisite]
@@ -19,10 +21,118 @@ include::partial$tekton-api.adoc[]
 
 include::partial$tekton-cli.adoc[]
 
-[#tekton-task-create]
-== Create a Task
-
 include::partial$tekton-nav-to-folder.adoc[]
+
+[#tekton-tasks]
+
+[[tekton-task-clone]]
+== Clone Source Code
+
+The following listing shows a simple Task that clones the sources using git command and lists the sources:
+
+.List application source code
+[source,yaml]
+----
+include::ROOT:example$source-lister.yaml[]
+----
+
+The sources are usually cloned to a standard path called `/workspace/<input.resource.name>`, in this example the input source name is `source` and hence the git clone will be done to a path called `/workspace/source`.
+
+You can create the Task using the command as shown in the following listing:
+
+[#task-source-lister]
+[source,bash,subs="+macros,+attributes"]
+----
+tkn task create -n {tutorial-namespace} -f source-lister.yaml
+----
+copyToClipboard::task-source-lister[]
+
+Verify that your task was created:
+
+.Verify task
+[source,bash,subs="+quotes,macros+,attributes+"]
+----
+$ *tkn task ls*
+NAME            AGE
+source-lister   37 seconds ago
+----
+
+Now you can use the `tkn` CLI tool to run the Task, you can pass the parameters and input sources to the Task via the `tkn task start <options>`.
+
+[#run-task-source-lister]
+[source,bash,subs="+macros,+attributes"]
+----
+tkn task start source-lister --inputresource='source=git-source'
+----
+copyToClipboard::run-task-source-lister[]
+
+<1> You are mapping the git-source from the Pipeline resource to be the input source for the Task.
+
+The command should show an output like:
+[source,bash,subs="+quotes,macros+,attributes+"]
+----
+Taskrun started: source-lister-run-96qc4
+Waiting for logs to be available...
+----
+
+[NOTE]
+=====
+The container images used by the steps need to be downloaded therefore the first execution of the task will take some time before it starts logging the output to the terminal.
+=====
+
+Remember a Task is running as a pod therefore you can watch your pod to see task lifecycle: Init, PodInitializing, Running, and finally Completed as seen in the following listing:
+
+.Watch the pods
+[source,bash,subs="+quotes,macros+,attributes+"]
+----
+$ *watch kubectl get pods*
+NAME                                 READY   STATUS       AGE
+source-lister-run-6xpgx-pod-c7dc67   0/2     Init:0/2     9s
+...
+NAME                                 READY   STATUS       AGE
+source-lister-run-6kt8d-pod-67b326   0/2     Completed    41s
+----
+
+If the Task ran successfully you will notice the following logs in your terminal (lines truncated for brevity):
+
+[source,bash]
+----
+Taskrun started: source-lister-run-96qc4
+Waiting for logs to be available...
+...
+[git-source-git-source-rdr2k] {"level":"info","ts":1585065123.3817806,"logger":"fallback-logger","caller":"logging/config.go:69","msg":"Fetch GitHub commit ID from kodata failed: open /var/run/ko/refs/heads/master: no such file or directory"}
+[git-source-git-source-rdr2k] {"level":"info","ts":1585065133.3997571,"logger":"fallback-logger","caller":"logging/config.go:69","msg":"Fetch GitHub commit ID from kodata failed: open /var/run/ko/refs/heads/master: no such file or directory"}
+[git-source-git-source-rdr2k] {"level":"info","ts":1585065138.9021251,"logger":"fallback-logger","caller":"git/git.go:102","msg":"Successfully cloned https://github.com/redhat-developer-demos/tekton-tutorial @ master in path /workspace/source"}
+[git-source-git-source-rdr2k] {"level":"warn","ts":1585065138.902316,"logger":"fallback-logger","caller":"git/git.go:149","msg":"Unexpected error: creating symlink: symlink /tekton/home/.ssh /root/.ssh: file exists"}
+[git-source-git-source-rdr2k] {"level":"info","ts":1585065138.9946759,"logger":"fallback-logger","caller":"git/git.go:130","msg":"Successfully initialized and updated submodules in path /workspace/source"}
+
+[ls-build-sources] {"level":"info","ts":1585065132.8109465,"logger":"fallback-logger","caller":"logging/config.go:69","msg":"Fetch GitHub commit ID from kodata failed: \"KO_DATA_PATH\" does not exist or is empty"}
+[ls-build-sources] total 36
+[ls-build-sources] drwxr-xr-x    3 root     root          4096 Mar 24 15:52 src
+[ls-build-sources] -rw-r--r--    1 root     root          3472 Mar 24 15:52 pom.xml
+[ls-build-sources] -rw-r--r--    1 root     root          6609 Mar 24 15:52 mvnw.cmd
+[ls-build-sources] -rwxr-xr-x    1 root     root         10078 Mar 24 15:52 mvnw
+[ls-build-sources] -rw-r--r--    1 root     root           671 Mar 24 15:52 Dockerfile.jvm
+[ls-build-sources] -rw-r--r--    1 root     root           188 Mar 24 15:52 Dockerfile
+----
+
+[NOTE]
+====
+
+The logs are the consolidated logs from all the Task step containers. You can identify the source of the log i.e the step that has generated the logs using the text within the square brackets `[]` of each log line.
+
+e.g.
+
+Logs starting with **[ls-build-sources]** are from the container that is responsible for running the Task step i.e. `ls-build-sources`.
+====
+
+[[tekton-task-list-ws]]
+== Know the workspace
+
+In the example above, there is a log which shows the `git clone` command that cloned the application sources to the `/workspace/source` directory. The *workspace* directory is where your Task/Pipeline sources/build atrifacts will be cloned and generated. The `source` sub-path under is the directory where Tekton cloned the applicaiton sources. It is usually the name of the resources --> inputs --> Resource of type Git.
+
+[[tekton-task-build-sources]]
+== Build Sources
 
 The following snippet shows what a Tekton Task YAML looks like:
 
@@ -51,7 +161,6 @@ NOTE: The <<tekton-task-run>> could override the parameter values, if no paramet
 *** **name** - the name of the input resource using which it can be referenced and bound via <<tekton-task-run>>
 *** **type** - the type of the input resource, typically the pipeline resource type
 * **steps** - One or more sub-tasks that will be executed in the defined order. The step has all the attributes like a https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.14/#pod-v1-core[Pod spec]
-* **stepTemplate** - when there is a need to have similar container configuration across all steps of a the task, we can have them defined in the stepTemplate, the task steps will inherit them implicitly in all steps. In the example above we define the resources and securityContext for all the steps
 * **volumes** - the task can also mount external volumes using the **volumes** attribute.
 
 The parameters that were part of the menu:spec[inputs > params] can be used in the steps using the notation `$(<variable-name>)`.
@@ -72,7 +181,7 @@ Kubernetes::
 [source,bash,subs="+macros,attributes+"]
 ----
 kubectl create -n {tutorial-namespace} \
-  -f $TUTORIAL_HOME/apps/nexus/link:{github-repo}/apps/nexus/skaffold.yaml[skaffold.yaml]
+  -f $TUTORIAL_HOME/apps/nexus/link:{github-repo}/apps/nexus/skaffold.yaml[app.yaml]
 ----
 copyToClipboard::tekton-nexus-deploy-k8s[]
 
@@ -145,6 +254,7 @@ The above command should list one Task as shown below:
 ----
 NAME        AGE
 build-app   12 seconds ago
+source-lister   7 minutes ago
 ----
 
 [TIP]
@@ -157,115 +267,45 @@ build-app   12 seconds ago
 
 The https://github.com/tektoncd/pipeline/blob/master/docs/taskruns.md[TaskRun] is used to run a specific task independently. In the following section we will run the `build-app` task created in the previous step
 
-[#tekton-task-run-create]
-=== Create TaskRun
-
-The following snippet shows what a Tekton TaskRun YAML looks like:
-
-.link:{github-repo}/{pipelines-repo}/build-app-task-run.yaml[build-app-task-run.yaml]
-[source,yaml,subs="+macros,attributes+"]
-----
-include::ROOT:example$build-app-task-run.yaml[]
-----
-
-* **generateName** - since the TaskRun can be run many times, in order to have unqiue name across the TaskRun ( helpful when checking the TaskRun history) we use this **generateName** instead of **name**. When Kubernetes sees **generateName** it will generate unquie set of characters and suffix the same to `build-app-`, similar to how pod names are generated
-* **serviceAccountName** - it is always recommended to have a service account associated with TaskRun, which can then be used to define fine grained roles.
-* **taskRef** - this is used to refer to the Task by its name that will be run as part of this TaskRun. In this example we use **build-app** Task.
-
-As described in the earlier section that the Task inputs and outputs could be overridden via TaskRun. When executing TaskRun the menu:spec[inputs>resources] and menu:spec[outputs>resources] can refer to the <<02-pipeline-resources.adoc#tkn-see-what-you-have-deployed,pipeline resources>> that already defined in the same namespace.
-
-In this example we make the Task's menu:spec[inputs>resources>source] to refer to pipeline resource `git-source` via the **resourceRef**. Similarly menu:spec[outputs>resources>builtImage] to refer to pipeline resource `tekton-tutorial-greeter-image` via the **resourceRef**.
-
-[NOTE]
-====
-The menu:spec[inputs>resources>source] and menu:spec[outputs>resources>builtImage] were defined as part of the <<tekton-task-create,Task>> specification.
-====
-
 Before we run the Task using TaskRun let us create the Kubernetes service account and attach the needed permissions to the service account, the following Kubernetes resource defines a service account called `pipeline` in namespace `{tutorial-namespace}` who will have administrative role within the `{tutorial-namespace}` namespace.
 
-.link:{github-repo}/{pipelines-repo}/pipeline-sa-role.yaml[pipeline-sa-role.yaml]
-[source,yaml,subs="+macros,attributes+"]
-----
-include::ROOT:example$pipeline-sa-role.yaml[]
-----
-
-ifndef::workshop[]
 [tabs]
 ====
-Kubernetes::
+kubectl::
 +
 --
-[#tekton-taskrun-sa-to-k8s]
-[source,bash,subs="+macros,attributes+"]
+[#create-pipeline-sa]
+[source,bash,subs="+macros,+attributes"]
 ----
-kubectl create -n {tutorial-namespace} -f link:{github-repo}/{pipelines-repo}/pipeline-sa-role.yaml[pipeline-sa-role.yaml]
+kubectl create -n {tutorial-namespace} pipeline-sa-role.yaml
 ----
-copyToClipboard::tekton-taskrun-sa-to-k8s[]
+copyToClipboard::create-pipeline-sa[]
 --
-OpenShift::
+oc::
 +
 --
-endif::[]
-[#tekton-taskrun-sa-to-oc]
-[source,bash,subs="+macros,attributes+"]
-----
-oc create -n {tutorial-namespace} -f link:{github-repo}/{pipelines-repo}/pipeline-sa-role.yaml[pipeline-sa-role.yaml]
-----
-copyToClipboard::tekton-taskrun-sa-to-oc[]
-ifndef::workshop[]
+Service Account *pipeline* will be created automatically by OpenShift Pipelines operator.
 --
 ====
-endif::[]
+
 
 The application build task(`build-app`) could be run using the command:
 
-ifndef::workshop[]
-[tabs]
-====
-Kubernetes::
-+
---
-[#tekton-taskrun-run-to-k8s]
+[#tekton-taskrun-sa-to-k8s]
 [source,bash,subs="+macros,attributes+"]
 ----
-kubectl create -n {tutorial-namespace} -f link:{github-repo}/{pipelines-repo}/build-app-task-run.yaml[build-app-task-run.yaml]
+tkn task start -n {tutorial-namespace} build-app \
+  --inputresource='source=git-source' \
+  --outputresource='builtImage=tekton-tutorial-greeter-image'
 ----
-copyToClipboard::tekton-taskrun-run-to-k8s[]
+copyToClipboard::tekton-taskrun-sa-to-k8s[]
 
-IMPORTANT: As tasks will use generated name, never use `kubectl **apply** -f build-app-task-run.yaml`
---
-OpenShift::
-+
---
-endif::[]
-[#tekton-taskrun-run-to-oc]
+We will use the Tekton cli to inspect the created resources, the previous `task start` commmand will show an output to see the logs of the run like:
+
 [source,bash,subs="+macros,attributes+"]
 ----
-oc create -n {tutorial-namespace} -f link:{github-repo}/{pipelines-repo}/build-app-task-run.yaml[build-app-task-run.yaml]
-----
-copyToClipboard::tekton-taskrun-run-to-oc[]
-IMPORTANT: As tasks will use generated name, never use `oc **apply** -f build-app-task-run.yaml`
-ifndef::workshop[]
---
-====
-endif::[]
-
-We will use the Tekton cli to inspect the created resources:
-
-[#tekton-inspect-taskrun]
-[source,bash,subs="+macros,attributes+"]
-----
-tkn taskrun ls
-----
-copyToClipboard::tekton-inspect-taskrun[]
-
-The above command should list one TaskRun as shown below:
-
-[source,bash]
-----
-NAME              STARTED   DURATION   STATUS
-NAME              STARTED        DURATION   STATUS
-build-app-skgpq   1 minute ago   ---        Running(Pending)
+In order to track the taskrun progress run:
+tkn taskrun logs build-app-run-mwjmh -f -n tektontutorial
 ----
 
 NOTE: It will take few seconds for the TaskRun to show status as `Running` as it needs to download the container images.
