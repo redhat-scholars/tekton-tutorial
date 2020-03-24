@@ -87,25 +87,22 @@
     <a class="nav-link" href="tasks.html#tekton-task-prerequisite">Prerequisites</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="tasks.html#tekton-task-create">Create a task</a>
+    <a class="nav-link" href="tasks.html#tekton-task-clone">Clone Source Code</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="tasks.html#tekton-task-list-ws">List workspace</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="tasks.html#tekton-task-build-sources">Build Sources </a>
   </li>
   <li class="nav-item" data-depth="2">
     <a class="nav-link" href="tasks.html#tekton-task-deploy">Deploy task</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <button class="nav-toggle"></button>
     <a class="nav-link" href="tasks.html#tekton-task-run">TaskRun</a>
-<ul class="nav-list">
-  <li class="nav-item" data-depth="3">
-    <a class="nav-link" href="tasks.html#tekton-task-run-create">Create TaskRun</a>
   </li>
-  <li class="nav-item" data-depth="3">
-    <a class="nav-link" href="tasks.html#tekton-task-run-run">Run the Task</a>
-  </li>
-  <li class="nav-item" data-depth="3">
+  <li class="nav-item" data-depth="2">
     <a class="nav-link" href="tasks.html#tekton-test-task-output">Test Task output</a>
-  </li>
-</ul>
   </li>
   <li class="nav-item" data-depth="2">
     <a class="nav-link" href="tasks.html#tekton-task-cleanup">Clean</a>
@@ -206,10 +203,10 @@
 <td class="tableblock halign-center valign-top"><p class="tableblock"><a href="https://docs.docker.com/docker-for-windows/install">Docker for Windows</a></p></td>
 </tr>
 <tr>
-<td class="tableblock halign-center valign-top"><p class="tableblock"><code>kubectl v1.15.0</code></p></td>
-<td class="tableblock halign-center valign-top"><p class="tableblock"><a href="https://storage.googleapis.com/kubernetes-release/release/v1.15.0/bin/darwin/amd64/kubectl">Download</a></p></td>
-<td class="tableblock halign-center valign-top"><p class="tableblock"><a href="https://storage.googleapis.com/kubernetes-release/release/v1.15.0/bin/linux/amd64/kubectl">Download</a></p></td>
-<td class="tableblock halign-center valign-top"><p class="tableblock"><a href="https://storage.googleapis.com/kubernetes-release/release/v1.15.0/bin/windows/amd64/kubectl.exe">Download</a></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock"><code>kubectl</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock"><a href="https://kubernetes.io/docs/tasks/tools/install-kubectl/">Install</a></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock"><a href="https://kubernetes.io/docs/tasks/tools/install-kubectl/">Install</a></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock"><a href="https://kubernetes.io/docs/tasks/tools/install-kubectl/">Install</a></p></td>
 </tr>
 <tr>
 <td class="tableblock halign-center valign-top"><p class="tableblock"><a href="https://github.com/wercker/stern">stern</a></p></td>
@@ -228,12 +225,6 @@
 <td class="tableblock halign-center valign-top"><p class="tableblock"><code>brew install httpie</code></p></td>
 <td class="tableblock halign-center valign-top"><p class="tableblock"><code>dnf install httpie</code></p></td>
 <td class="tableblock halign-center valign-top"><p class="tableblock"><a href="https://httpie.org/doc#windows-etc" class="bare">https://httpie.org/doc#windows-etc</a></p></td>
-</tr>
-<tr>
-<td class="tableblock halign-center valign-top"><p class="tableblock"><a href="https://github.com/rakyll/hey">hey</a></p></td>
-<td class="tableblock halign-center valign-top"><p class="tableblock"><a href="https://storage.googleapis.com/hey-release/hey_darwin_amd64">Download</a></p></td>
-<td class="tableblock halign-center valign-top"><p class="tableblock"><a href="https://storage.googleapis.com/jblabs/dist/hey_linux_v0.1.2">Download</a></p></td>
-<td class="tableblock halign-center valign-top"><p class="tableblock"><a href="https://storage.googleapis.com/jblabs/dist/hey_win_v0.1.2.exe">Download</a></p></td>
 </tr>
 <tr>
 <td class="tableblock halign-center valign-top"><p class="tableblock">watch</p></td>
@@ -277,13 +268,16 @@ export TUTORIAL_HOME="$(pwd)/tekton-tutorial"</code></pre>
 <div class="ulist">
 <ul>
 <li>
-<p>Tekton <code>v0.10.1</code></p>
+<p>Tekton <code>v0.10.2</code></p>
 </li>
 <li>
-<p>Minikube <code>v1.7.2</code></p>
+<p>Minikube <code>v1.8.2+</code></p>
 </li>
 <li>
 <p>OpenShift <code>v4.2+</code></p>
+</li>
+<li>
+<p>Tekton CLI <code>0.8.0</code></p>
 </li>
 </ul>
 </div>
@@ -349,7 +343,7 @@ export TUTORIAL_HOME="$(pwd)/tekton-tutorial"</code></pre>
 </div>
 <div id="minikube-enable-registry-run" class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">minikube addons enable registry</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">minikube -p tektontutorial addons enable registry</code></pre>
 </div>
 </div>
 <button class="copybtn float-right" title="Copy to clipboard" data-clipboard-target="#minikube-enable-registry-run"><i class="fa fa-clipboard"></i></button><br/>
@@ -424,7 +418,7 @@ kubectl apply -n kube-system -f node-etc-hosts-update.yaml</code></pre>
 </div>
 <div id="minikube-check-host-entry" class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">watch minikube ssh -- sudo cat /etc/hosts</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">watch minikube -p tektontutorial ssh -- sudo cat /etc/hosts</code></pre>
 </div>
 </div>
 <button class="copybtn float-right" title="Copy to clipboard" data-clipboard-target="#minikube-check-host-entry"><i class="fa fa-clipboard"></i></button><br/>
@@ -435,8 +429,10 @@ kubectl apply -n kube-system -f node-etc-hosts-update.yaml</code></pre>
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">127.0.0.1       localhost
 127.0.1.1 demo
-10.111.151.121  dev.local
-10.111.151.121  example.com</code></pre>
+10.111.151.121  example.com
+10.111.151.121  example.org
+10.111.151.121  test.com
+10.111.151.121  test.org</code></pre>
 </div>
 </div>
 <div class="admonitionblock note">
@@ -447,7 +443,7 @@ kubectl apply -n kube-system -f node-etc-hosts-update.yaml</code></pre>
 </td>
 <td class="content">
 <div class="paragraph">
-<p>The IP for <code>dev.local</code> and <code>example.com</code> will match the <strong>CLUSTER-IP</strong> of the internal registry. To know the Cluster IP run the command:</p>
+<p>The IP for <code>test.com</code> and <code>example.com</code> will match the <strong>CLUSTER-IP</strong> of the internal registry. To know the Cluster IP run the command:</p>
 </div>
 <div id="minikube-check-registry-ip" class="listingblock">
 <div class="content">
@@ -494,8 +490,10 @@ data:
     .:53 {
         errors
         health
-        rewrite name dev.local registry.kube-system.svc.cluster.local
-        rewrite name example.com registry.kube-system.svc.cluster.local
+        rewrite name exampe.com registry.kube-system.svc.cluster.local
+        rewrite name exampe.org registry.kube-system.svc.cluster.local
+        rewrite name test.com registry.kube-system.svc.cluster.local
+        rewrite name test.org registry.kube-system.svc.cluster.local
         kubernetes cluster.local in-addr.arpa ip6.arpa {
            pods insecure
            upstream
@@ -522,7 +520,7 @@ metadata:
 <div id="tekton-deploy-pipelines" class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl apply --filename \
-  <a href="https://storage.googleapis.com/tekton-releases/previous/v0.10.1/release.yaml" class="bare">https://storage.googleapis.com/tekton-releases/previous/v0.10.1/release.yaml</a></code></pre>
+<a href="https://github.com/tektoncd/pipeline/releases/download/v0.10.2/release.yaml" class="bare">https://github.com/tektoncd/pipeline/releases/download/v0.10.2/release.yaml</a></code></pre>
 </div>
 </div>
 <button class="copybtn float-right" title="Copy to clipboard" data-clipboard-target="#tekton-deploy-pipelines"><i class="fa fa-clipboard"></i></button><br/>
@@ -569,13 +567,13 @@ tekton-pipelines-webhook-6fc9d4d9b6-kpkp7    1/1     Running   0          2m33s<
 <div class="ulist">
 <ul>
 <li>
-<p><a href="https://github.com/tektoncd/cli/releases/download/v0.7.1/tkn_0.7.1_Darwin_x86_64.tar.gz">Download for macOS</a></p>
+<p><a href="https://github.com/tektoncd/cli/releases/download/v0.8.0/tkn_0.8.0_Darwin_x86_64.tar.gz">Download for macOS</a></p>
 </li>
 <li>
-<p><a href="https://github.com/tektoncd/cli/releases/download/v0.7.1/tkn_0.7.1_Linux_x86_64.tar.gz">Download for Linux</a></p>
+<p><a href="https://github.com/tektoncd/cli/releases/download/v0.8.0/tkn_0.8.0_Linux_x86_64.tar.gz">Download for Linux</a></p>
 </li>
 <li>
-<p><a href="https://github.com/tektoncd/cli/releases/download/v0.7.1/tkn_0.7.1_Windows_x86_64.tar.gz">Download for Windows</a></p>
+<p><a href="https://github.com/tektoncd/cli/releases/download/v0.8.0/tkn_0.8.0_Windows_x86_64.tar.gz">Download for Windows</a></p>
 </li>
 </ul>
 </div>
@@ -593,7 +591,7 @@ tekton-pipelines-webhook-6fc9d4d9b6-kpkp7    1/1     Running   0          2m33s<
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">Client version: 0.7.1</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">Client version: 0.8.0</code></pre>
 </div>
 </div>
 <div class="paragraph">

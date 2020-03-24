@@ -2,22 +2,22 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 <url>
 <loc>https://redhat-developer-demos.github.io/tekton-tutorial/tekton-tutorial/index.html</loc>
-<lastmod>2020-02-27T08:33:38.080Z</lastmod>
+<lastmod>2020-03-24T16:16:13.235Z</lastmod>
 </url>
 <url>
 <loc>https://redhat-developer-demos.github.io/tekton-tutorial/tekton-tutorial/pipeline-resources.html</loc>
-<lastmod>2020-02-27T08:33:38.080Z</lastmod>
+<lastmod>2020-03-24T16:16:13.235Z</lastmod>
 </url>
 <url>
 <loc>https://redhat-developer-demos.github.io/tekton-tutorial/tekton-tutorial/pipelines.html</loc>
-<lastmod>2020-02-27T08:33:38.080Z</lastmod>
+<lastmod>2020-03-24T16:16:13.235Z</lastmod>
 </url>
 <url>
 <loc>https://redhat-developer-demos.github.io/tekton-tutorial/tekton-tutorial/setup.html</loc>
-<lastmod>2020-02-27T08:33:38.080Z</lastmod>
+<lastmod>2020-03-24T16:16:13.235Z</lastmod>
 </url>
 <url>
 <loc>https://redhat-developer-demos.github.io/tekton-tutorial/tekton-tutorial/tasks.html</loc>
-<lastmod>2020-02-27T08:33:38.080Z</lastmod>
+<lastmod>2020-03-24T16:16:13.235Z</lastmod>
 </url>
 </urlset>
