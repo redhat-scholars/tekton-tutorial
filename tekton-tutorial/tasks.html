@@ -826,6 +826,55 @@ source-lister   7 minutes ago</code></pre>
 </div>
 </div>
 </div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>Since the TaskRun pod will be run as an underprivleged user with uid <code>1001</code>, its required that <code>fsGroup</code> of the pod is set correctly. This done by configuring the ConfigMap <code>config-defaults</code> of the <code>tekton-pipelines</code> namespace. In OpenShift the namespace is called <code>openshift-pipelines</code>.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Run the following command to patch the ConfigMap <code>config-defaults</code>:</p>
+</div>
+<div class="tabset is-loading">
+<div class="ulist tabs">
+<ul>
+<li>
+<p><a id="tabset6_kubectl"></a>kubectl</p>
+</li>
+<li>
+<p><a id="tabset6_oc"></a>oc</p>
+</li>
+</ul>
+</div>
+<div class="content">
+<div class="tab-pane" aria-labelledby="tabset6_kubectl">
+<div id="patch-tekton-config-defaults-k8s" class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl patch -n tekton-pipelines cm config-defaults \
+      --patch  "$(cat $TUTORIAL_HOME/pipelines/pod-template-patch.yaml)"</code></pre>
+</div>
+</div>
+<button class="copybtn float-right" title="Copy to clipboard" data-clipboard-target="#patch-tekton-config-defaults-k8s"><i class="fa fa-clipboard"></i></button><br/>
+</div>
+<div class="tab-pane" aria-labelledby="tabset6_oc">
+<div id="patch-tekton-config-defaults" class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc patch -n openshift-pipelines cm config-defaults \
+    --patch "$(cat $TUTORIAL_HOME/pipelines/pod-template-patch.yaml)"</code></pre>
+</div>
+</div>
+<button class="copybtn float-right" title="Copy to clipboard" data-clipboard-target="#patch-tekton-config-defaults"><i class="fa fa-clipboard"></i></button><br/>
+</div>
+</div>
+</div>
 <div class="paragraph">
 <p>The application build task(<code>build-app</code>) could be run using the command:</p>
 </div>
@@ -833,7 +882,8 @@ source-lister   7 minutes ago</code></pre>
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">tkn task start -n tektontutorial build-app \
   --inputresource='source=git-source' \
-  --outputresource='builtImage=tekton-tutorial-greeter-image'</code></pre>
+  --outputresource='builtImage=tekton-tutorial-greeter-image' \
+  --param contextDir='apps/greeter/java/springboot'</code></pre>
 </div>
 </div>
 <button class="copybtn float-right" title="Copy to clipboard" data-clipboard-target="#tekton-taskrun-sa-to-k8s"><i class="fa fa-clipboard"></i></button><br/>
@@ -929,15 +979,15 @@ Each task step will be run within a container of its own.
 <div class="ulist tabs">
 <ul>
 <li>
-<p><a id="tabset6_kubernetes"></a>Kubernetes</p>
+<p><a id="tabset7_kubernetes"></a>Kubernetes</p>
 </li>
 <li>
-<p><a id="tabset6_openshift"></a>OpenShift</p>
+<p><a id="tabset7_openshift"></a>OpenShift</p>
 </li>
 </ul>
 </div>
 <div class="content">
-<div class="tab-pane" aria-labelledby="tabset6_kubernetes">
+<div class="tab-pane" aria-labelledby="tabset7_kubernetes">
 <div id="tekton-app-run-to-k8s" class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl run demo-greeter -n tektontutorial \
@@ -948,7 +998,7 @@ kubectl expose pod demo-greeter -n tektontutorial --port 8080 --type=NodePort</c
 </div>
 <button class="copybtn float-right" title="Copy to clipboard" data-clipboard-target="#tekton-app-run-to-k8s"><i class="fa fa-clipboard"></i></button><br/>
 </div>
-<div class="tab-pane" aria-labelledby="tabset6_openshift">
+<div class="tab-pane" aria-labelledby="tabset7_openshift">
 <div id="tekton-app-run-to-oc" class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc run demo-greeter -n tektontutorial --generator='run-pod/v1' --image='dev.local/rhdevelopers/tekton-tutorial-greeter' &amp;&amp; \
@@ -967,15 +1017,15 @@ oc expose svc -n tektontutorial demo-greeter</code></pre>
 <div class="ulist tabs">
 <ul>
 <li>
-<p><a id="tabset7_kubernetes"></a>Kubernetes</p>
+<p><a id="tabset8_kubernetes"></a>Kubernetes</p>
 </li>
 <li>
-<p><a id="tabset7_openshift"></a>OpenShift</p>
+<p><a id="tabset8_openshift"></a>OpenShift</p>
 </li>
 </ul>
 </div>
 <div class="content">
-<div class="tab-pane" aria-labelledby="tabset7_kubernetes">
+<div class="tab-pane" aria-labelledby="tabset8_kubernetes">
 <div id="tekton-invoke-app-k8s" class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">SVC_URL=$(minikube ip):$(kubectl get svc -n tektontutorial demo-greeter -o yaml | yq r - 'spec.ports[0].nodePort') &amp;&amp; \
@@ -984,7 +1034,7 @@ http --body $SVC_URL</code></pre>
 </div>
 <button class="copybtn float-right" title="Copy to clipboard" data-clipboard-target="#tekton-invoke-app-k8s"><i class="fa fa-clipboard"></i></button><br/>
 </div>
-<div class="tab-pane" aria-labelledby="tabset7_openshift">
+<div class="tab-pane" aria-labelledby="tabset8_openshift">
 <div id="tekton-invoke-app-oc" class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">SVC_URL=$(oc get routes -o yaml | yq r - 'spec.url.host' )
@@ -1008,15 +1058,15 @@ http --body $SVC_URL</code></pre>
 <div class="ulist tabs">
 <ul>
 <li>
-<p><a id="tabset8_kubernetes"></a>Kubernetes</p>
+<p><a id="tabset9_kubernetes"></a>Kubernetes</p>
 </li>
 <li>
-<p><a id="tabset8_openshift"></a>OpenShift</p>
+<p><a id="tabset9_openshift"></a>OpenShift</p>
 </li>
 </ul>
 </div>
 <div class="content">
-<div class="tab-pane" aria-labelledby="tabset8_kubernetes">
+<div class="tab-pane" aria-labelledby="tabset9_kubernetes">
 <div id="tekton-task-cleanup-k8s" class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl delete pod -n tektontutorial demo-greeter &amp;&amp;\
@@ -1025,7 +1075,7 @@ kubectl delete svc -n tektontutorial demo-greeter</code></pre>
 </div>
 <button class="copybtn float-right" title="Copy to clipboard" data-clipboard-target="#tekton-task-cleanup-k8s"><i class="fa fa-clipboard"></i></button><br/>
 </div>
-<div class="tab-pane" aria-labelledby="tabset8_openshift">
+<div class="tab-pane" aria-labelledby="tabset9_openshift">
 <div id="tekton-task-cleanup-oc" class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc delete pod -n tektontutorial demo-greeter &amp;&amp;\
