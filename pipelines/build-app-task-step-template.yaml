@@ -6,6 +6,7 @@ spec:
   stepTemplate:
     securityContext:
       runAsUser: 0
+      privileged: true
     volumeMounts:
       - name: varlibc
         mountPath: /var/lib/containers

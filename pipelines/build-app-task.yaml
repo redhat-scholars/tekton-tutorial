@@ -31,6 +31,7 @@ spec:
   steps:
     - name: build-sources
       image: docker.io/maven:3.6.3-jdk-8-slim
+      workingDir: "/workspace/source/$(inputs.params.contextDir)"
       command:
         - mvn
       args:
@@ -40,9 +41,9 @@ spec:
       env:
         - name: user.home
           value: /home/tekton
-      workingDir: "/workspace/source/$(inputs.params.contextDir)"
     - name: build-image
       image: quay.io/buildah/stable
+      workingDir: "/workspace/source/$(inputs.params.contextDir)"
       command:
         - "buildah"
       args:
@@ -54,13 +55,14 @@ spec:
         - "$(inputs.params.destinationImage)"
         - "."
       securityContext:
+        privileged: true
         runAsUser: 0
       volumeMounts:
         - name: varlibc
           mountPath: /var/lib/containers
-      workingDir: "/workspace/source/$(inputs.params.contextDir)"
     - name: push-image
       image: quay.io/buildah/stable
+      workingDir: "/workspace/source/$(inputs.params.contextDir)"
       command:
         - "buildah"
       args:
@@ -70,10 +72,10 @@ spec:
         - "docker://$(inputs.params.destinationImage)"
       securityContext:
         runAsUser: 0
+        privileged: true
       volumeMounts:
         - name: varlibc
           mountPath: /var/lib/containers
-      workingDir: "/workspace/source/$(inputs.params.contextDir)"
   volumes:
     - name: varlibc
       emptyDir: {}

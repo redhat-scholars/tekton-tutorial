@@ -520,6 +520,164 @@ endif::[]
 
 The above command should show an output like **hello**
 
+[[tekton-task-step-template]]
+== Step Template
+
+When there is a need to have similar container configuration across all steps of a Task, we can have them defined in the stepTemplate. The Task steps will then inherit them implicitly in all steps. In the example above we define the resources and securityContext for all the steps using the stepTemplate.  Also if you notice in the example above we can also override the stepTemplate at the step level. That gives a unique flexibility to tweak the settings at step level.
+
+With the current `build-app` task, we see the following configurations are repeated in `build-image` and `push-image`:
+
+[source,yaml]
+----
+securityContext:
+  privileged: true
+  runAsUser: 0
+volumeMounts:
+  - name: varlibc
+    mountPath: /var/lib/containers
+----
+
+We can move the the above step configuration into a stepTemplate as shown in the following updated `build-app` task:
+
+[source,yaml]
+----
+include::ROOT:example$build-app-task-step-template.yaml[]
+----
+
+Now you can apply the task as shown:
+
+[tabs]
+====
+kubectl::
++
+--
+[#apply-task-step-tpl]
+[source,bash,subs="+macros,+attributes"]
+----
+kubectl apply -n {tutorial-namespace} -f build-app-task-step-template.yaml
+----
+copyToClipboard::apply-task-step-tpl[]
+--
+oc::
++
+--
+[#oc-apply-task-step-tpl]
+[source,bash,subs="+macros,+attributes"]
+----
+oc apply -n {tutorial-namespace} -f build-app-task-step-template.yaml
+----
+copyToClipboard::oc-apply-task-step-tpl[]
+--
+====
+
+Now try <<tekton-task-run,running>> task agian. When you examine the TaskRun pods should notice `stepTemplate` added to all the step containers including `build-sources`.
+
+Assuming the build-app-run pod to be `build-app-run-bsr4k-pod-xbxwg`:
+
+Check `securityContext`:
+
+[tabs]
+====
+kubectl::
++
+--
+[#check-sc]
+[source,bash,subs="+macros,+attributes"]
+----
+kubectl get pod -n {tutorial-namespace} build-app-run-bsr4k-pod-xbxwg\
+-o=jsonpath="{range .spec.containers[*]} {.name} {'\n'} {.volumeMounts[?(@.name=='varlibc')]} {'\n'} {end}"
+----
+copyToClipboard::apply-check-sc[]
+--
+oc::
++
+--
+[#oc-check-sc]
+[source,bash,subs="+macros,+attributes"]
+----
+oc get pod -n {tutorial-namespace} build-app-run-bsr4k-pod-xbxwg\
+-o=jsonpath="{range .spec.containers[*]} {.name} {'\n'} {.volumeMounts[?(@.name=='varlibc')]} {'\n'} {end}"
+----
+copyToClipboard::oc-check-sc[]
+--
+====
+
+The command should an output like :
+
+[source,bash]
+----
+ step-create-dir-builtimage-4jmh2
+ map[privileged:true runAsUser:0]
+
+ step-git-source-git-source-fgq4p
+ map[privileged:true runAsUser:0]
+
+ step-build-sources
+ map[privileged:true runAsUser:0]
+ 
+ step-build-image
+ map[privileged:true runAsUser:0]
+
+ step-push-image
+ map[privileged:true runAsUser:0]
+
+ step-image-digest-exporter-8g4ss
+ map[privileged:true runAsUser:0]
+----
+
+Check `volumeMounts`:
+
+[tabs]
+====
+kubectl::
++
+--
+[#check-vm]
+[source,bash,subs="+macros,+attributes"]
+----
+kubectl get pod -n {tutorial-namespace} build-app-run-bsr4k-pod-xbxwg\
+-o=jsonpath="{range .spec.containers[*]} {.name} {'\n'} {.volumeMounts[?(@.name=='varlibc')]} {'\n'} {end}"
+----
+copyToClipboard::apply-check-vm[]
+--
+oc::
++
+--
+[#oc-check-vm]
+[source,bash,subs="+macros,+attributes"]
+----
+oc get pod -n {tutorial-namespace} build-app-run-bsr4k-pod-xbxwg\
+-o=jsonpath="{range .spec.containers[*]} {.name} {'\n'} {.volumeMounts[?(@.name=='varlibc')]} {'\n'} {end}"
+----
+copyToClipboard::oc-check-vm[]
+--
+====
+
+The command should an output like :
+
+[source,bash]
+----
+step-create-dir-builtimage-4jmh2
+ map[mountPath:/var/lib/containers name:varlibc]
+
+step-git-source-git-source-fgq4p
+ map[mountPath:/var/lib/containers name:varlibc]
+
+step-build-sources
+ map[mountPath:/var/lib/containers name:varlibc]
+
+step-build-image
+ map[mountPath:/var/lib/containers name:varlibc]
+
+step-push-image
+ map[mountPath:/var/lib/containers name:varlibc]
+
+step-image-digest-exporter-8g4ss
+ map[mountPath:/var/lib/containers name:varlibc]
+----
+
+NOTE: The Task steps can override the stepTemplate values.
+
 [#tekton-task-cleanup]
 == Cleanup
 

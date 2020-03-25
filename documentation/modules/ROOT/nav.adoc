@@ -23,6 +23,7 @@
 ** xref:tasks.adoc#tekton-task-deploy[Deploy task]
 **  xref:tasks.adoc#tekton-task-run[TaskRun]
 **  xref:tasks.adoc#tekton-test-task-output[Test Task output]
+** xref:tasks.adoc#tekton-task-step-template[Step Template]
 **  xref:tasks.adoc#tekton-task-cleanup[Clean]
 
 * xref:pipelines.adoc[Pipelines]
