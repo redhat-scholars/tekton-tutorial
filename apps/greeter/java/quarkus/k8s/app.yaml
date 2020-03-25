@@ -1,31 +1,31 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: helloworld-quarkus
+  name: helloworld
 spec:
   selector:
-    app: helloworld-quarkus
+    app: helloworld
   ports:
-  - port: 8080
-    targetPort: 8080
+    - port: 8080
+      targetPort: 8080
+  type: NodePort
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: helloworld-quarkus
+  name: helloworld
 spec:
   selector:
     matchLabels:
-      app: helloworld-quarkus
+      app: helloworld
   template:
     metadata:
       labels:
-        app: helloworld-quarkus
+        app: helloworld
     spec:
       containers:
-      - name: helloworld-quarkus
-        image: dev.local/rhdevelopers/helloworld-sb-quarkus:0.0.1
-        imagePullPolicy: IfNotPresent
-        ports:
-        - containerPort: 8080
-
+        - name: helloworld
+          image: example.com/rhdevelopers/tekton-tutorial-greeter
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
