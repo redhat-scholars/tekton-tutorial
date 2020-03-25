@@ -29,33 +29,6 @@ copyToClipboard::setup-minikube-start[]
 🏄  Done! kubectl is now configured to use "{tutorial-namespace}"
 ----
 
-[#minikube-enable-registry]
-**Enable Internal Registry**
-
-[#minikube-enable-registry-run]
-[source,bash,subs="+macros,attributes+"]
-----
-minikube -p {tutorial-namespace} addons enable registry
-----
-copyToClipboard::minikube-enable-registry-run[]
-
-NOTE: It will take few mins for the registry to be enabled, you can watch the status using `kubectl get pods -n kube-system -w  | grep registry`
-
-A successful enable of <<minikube-enable-registry,registry>> will show the following pods when running the command:
-
-[#minikube-check-registry]
-[source,bash,subs="attributes+,+macros"]
-----
-kubectl get pods -n kube-system | grep registry
-----
-copyToClipboard::minikube-check-registry[]
-
-[source,bash]
-----
-registry-7c5hg                             1/1     Running   0          29m
-registry-proxy-cj6dj                       1/1     Running   0          29m
-----
-
 **Navigate to registry helper folder:**
 
 [#minikube-registry-helper-nav]
@@ -69,13 +42,10 @@ copyToClipboard::minikube-registry-helper-nav[]
 
 As part of some exercises in the tutorial, we need to push and pull images to local internal registry. To make push and pull smoother we will have a helper deployed so that we can use some common names like `dev.local`, `example.com` as registry aliases for internal registry
 
-**Add entries to minikube host file**
-
 [#minikube-add-entry-to-host]
 [source,bash,subs="attributes+,+macros"]
 ----
-kubectl apply -n kube-system -f registry-aliases-config.yaml &&\
-kubectl apply -n kube-system -f node-etc-hosts-update.yaml
+./configure.sh
 ----
 copyToClipboard::minikube-add-entry-to-host[]
 
@@ -84,16 +54,7 @@ copyToClipboard::minikube-add-entry-to-host[]
 Wait for the Daemonset to be running before proceeding to next step, the status of the Daemonset can be viewed via `kubectl get pods -n kube-system -w`, you can do kbd:[CTRL+c] to end the watch.
 =====
 
-Check if the entries are added to minikube node host file
-
-[#minikube-check-host-entry]
-[source,bash,subs="attributes+,+macros"]
-----
-watch minikube -p {tutorial-namespace} ssh -- sudo cat /etc/hosts
-----
-copyToClipboard::minikube-check-host-entry[]
-
-A successful daemonset run will show the minikube node `/etc/hosts` file with the following entries:
+A successful configure run will show the minikube node `/etc/hosts` file with the following entries:
 
 [source,bash]
 ----
@@ -123,23 +84,6 @@ NAME       TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)                  AG
 registry   ClusterIP   10.111.151.121   <none>        80/TCP                  178m
 ----
 
-**Update CoreDNS**
-
-[#minikube-update-coredns]
-[source,bash,subs="attributes+,+macros"]
-----
-./patch-coredns.sh
-----
-copyToClipboard::minikube-update-coredns[]
-
-To check successful patch  run the following command 
-
-[#check-coredns-cm]
-[source,bash,subs="attributes+,+macros"]
-----
-kubectl get cm -n kube-system coredns -o yaml
-----
-copyToClipboard::check-coredns-cm[]
 
 A successful patch will have the coredns updated ConfigMap `coredns` in `kube-system`
 
@@ -150,18 +94,22 @@ data:
   Corefile: |-
     .:53 {
         errors
-        health
-        rewrite name exampe.com registry.kube-system.svc.cluster.local
-        rewrite name exampe.org registry.kube-system.svc.cluster.local
-        rewrite name test.com registry.kube-system.svc.cluster.local
-        rewrite name test.org registry.kube-system.svc.cluster.local
+         rewrite name example.com  registry.kube-system.svc.cluster.local
+    rewrite name example.org  registry.kube-system.svc.cluster.local
+    rewrite name test.com  registry.kube-system.svc.cluster.local
+    rewrite name test.org  registry.kube-system.svc.cluster.local
+
+        health {
+           lameduck 5s
+        }
+        ready
         kubernetes cluster.local in-addr.arpa ip6.arpa {
            pods insecure
-           upstream
            fallthrough in-addr.arpa ip6.arpa
+           ttl 30
         }
         prometheus :9153
-        proxy . /etc/resolv.conf
+        forward . /etc/resolv.conf
         cache 30
         loop
         reload

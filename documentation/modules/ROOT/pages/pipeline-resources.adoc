@@ -55,7 +55,7 @@ Kubernetes::
 [#tekton-build-res-deploy-to-k8s]
 [source,bash,subs="+macros,attributes+"]
 ----
-kubectl create -n {tutorial-namespace} -f link:{github-repo}/{pipelines-repo}/build-resources.yaml[build-resources.yaml]
+kubectl apply -n {tutorial-namespace} -f link:{github-repo}/{pipelines-repo}/build-resources.yaml[build-resources.yaml]
 ----
 copyToClipboard::tekton-build-res-deploy-to-k8s[]
 --
@@ -66,7 +66,7 @@ endif::[]
 [#tekton-build-res-deploy-to-oc]
 [source,bash,subs="+macros,attributes+"]
 ----
-oc create -n {tutorial-namespace} -f link:{github-repo}/{pipelines-repo}/build-resources.yaml[build-resources.yaml]
+oc apply -n {tutorial-namespace} -f link:{github-repo}/{pipelines-repo}/build-resources.yaml[build-resources.yaml]
 ----
 copyToClipboard::tekton-build-res-deploy-to-oc[]
 ifndef::workshop[]

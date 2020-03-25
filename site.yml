@@ -5,7 +5,6 @@ site:
   title: Tekton Tutorial
   url: https://redhat-developer-demos.github.io/tekton-tutorial
   start_page: tekton-tutorial::index.adoc
-
 content:
   sources:
     - url: git@github.com:redhat-developer-demos/tekton-tutorial.git
@@ -23,11 +22,11 @@ asciidoc:
 ui:
   bundle:
     url: https://github.com/redhat-developer-demos/rhd-tutorial-ui/releases/download/v0.0.4/ui-bundle.zip
-  supplemental_files: 
+  supplemental_files:
     - path: ./supplemental-ui
     - path: .nojekyll
     - path: ui.yml
       contents: "static_files: [ .nojekyll ]"
-  
+
 output:
   dir: ./gh-pages

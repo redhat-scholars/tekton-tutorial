@@ -13,38 +13,67 @@ spec:
         default: .
       - name: mavenMirrorUrl
         description: the maven mirrror url
-        default: http://repo1.maven.apache.org/maven2
+        default: https://repo.maven.apache.org/maven2/
       - name: destinationImage
         description: the fully qualified image name
         default: "$(outputs.resources.builtImage.url)"
       - name: dockerFile
         description: the docker file to used for building the application
-        default: Dockerfile.jvm
+        default: Dockerfile
+      - name: tlsVerify
+        description: tls verify
+        type: string
+        default: "false"
   outputs:
     resources:
       - name: builtImage
         type: image
   steps:
     - name: build-sources
-      image: quay.io/quarkus/centos-quarkus-maven:20.0.0-java8
+      image: docker.io/maven:3.6.3-jdk-8-slim
       workingDir: "/workspace/source/$(inputs.params.contextDir)"
-      args:
+      command:
         - mvn
+      args:
         - -DskipTests
         - clean
         - package
       env:
-        - name: MAVEN_MIRROR_URL
-          value: "$(inputs.params.mavenMirrorUrl)"
-    - name: build-and-push
-      image: gcr.io/kaniko-project/executor:v0.19.0
-      # specifying DOCKER_CONFIG is required to allow kaniko to detect docker credential
-      env:
-        - name: "DOCKER_CONFIG"
-          value: "/tekton/home/.docker/"
+        - name: user.home
+          value: /home/tekton
+    - name: build-image
+      image: quay.io/buildah/stable
+      workingDir: "/workspace/source/$(inputs.params.contextDir)"
       command:
-        - /kaniko/executor
+        - "buildah"
       args:
-        - --dockerfile=$(params.pathToDockerFile)
-        - --destination=$(params.destinationImage)
-        - --context=$(params.contextDir)
+        - "bud"
+        - "--layers"
+        - "-f"
+        - "$(inputs.params.dockerFile)"
+        - "-t"
+        - "$(inputs.params.destinationImage)"
+        - "."
+      securityContext:
+        runAsUser: 0
+      volumeMounts:
+        - name: varlibc
+          mountPath: /var/lib/containers
+    - name: push-image
+      image: quay.io/buildah/stable
+      workingDir: "/workspace/source/$(inputs.params.contextDir)"
+      command:
+        - "buildah"
+      args:
+        - "push"
+        - "--tls-verify=$(inputs.params.tlsVerify)"
+        - $(inputs.params.destinationImage)
+        - "docker://$(inputs.params.destinationImage)"
+      securityContext:
+        runAsUser: 0
+      volumeMounts:
+        - name: varlibc
+          mountPath: /var/lib/containers
+  volumes:
+    - name: varlibc
+      emptyDir: {}

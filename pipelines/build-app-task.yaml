@@ -20,56 +20,56 @@ spec:
       - name: dockerFile
         description: the docker file to used for building the application
         default: Dockerfile
+      - name: tlsVerify
+        description: tls verify
+        type: string
+        default: "false"
   outputs:
     resources:
       - name: builtImage
         type: image
   steps:
     - name: build-sources
-      image: quay.io/quarkus/centos-quarkus-maven:20.0.0-java8
+      image: docker.io/maven:3.6.3-jdk-8-slim
       workingDir: "/workspace/source/$(inputs.params.contextDir)"
-      args:
+      command:
         - mvn
+      args:
         - -DskipTests
         - clean
         - package
       env:
-        - name: MAVEN_MIRROR_URL
-          value: "$(inputs.params.mavenMirrorUrl)"
-        - name: HOME
-          value: /home/quarkus
+        - name: user.home
+          value: /home/tekton
     - name: build-image
       image: quay.io/buildah/stable
       workingDir: "/workspace/source/$(inputs.params.contextDir)"
       command:
-        [
-          "buildah",
-          "bud",
-          "--tls-verify=false",
-          "--layers",
-          "-f",
-          "$(inputs.params.dockerFile)",
-          "-t",
-          "$(inputs.params.destinationImage)",
-          ".",
-        ]
+        - "buildah"
+      args:
+        - "bud"
+        - "--layers"
+        - "-f"
+        - "$(inputs.params.dockerFile)"
+        - "-t"
+        - "$(inputs.params.destinationImage)"
+        - "."
       securityContext:
         privileged: true
         runAsUser: 0
       volumeMounts:
         - name: varlibc
           mountPath: /var/lib/containers
-    - name: build-push
+    - name: push-image
       image: quay.io/buildah/stable
       workingDir: "/workspace/source/$(inputs.params.contextDir)"
       command:
-        [
-          "buildah",
-          "push",
-          "--tls-verify=false",
-          "$(inputs.params.destinationImage)",
-          "docker://$(inputs.params.destinationImage)",
-        ]
+        - "buildah"
+      args:
+        - "push"
+        - "--tls-verify=$(inputs.params.tlsVerify)"
+        - $(inputs.params.destinationImage)
+        - "docker://$(inputs.params.destinationImage)"
       securityContext:
         privileged: true
         runAsUser: 0

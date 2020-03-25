@@ -4,11 +4,11 @@ metadata:
   name: git-source
 spec:
   type: git
-  params: 
-  - name: url
-    value: https://github.com/redhat-developer-demos/tekton-tutorial
-  - name: revision
-    value: master
+  params:
+    - name: url
+      value: https://github.com/redhat-developer-demos/tekton-tutorial
+    - name: revision
+      value: master
 ---
 apiVersion: tekton.dev/v1alpha1
 kind: PipelineResource
@@ -16,8 +16,8 @@ metadata:
   name: tekton-tutorial-greeter-image
 spec:
   type: image
-  params: 
-  - name: url
-    value: "dev.local/rhdevelopers/tekton-tutorial-greeter"
-    # if you are on OpenShift uncomment the line below
-    #value: "image-registry.openshift-image-registry.svc:5000/tutorial/helloworld"
+  params:
+    - name: url
+      value: "example.com/rhdevelopers/tekton-tutorial-greeter"
+      # if you are on OpenShift uncomment the line below
+      #value: "image-registry.openshift-image-registry.svc:5000/tutorial/helloworld"

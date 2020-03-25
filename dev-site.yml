@@ -5,7 +5,6 @@ site:
   title: Tekton Tutorial
   url: https://redhat-developer-demos.github.io/tekton-tutorial
   start_page: tekton-tutorial::index.adoc
-
 content:
   sources:
     - url: .
@@ -13,7 +12,7 @@ content:
       start_path: documentation
 asciidoc:
   attributes:
-    tutorial-namespace:  tektontutorial
+    tutorial-namespace: tektontutorial
     title: Tekton Tutorial
     workshop-domain: guru.devx.red
     kubernetes-version: v1.15.0
