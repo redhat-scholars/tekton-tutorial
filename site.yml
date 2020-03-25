@@ -14,7 +14,7 @@ asciidoc:
   attributes:
     tutorial-namespace: tektontutorial
     title: Tekton Tutorial
-    kubernetes-version: v1.15.0
+    kubernetes-version: v1.17.2
     release-version: master
   extensions:
     - ./lib/copy-to-clipboard.js
