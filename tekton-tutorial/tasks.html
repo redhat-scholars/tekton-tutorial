@@ -117,6 +117,9 @@
     <a class="nav-link" href="#tekton-test-task-output">Test Task output</a>
   </li>
   <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="#tekton-task-step-template">Step Template</a>
+  </li>
+  <li class="nav-item" data-depth="2">
     <a class="nav-link" href="#tekton-task-cleanup">Clean</a>
   </li>
 </ul>
@@ -891,6 +894,7 @@ spec:
         - "$(inputs.params.destinationImage)"
         - "."
       securityContext:
+        privileged: true
         runAsUser: 0
       volumeMounts:
         - name: varlibc
@@ -907,6 +911,7 @@ spec:
         - "docker://$(inputs.params.destinationImage)"
       securityContext:
         runAsUser: 0
+        privileged: true
       volumeMounts:
         - name: varlibc
           mountPath: /var/lib/containers
@@ -1240,21 +1245,294 @@ http --body $SVC_URL</code></pre>
 </div>
 </div>
 <div class="sect1">
+<h2 id="tekton-task-step-template"><a class="anchor" href="#tekton-task-step-template"></a>Step Template</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>When there is a need to have similar container configuration across all steps of a Task, we can have them defined in the stepTemplate. The Task steps will then inherit them implicitly in all steps. In the example above we define the resources and securityContext for all the steps using the stepTemplate.  Also if you notice in the example above we can also override the stepTemplate at the step level. That gives a unique flexibility to tweak the settings at step level.</p>
+</div>
+<div class="paragraph">
+<p>With the current <code>build-app</code> task, we see the following configurations are repeated in <code>build-image</code> and <code>push-image</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">securityContext:
+  privileged: true
+  runAsUser: 0
+volumeMounts:
+  - name: varlibc
+    mountPath: /var/lib/containers</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>We can move the the above step configuration into a stepTemplate as shown in the following updated <code>build-app</code> task:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">apiVersion: tekton.dev/v1alpha1
+kind: Task
+metadata:
+  name: build-app
+spec:
+  stepTemplate:
+    securityContext:
+      runAsUser: 0
+      privileged: true
+    volumeMounts:
+      - name: varlibc
+        mountPath: /var/lib/containers
+  inputs:
+    resources:
+      - name: source
+        type: git
+    params:
+      - name: contextDir
+        description: the context dir within source
+        default: .
+      - name: mavenMirrorUrl
+        description: the maven mirrror url
+        default: https://repo.maven.apache.org/maven2/
+      - name: destinationImage
+        description: the fully qualified image name
+        default: "$(outputs.resources.builtImage.url)"
+      - name: dockerFile
+        description: the docker file to used for building the application
+        default: Dockerfile
+      - name: tlsVerify
+        description: tls verify
+        type: string
+        default: "false"
+  outputs:
+    resources:
+      - name: builtImage
+        type: image
+  steps:
+    - name: build-sources
+      image: docker.io/maven:3.6.3-jdk-8-slim
+      command:
+        - mvn
+      args:
+        - -DskipTests
+        - clean
+        - package
+      env:
+        - name: user.home
+          value: /home/tekton
+      workingDir: "/workspace/source/$(inputs.params.contextDir)"
+    - name: build-image
+      image: quay.io/buildah/stable
+      command:
+        - "buildah"
+      args:
+        - "bud"
+        - "--layers"
+        - "-f"
+        - "$(inputs.params.dockerFile)"
+        - "-t"
+        - "$(inputs.params.destinationImage)"
+        - "."
+      workingDir: "/workspace/source/$(inputs.params.contextDir)"
+    - name: push-image
+      image: quay.io/buildah/stable
+      command:
+        - "buildah"
+      args:
+        - "push"
+        - "--tls-verify=$(inputs.params.tlsVerify)"
+        - $(inputs.params.destinationImage)
+        - "docker://$(inputs.params.destinationImage)"
+      workingDir: "/workspace/source/$(inputs.params.contextDir)"
+  volumes:
+    - name: varlibc
+      emptyDir: {}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now you can apply the task as shown:</p>
+</div>
+<div class="tabset is-loading">
+<div class="ulist tabs">
+<ul>
+<li>
+<p><a id="tabset8_kubectl"></a>kubectl</p>
+</li>
+<li>
+<p><a id="tabset8_oc"></a>oc</p>
+</li>
+</ul>
+</div>
+<div class="content">
+<div class="tab-pane" aria-labelledby="tabset8_kubectl">
+<div id="apply-task-step-tpl" class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl apply -n tektontutorial -f build-app-task-step-template.yaml</code></pre>
+</div>
+</div>
+<button class="copybtn float-right" title="Copy to clipboard" data-clipboard-target="#apply-task-step-tpl"><i class="fa fa-clipboard"></i></button><br/>
+</div>
+<div class="tab-pane" aria-labelledby="tabset8_oc">
+<div id="oc-apply-task-step-tpl" class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc apply -n tektontutorial -f build-app-task-step-template.yaml</code></pre>
+</div>
+</div>
+<button class="copybtn float-right" title="Copy to clipboard" data-clipboard-target="#oc-apply-task-step-tpl"><i class="fa fa-clipboard"></i></button><br/>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Now try <a href="#tekton-task-run">running</a> task agian. When you examine the TaskRun pods should notice <code>stepTemplate</code> added to all the step containers including <code>build-sources</code>.</p>
+</div>
+<div class="paragraph">
+<p>Assuming the build-app-run pod to be <code>build-app-run-bsr4k-pod-xbxwg</code>:</p>
+</div>
+<div class="paragraph">
+<p>Check <code>securityContext</code>:</p>
+</div>
+<div class="tabset is-loading">
+<div class="ulist tabs">
+<ul>
+<li>
+<p><a id="tabset9_kubectl"></a>kubectl</p>
+</li>
+<li>
+<p><a id="tabset9_oc"></a>oc</p>
+</li>
+</ul>
+</div>
+<div class="content">
+<div class="tab-pane" aria-labelledby="tabset9_kubectl">
+<div id="check-sc" class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl get pod -n tektontutorial build-app-run-bsr4k-pod-xbxwg\
+-o=jsonpath="{range .spec.containers[*]} {.name} {'\n'} {.volumeMounts[?(@.name=='varlibc')]} {'\n'} {end}"</code></pre>
+</div>
+</div>
+<button class="copybtn float-right" title="Copy to clipboard" data-clipboard-target="#apply-check-sc"><i class="fa fa-clipboard"></i></button><br/>
+</div>
+<div class="tab-pane" aria-labelledby="tabset9_oc">
+<div id="oc-check-sc" class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc get pod -n tektontutorial build-app-run-bsr4k-pod-xbxwg\
+-o=jsonpath="{range .spec.containers[*]} {.name} {'\n'} {.volumeMounts[?(@.name=='varlibc')]} {'\n'} {end}"</code></pre>
+</div>
+</div>
+<button class="copybtn float-right" title="Copy to clipboard" data-clipboard-target="#oc-check-sc"><i class="fa fa-clipboard"></i></button><br/>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>The command should an output like :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash"> step-create-dir-builtimage-4jmh2
+ map[privileged:true runAsUser:0]
+
+ step-git-source-git-source-fgq4p
+ map[privileged:true runAsUser:0]
+
+ step-build-sources
+ map[privileged:true runAsUser:0]
+
+ step-build-image
+ map[privileged:true runAsUser:0]
+
+ step-push-image
+ map[privileged:true runAsUser:0]
+
+ step-image-digest-exporter-8g4ss
+ map[privileged:true runAsUser:0]</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Check <code>volumeMounts</code>:</p>
+</div>
+<div class="tabset is-loading">
+<div class="ulist tabs">
+<ul>
+<li>
+<p><a id="tabset10_kubectl"></a>kubectl</p>
+</li>
+<li>
+<p><a id="tabset10_oc"></a>oc</p>
+</li>
+</ul>
+</div>
+<div class="content">
+<div class="tab-pane" aria-labelledby="tabset10_kubectl">
+<div id="check-vm" class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl get pod -n tektontutorial build-app-run-bsr4k-pod-xbxwg\
+-o=jsonpath="{range .spec.containers[*]} {.name} {'\n'} {.volumeMounts[?(@.name=='varlibc')]} {'\n'} {end}"</code></pre>
+</div>
+</div>
+<button class="copybtn float-right" title="Copy to clipboard" data-clipboard-target="#apply-check-vm"><i class="fa fa-clipboard"></i></button><br/>
+</div>
+<div class="tab-pane" aria-labelledby="tabset10_oc">
+<div id="oc-check-vm" class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc get pod -n tektontutorial build-app-run-bsr4k-pod-xbxwg\
+-o=jsonpath="{range .spec.containers[*]} {.name} {'\n'} {.volumeMounts[?(@.name=='varlibc')]} {'\n'} {end}"</code></pre>
+</div>
+</div>
+<button class="copybtn float-right" title="Copy to clipboard" data-clipboard-target="#oc-check-vm"><i class="fa fa-clipboard"></i></button><br/>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>The command should an output like :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">step-create-dir-builtimage-4jmh2
+ map[mountPath:/var/lib/containers name:varlibc]
+
+step-git-source-git-source-fgq4p
+ map[mountPath:/var/lib/containers name:varlibc]
+
+step-build-sources
+ map[mountPath:/var/lib/containers name:varlibc]
+
+step-build-image
+ map[mountPath:/var/lib/containers name:varlibc]
+
+step-push-image
+ map[mountPath:/var/lib/containers name:varlibc]
+
+step-image-digest-exporter-8g4ss
+ map[mountPath:/var/lib/containers name:varlibc]</code></pre>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+The Task steps can override the stepTemplate values.
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
 <h2 id="tekton-task-cleanup"><a class="anchor" href="#tekton-task-cleanup"></a>Cleanup</h2>
 <div class="sectionbody">
 <div class="tabset is-loading">
 <div class="ulist tabs">
 <ul>
 <li>
-<p><a id="tabset8_kubernetes"></a>Kubernetes</p>
+<p><a id="tabset11_kubernetes"></a>Kubernetes</p>
 </li>
 <li>
-<p><a id="tabset8_openshift"></a>OpenShift</p>
+<p><a id="tabset11_openshift"></a>OpenShift</p>
 </li>
 </ul>
 </div>
 <div class="content">
-<div class="tab-pane" aria-labelledby="tabset8_kubernetes">
+<div class="tab-pane" aria-labelledby="tabset11_kubernetes">
 <div id="tekton-task-cleanup-k8s" class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl delete pod -n tektontutorial demo-greeter &amp;&amp;\
@@ -1263,7 +1541,7 @@ kubectl delete svc -n tektontutorial demo-greeter</code></pre>
 </div>
 <button class="copybtn float-right" title="Copy to clipboard" data-clipboard-target="#tekton-task-cleanup-k8s"><i class="fa fa-clipboard"></i></button><br/>
 </div>
-<div class="tab-pane" aria-labelledby="tabset8_openshift">
+<div class="tab-pane" aria-labelledby="tabset11_openshift">
 <div id="tekton-task-cleanup-oc" class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc delete pod -n tektontutorial demo-greeter &amp;&amp;\

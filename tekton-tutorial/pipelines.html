@@ -117,6 +117,9 @@
     <a class="nav-link" href="tasks.html#tekton-test-task-output">Test Task output</a>
   </li>
   <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="tasks.html#tekton-task-step-template">Step Template</a>
+  </li>
+  <li class="nav-item" data-depth="2">
     <a class="nav-link" href="tasks.html#tekton-task-cleanup">Clean</a>
   </li>
 </ul>
@@ -372,9 +375,9 @@ tasks                            tekton.dev   true         Task</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">NAME                             TYPE    DETAILS
-git-source                       git     url: https://github.com/redhat-developer-demos/tekton-tutorial
-tekton-tutorial-greeter-image   image   url: localhost:5000/rhdevelopers/tekton-tutorial-greeter:v0.1.1</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">NAME                            TYPE    DETAILS
+git-source                      git     url: https://github.com/redhat-developer-demos/tekton-tutorial
+tekton-tutorial-greeter-image   image   url: example.com/rhdevelopers/tekton-tutorial-greeter</code></pre>
 </div>
 </div>
 <div id="tekton-prerreq-task-resources" class="listingblock">
@@ -385,12 +388,13 @@ tekton-tutorial-greeter-image   image   url: localhost:5000/rhdevelopers/tekton-
 <button class="copybtn float-right" title="Copy to clipboard" data-clipboard-target="#tekton-prerreq-task-resources"><i class="fa fa-clipboard"></i></button><br/>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">NAME        AGE
-build-app   5 hours ago</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">NAME            AGE
+build-app       2 hours ago
+source-lister   7 seconds ago</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>If you don&#8217;t see the output as above please ensure you have completed all the exercises of <a href="#:02-pipeline-resources.adoc" class="page unresolved">Chapter 2</a> and <a href="#:03-tasks.adoc" class="page unresolved">Chapter 3</a> before proceeding further.</p>
+<p>If you don&#8217;t see the output as above please ensure you have completed all the exercises of <a href="pipeline-resources.html" class="page">Chapter 2</a> and <a href="tasks.html" class="page">Chapter 3</a> before proceeding further.</p>
 </div>
 </div>
 </div>
@@ -432,7 +436,7 @@ build-app   5 hours ago</code></pre>
 <div id="tekton-pipeline-add-tasks-k8s" class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl create -n tektontutorial \
-  -f <a href="https://raw.githubusercontent.com/tektoncd/catalog/master/kn/kn.yaml" class="bare">https://raw.githubusercontent.com/tektoncd/catalog/master/kn/kn.yaml</a></code></pre>
+  -f <a href="https://raw.githubusercontent.com/tektoncd/catalog/master/openshift-client/openshift-client-task.yaml" class="bare">https://raw.githubusercontent.com/tektoncd/catalog/master/openshift-client/openshift-client-task.yaml</a></code></pre>
 </div>
 </div>
 <button class="copybtn float-right" title="Copy to clipboard" data-clipboard-target="#tekton-pipeline-add-tasks-k8s"><i class="fa fa-clipboard"></i></button><br/>
@@ -441,7 +445,7 @@ build-app   5 hours ago</code></pre>
 <div id="tekton-pipeline-add-tasks-oc" class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc create -n tektontutorial \
-  -f <a href="https://raw.githubusercontent.com/tektoncd/catalog/master/kn/kn.yaml" class="bare">https://raw.githubusercontent.com/tektoncd/catalog/master/kn/kn.yaml</a></code></pre>
+  -f  <a href="https://raw.githubusercontent.com/tektoncd/catalog/master/openshift-client/openshift-client-task.yaml" class="bare">https://raw.githubusercontent.com/tektoncd/catalog/master/openshift-client/openshift-client-task.yaml</a></code></pre>
 </div>
 </div>
 <button class="copybtn float-right" title="Copy to clipboard" data-clipboard-target="#tekton-pipeline-add-tasks-oc"><i class="fa fa-clipboard"></i></button><br/>
@@ -462,9 +466,10 @@ build-app   5 hours ago</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">NAME        AGE
-build-app   5 hours ago
-kn          3 minutes ago</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">NAME               AGE
+build-app          2 hours ago
+openshift-client   3 seconds ago
+source-lister      10 minutes ago</code></pre>
 </div>
 </div>
 </div>
@@ -491,55 +496,50 @@ kn          3 minutes ago</code></pre>
 <p>The following snippet shows what a Tekton Pipeline YAML looks like:</p>
 </div>
 <div class="listingblock">
-<div class="title"><a href="https://github.com/redhat-developer-demos/tekton-tutorial/blob/master/pipelines/kn-svc-deploy.yaml">kn-svc-deploy.yaml</a></div>
+<div class="title"><a href="https://github.com/redhat-developer-demos/tekton-tutorial/blob/master/pipelines/kn-svc-deploy.yaml">svc-deploy.yaml</a></div>
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">apiVersion: tekton.dev/v1alpha1
 kind: Pipeline
 metadata:
-  name: kn-svc-deploy
+  name: svc-deploy
 spec:
   params:
-  - name: mavenMirrorUrl
-    description: the maven mirror
-    default: <a href="http://repo1.maven.apache.org/maven2" class="bare">http://repo1.maven.apache.org/maven2</a>
+    - name: contextDir
+      description: the context directory from where to build the application
   resources:
-  - name: appSource
-    type: git
-  - name: appImage
-    type: image
+    - name: source
+      type: git
+    - name: builtImage
+      type: image
   tasks:
-   - name: build-java-app
-     taskRef:
-       name: build-app
-     params:
-      - name: contextDir
-        value: apps/greeter/java/quarkus
-      - name: mavenMirrorUrl
-        value: "$(params.mavenMirrorUrl)"
-     resources:
-      inputs:
-        - name: source
-          resource: appSource
-      outputs:
-        - name: builtImage
-          resource: appImage
-   - name: deploy-kn-service
-     taskRef:
-       name: kn
-     runAfter:
-      - build-java-app
-     resources:
-      inputs:
-        - name: image
-          resource: appImage
-     params:
-      - name: ARGS
-        value:
-        - "service"
-        - "create"
-        - "greeter"
-        - "--force"
-        - "--image=$(inputs.resources.image.url)"</code></pre>
+    - name: build-java-app
+      taskRef:
+        name: build-app
+      params:
+        - name: contextDir
+          value: $(params.contextDir)
+      resources:
+        inputs:
+          - name: source
+            resource: source
+        outputs:
+          - name: builtImage
+            resource: builtImage
+    - name: deploy-kubernetes-service
+      taskRef:
+        name: openshift-client
+      runAfter:
+        - build-java-app
+      resources:
+        inputs:
+          - name: image
+            resource: appImage
+      params:
+        - name: ARGS
+          value:
+            - "apply"
+            - "-f"
+            - "k8s/app.yaml"</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -701,14 +701,45 @@ kn-svc-deploy   4 seconds ago   ---        ---       ---        ---</code></pre>
 <h2 id="tekton-pipeline-run"><a class="anchor" href="#tekton-pipeline-run"></a>Run Pipeline</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Unlike <a href="#03-tasks.adoc.adoc#tekton-task-run-run" class="page unresolved">TaskRun</a> we will not be using YAML to trigger PipelineRun, instead we will use the Tekton cli to trigger the pipeline:</p>
+<p>The following resource defines a service account called <code>pipeline</code> in namespace <code>tektontutorial</code>, which will have needed permissions in the <code>tektontutorial</code> namespace to perform Tekton tasks.</p>
+</div>
+<div class="tabset is-loading">
+<div class="ulist tabs">
+<ul>
+<li>
+<p><a id="tabset5_kubectl"></a>kubectl</p>
+</li>
+<li>
+<p><a id="tabset5_oc"></a>oc</p>
+</li>
+</ul>
+</div>
+<div class="content">
+<div class="tab-pane" aria-labelledby="tabset5_kubectl">
+<div id="create-pipeline-sa" class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl apply -n tektontutorial -f pipeline-sa-role.yaml</code></pre>
+</div>
+</div>
+<button class="copybtn float-right" title="Copy to clipboard" data-clipboard-target="#create-pipeline-sa"><i class="fa fa-clipboard"></i></button><br/>
+</div>
+<div class="tab-pane" aria-labelledby="tabset5_oc">
+<div class="paragraph">
+<p>OpenShift Pipelines creates and uses the <code>pipeline</code> SA by default.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Run the following command to start the pipeline:</p>
 </div>
 <div id="tekton-trigger-pipelinerun" class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">tkn pipeline start kn-svc-deploy \
- --resource="appSource=git-source" \<i class="conum" data-value="1"></i><b>(1)</b>
- --resource="appImage=tekton-tutorial-greeter-image" \<i class="conum" data-value="2"></i><b>(2)</b>
- --serviceaccount='pipeline' <i class="conum" data-value="3"></i><b>(3)</b></code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">tkn pipeline start kn-svc-deploy \<i class="conum" data-value="1"></i><b>(1)</b>
+ --resource="appSource=git-source" \<i class="conum" data-value="2"></i><b>(2)</b>
+ --resource="appImage=tekton-tutorial-greeter-image" \<i class="conum" data-value="3"></i><b>(3)</b>
+ --serviceaccount='pipeline'\<i class="conum" data-value="4"></i><b>(4)</b>
+ --showlog</code></pre>
 </div>
 </div>
 <button class="copybtn float-right" title="Copy to clipboard" data-clipboard-target="#tekton-trigger-pipelinerun"><i class="fa fa-clipboard"></i></button><br/>
@@ -727,48 +758,6 @@ kn-svc-deploy   4 seconds ago   ---        ---       ---        ---</code></pre>
 <td>The service account to use with Pipeline run</td>
 </tr>
 </table>
-</div>
-<div class="admonitionblock tip">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-tip" title="Tip"></i>
-</td>
-<td class="content">
-<div class="paragraph">
-<p>If you have maven mirror available then you can modify the above command to use maven mirror:</p>
-</div>
-<div id="tekton-trigger-pipelinerun-maven-mirror" class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">tkn pipeline start kn-svc-deploy \
- --param="mavenMirrorUrl=http://nexus:8081/nexus/content/groups/public" \
- --resource="appSource=git-source" \<i class="conum" data-value="1"></i><b>(1)</b>
- --resource="appImage=tekton-tutorial-greeter-image" \<i class="conum" data-value="2"></i><b>(2)</b>
- --serviceaccount='pipeline' <i class="conum" data-value="3"></i><b>(3)</b></code></pre>
-</div>
-</div>
-<button class="copybtn float-right" title="Copy to clipboard" data-clipboard-target="#tekton-trigger-pipelinerun-maven-mirror"><i class="fa fa-clipboard"></i></button><br/>
-</td>
-</tr>
-</table>
-</div>
-<div class="paragraph">
-<p>We will use the Tekton cli to inspect the created resources:</p>
-</div>
-<div id="tekton-inspect-pipelinerun" class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">tkn pipelinerun ls</code></pre>
-</div>
-</div>
-<button class="copybtn float-right" title="Copy to clipboard" data-clipboard-target="#tekton-inspect-pipelinerun"><i class="fa fa-clipboard"></i></button><br/>
-<div class="paragraph">
-<p>The above command should list one PipelineRun as shown below:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">NAME                      STARTED          DURATION    STATUS
-kn-svc-deploy-run-4896t   4 seconds ago    ---         Running</code></pre>
-</div>
 </div>
 <div class="admonitionblock note">
 <table>
@@ -841,53 +830,37 @@ tkn pr logs -f -a &lt;pipeline-run-name&gt; <i class="conum" data-value="1"></i>
 <div class="ulist tabs">
 <ul>
 <li>
-<p><a id="tabset5_kubernetes"></a>Kubernetes</p>
+<p><a id="tabset6_kubernetes"></a>Kubernetes</p>
 </li>
 <li>
-<p><a id="tabset5_openshift"></a>OpenShift</p>
+<p><a id="tabset6_openshift"></a>OpenShift</p>
 </li>
 </ul>
 </div>
 <div class="content">
-<div class="tab-pane" aria-labelledby="tabset5_kubernetes">
-<div id="tkn-kubectl-svc-gateway-env" class="listingblock">
+<div class="tab-pane" aria-labelledby="tabset6_kubernetes">
+<div id="tekton-invoke-app-k8s" class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">IP_ADDRESS="$(minikube ip):$(kubectl get svc kourier-external --namespace kourier-system --output 'jsonpath={.spec.ports[?(@.port==80)].nodePort}')"</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">SVC_URL=$(minikube -p tektontutorial -n tektontutorial service helloworld --url) &amp;&amp; \
+http --body $SVC_URL</code></pre>
 </div>
 </div>
-<button class="copybtn float-right" title="Copy to clipboard" data-clipboard-target="#tkn-kubectl-svc-gateway-env"><i class="fa fa-clipboard"></i></button><br/>
-<div id="tkn-kubectl-svc-call" class="listingblock">
+<button class="copybtn float-right" title="Copy to clipboard" data-clipboard-target="#tekton-invoke-app-k8s"><i class="fa fa-clipboard"></i></button><br/>
+</div>
+<div class="tab-pane" aria-labelledby="tabset6_openshift">
+<div id="tekton-invoke-app-oc" class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">http $IP_ADDRESS 'Host:greeter.tektontutorial.example.com'</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc expose svc helloworld
+SVC_URL=$(oc get routes helloworld -o yaml | yq r - 'spec.url.host' )
+http --body $SVC_URL</code></pre>
 </div>
 </div>
-<button class="copybtn float-right" title="Copy to clipboard" data-clipboard-target="#tkn-kubectl-svc-call"><i class="fa fa-clipboard"></i></button><br/>
-</div>
-<div class="tab-pane" aria-labelledby="tabset5_openshift">
-<div id="tkn-openshift-oc-svc-call" class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">export SVC_URL=`oc get rt greeter -o yaml | yq read - 'status.url'` &amp;&amp; \
-http $SVC_URL</code></pre>
-</div>
-</div>
-<button class="copybtn float-right" title="Copy to clipboard" data-clipboard-target="#tkn-openshift-oc-svc-call"><i class="fa fa-clipboard"></i></button><br/>
+<button class="copybtn float-right" title="Copy to clipboard" data-clipboard-target="#tekton-invoke-app-oc"><i class="fa fa-clipboard"></i></button><br/>
 </div>
 </div>
 </div>
 <div class="paragraph">
-<p>The <code>http</code> command should return a response containing a line similar to <strong>Hi  greeter &#8658; '6fee83923a9f' : 1</strong></p>
-</div>
-<div class="admonitionblock note">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-note" title="Note"></i>
-</td>
-<td class="content">
-Sometimes the response might not be returned immediately especially when the pod is coming up from dormant state. In that case, repeat service invocation.
-</td>
-</tr>
-</table>
+<p>The <code>http</code> command should return a response containing a line similar to <strong>hello</strong></p>
 </div>
 </div>
 </div>
@@ -901,15 +874,15 @@ Sometimes the response might not be returned immediately especially when the pod
 <div class="ulist tabs">
 <ul>
 <li>
-<p><a id="tabset6_kubernetes"></a>Kubernetes</p>
+<p><a id="tabset7_kubernetes"></a>Kubernetes</p>
 </li>
 <li>
-<p><a id="tabset6_openshift"></a>OpenShift</p>
+<p><a id="tabset7_openshift"></a>OpenShift</p>
 </li>
 </ul>
 </div>
 <div class="content">
-<div class="tab-pane" aria-labelledby="tabset6_kubernetes">
+<div class="tab-pane" aria-labelledby="tabset7_kubernetes">
 <div id="tekton-pipeline-cleanup-sa-k8s" class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">tkn res ls | awk 'NR!=1{print $1}' | xargs kubectl delete pipelineresources &amp;&amp;\
@@ -923,7 +896,7 @@ kubectl delete -n tektontutorial ksvc greeter</code></pre>
 </div>
 <button class="copybtn float-right" title="Copy to clipboard" data-clipboard-target="#tekton-pipeline-cleanup-sa-k8s"><i class="fa fa-clipboard"></i></button><br/>
 </div>
-<div class="tab-pane" aria-labelledby="tabset6_openshift">
+<div class="tab-pane" aria-labelledby="tabset7_openshift">
 <div id="tekton-pipeline-cleanup-sa-oc" class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">tkn res ls | awk 'NR!=1{print $1}' | xargs oc delete pipelineresources &amp;&amp;\
