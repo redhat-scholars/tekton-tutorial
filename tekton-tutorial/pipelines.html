@@ -415,10 +415,10 @@ source-lister   7 seconds ago</code></pre>
 </ul>
 </div>
 <div class="paragraph">
-<p>For the exercise of this chapter we need <a href="https://github.com/knative/client">kn</a> client task that will be used to deploy the built container image as serverless service.</p>
+<p>For the exercise of this chapter we need <code>kubectl</code> or OpenShift client task that will be used to deploy the built the application.</p>
 </div>
 <div class="paragraph">
-<p>The <code>kn</code> Task can be installed from <a href="https://github.com/tektoncd/catalog">Tekton Pipelines Catalog</a> repository:</p>
+<p>Since there is no <code>kubectl</code> task avaibale in <a href="https://github.com/tektoncd/catalog">Tekton Pipelines Catalog</a> repository, we can use the OpenShift client task to deploy the app:</p>
 </div>
 <div class="tabset is-loading">
 <div class="ulist tabs">
@@ -496,7 +496,7 @@ source-lister      10 minutes ago</code></pre>
 <p>The following snippet shows what a Tekton Pipeline YAML looks like:</p>
 </div>
 <div class="listingblock">
-<div class="title"><a href="https://github.com/redhat-developer-demos/tekton-tutorial/blob/master/pipelines/kn-svc-deploy.yaml">svc-deploy.yaml</a></div>
+<div class="title"><a href="https://github.com/redhat-developer-demos/tekton-tutorial/blob/master/pipelines/svc-deploy.yaml">svc-deploy.yaml</a></div>
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">apiVersion: tekton.dev/v1alpha1
 kind: Pipeline
@@ -648,7 +648,7 @@ Only pipeline resources of same type can be bound. e.g. resource of type <code>g
 <div class="tab-pane" aria-labelledby="tabset4_kubernetes">
 <div id="tekton-pipeline-deploy-to-k8s" class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl create -n tektontutorial -f <a href="https://github.com/redhat-developer-demos/tekton-tutorial/blob/master/pipelines/kn-svc-deploy.yaml">kn-svc-deploy.yaml</a></code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl apply -n tektontutorial -f <a href="https://github.com/redhat-developer-demos/tekton-tutorial/blob/master/pipelines/svc-deploy.yaml">svc-deploy.yaml</a></code></pre>
 </div>
 </div>
 <button class="copybtn float-right" title="Copy to clipboard" data-clipboard-target="#tekton-pipeline-deploy-to-k8s"><i class="fa fa-clipboard"></i></button><br/>
@@ -656,7 +656,7 @@ Only pipeline resources of same type can be bound. e.g. resource of type <code>g
 <div class="tab-pane" aria-labelledby="tabset4_openshift">
 <div id="tekton-pipeline-deploy-to-oc" class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc create -n tektontutorial -f <a href="https://github.com/redhat-developer-demos/tekton-tutorial/blob/master/pipelines/kn-svc-deploy.yaml">kn-svc-deploy.yaml</a></code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc apply -n tektontutorial -f <a href="https://github.com/redhat-developer-demos/tekton-tutorial/blob/master/pipelines/svc-deploy.yaml">svc-deploy.yaml</a></code></pre>
 </div>
 </div>
 <button class="copybtn float-right" title="Copy to clipboard" data-clipboard-target="#tekton-pipeline-deploy-to-oc"><i class="fa fa-clipboard"></i></button><br/>
@@ -678,7 +678,7 @@ Only pipeline resources of same type can be bound. e.g. resource of type <code>g
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">NAME            AGE             LAST RUN   STARTED   DURATION   STATUS
-kn-svc-deploy   4 seconds ago   ---        ---       ---        ---</code></pre>
+svc-deploy   4 seconds ago   ---        ---       ---        ---</code></pre>
 </div>
 </div>
 <div class="admonitionblock tip">
@@ -701,7 +701,7 @@ kn-svc-deploy   4 seconds ago   ---        ---       ---        ---</code></pre>
 <h2 id="tekton-pipeline-run"><a class="anchor" href="#tekton-pipeline-run"></a>Run Pipeline</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>The following resource defines a service account called <code>pipeline</code> in namespace <code>tektontutorial</code>, which will have needed permissions in the <code>tektontutorial</code> namespace to perform Tekton tasks.</p>
+<p>A Kubernetes Service Account is required to deploy applications in to a Kubernetes namespace. The following resource defines a service account called <code>pipeline</code> in namespace <code>tektontutorial</code>, which will have needed permissions in the <code>tektontutorial</code> namespace to perform Tekton tasks.</p>
 </div>
 <div class="tabset is-loading">
 <div class="ulist tabs">
@@ -735,10 +735,11 @@ kn-svc-deploy   4 seconds ago   ---        ---       ---        ---</code></pre>
 </div>
 <div id="tekton-trigger-pipelinerun" class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">tkn pipeline start kn-svc-deploy \<i class="conum" data-value="1"></i><b>(1)</b>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">tkn pipeline start svc-deploy \<i class="conum" data-value="1"></i><b>(1)</b>
  --resource="appSource=git-source" \<i class="conum" data-value="2"></i><b>(2)</b>
  --resource="appImage=tekton-tutorial-greeter-image" \<i class="conum" data-value="3"></i><b>(3)</b>
- --serviceaccount='pipeline'\<i class="conum" data-value="4"></i><b>(4)</b>
+ --param="contextDir=apps/greeter/java/springboot" \<i class="conum" data-value="4"></i><b>(4)</b>
+ --serviceaccount='pipeline'\<i class="conum" data-value="5"></i><b>(5)</b>
  --showlog</code></pre>
 </div>
 </div>
@@ -755,6 +756,10 @@ kn-svc-deploy   4 seconds ago   ---        ---       ---        ---</code></pre>
 </tr>
 <tr>
 <td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Set the context directory to build the application sources</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
 <td>The service account to use with Pipeline run</td>
 </tr>
 </table>
@@ -885,13 +890,14 @@ http --body $SVC_URL</code></pre>
 <div class="tab-pane" aria-labelledby="tabset7_kubernetes">
 <div id="tekton-pipeline-cleanup-sa-k8s" class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">tkn res ls | awk 'NR!=1{print $1}' | xargs kubectl delete pipelineresources &amp;&amp;\
-tkn task ls | awk 'NR!=1{print $1}' | xargs kubectl delete tasks &amp;&amp;\
-tkn tr ls | awk 'NR!=1{print $1}' | xargs kubectl delete taskruns  &amp;&amp;\
-tkn pipeline ls | awk 'NR!=1{print $1}' | xargs kubectl delete pipeline &amp;&amp;\
-tkn pr ls | awk 'NR!=1{print $1}' | xargs kubectl delete pipelineruns &amp;&amp;\
-kubectl delete -n tektontutorial -f pipeline-sa-role.yaml &amp;&amp;\
-kubectl delete -n tektontutorial ksvc greeter</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl delete -n tektontutorial tasks --all ||\
+kubectl delete -n tektontutorial tr --all ||\
+kubectl delete -n tektontutorial pipelines --all ||\
+kubectl delete -n tektontutorial pr --all ||\
+kubectl delete -n tektontutorial pipelineresourcs --all ||\
+kubectl delete -n tektontutorial -f TUTORIAL_HOME/apps/greeter/java/springboot/k8s ||\
+kubectl delete -n tektontutorial -f TUTORIAL_HOME/pipelines/pipeline-sa-role.yaml \
+|| true</code></pre>
 </div>
 </div>
 <button class="copybtn float-right" title="Copy to clipboard" data-clipboard-target="#tekton-pipeline-cleanup-sa-k8s"><i class="fa fa-clipboard"></i></button><br/>
@@ -899,13 +905,13 @@ kubectl delete -n tektontutorial ksvc greeter</code></pre>
 <div class="tab-pane" aria-labelledby="tabset7_openshift">
 <div id="tekton-pipeline-cleanup-sa-oc" class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">tkn res ls | awk 'NR!=1{print $1}' | xargs oc delete pipelineresources &amp;&amp;\
-tkn task ls | awk 'NR!=1{print $1}' | xargs oc delete tasks &amp;&amp;\
-tkn tr ls | awk 'NR!=1{print $1}' | xargs oc delete taskruns  &amp;&amp;\
-tkn pipeline ls | awk 'NR!=1{print $1}' | xargs oc pipeline &amp;&amp;\
-tkn pr ls | awk 'NR!=1{print $1}' | xargs oc delete pipelineruns &amp;&amp;\
-oc delete -n tektontutorial -f pipeline-sa-role.yaml &amp;&amp;\
-oc delete -n tektontutorial ksvc greeter</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc delete -n tektontutorial tasks --all ||\
+oc delete -n tektontutorial taskruns--all ||\
+oc delete -n tektontutorial pipelines --all ||\
+oc delete -n tektontutorial pipelineruns --all ||\
+oc delete -n tektontutorial pipelineresources --all ||\
+oc delete -n tektontutorial -f TUTORIAL_HOME/apps/greeter/java/springboot/k8s ||\
+oc delete -n tektontutorial -f TUTORIAL_HOME/pipelines/pipeline-sa-role.yaml || true</code></pre>
 </div>
 </div>
 <button class="copybtn float-right" title="Copy to clipboard" data-clipboard-target="#tekton-pipeline-cleanup-sa-oc"><i class="fa fa-clipboard"></i></button><br/>
