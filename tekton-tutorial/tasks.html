@@ -93,7 +93,19 @@
     <a class="nav-link" href="#tekton-task-list-ws">List workspace</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="#tekton-task-build-sources">Build Sources </a>
+    <button class="nav-toggle"></button>
+    <a class="nav-link" href="#tekton-task-build-sources">Build Cloud Native Application</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="3">
+    <a class="nav-link" href="#build-sources">Build Sources</a>
+  </li>
+  <li class="nav-item" data-depth="3">
+    <a class="nav-link" href="#build-linux-image">Build Image</a>
+  </li>
+  <li class="nav-item" data-depth="3">
+    <a class="nav-link" href="#push-linux-image">Push Image</a>
+  </li>
+</ul>
   </li>
   <li class="nav-item" data-depth="2">
     <a class="nav-link" href="#tekton-task-deploy">Deploy task</a>
@@ -364,6 +376,102 @@ tasks                            tekton.dev   true         Task</code></pre>
 </div>
 </div>
 <div class="sect1">
+<h2 id="tekton-tasks"><a class="anchor" href="#tekton-tasks"></a>Tekton Task</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Each Task has the following:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>name</strong> - the unique name using which the task can be referred</p>
+</li>
+<li>
+<p><strong>inputs</strong> - the inputs to the task</p>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>resources</strong> - the pipeline resources that will be used in the task e.g. git-source</p>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>name</strong> - the name of the input resource using which it can be referenced and bound via <a href="#tekton-task-run">TaskRun</a></p>
+</li>
+<li>
+<p><strong>type</strong> - the type of the input resource, typically the pipeline resource type</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p><strong>params</strong> - the parameters that will be used in the task steps. Each parameter has</p>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>name</strong> - the name of the parameter</p>
+</li>
+<li>
+<p><strong>description</strong> - the description of the parameter</p>
+</li>
+<li>
+<p><strong>default</strong> - the default value of parameter</p>
+</li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+The <a href="#tekton-task-run">TaskRun</a> could override the parameter values, if no parameter value is passed then the <strong>default</strong> value will be used.
+</td>
+</tr>
+</table>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>outputs</strong> the pipeline resource that will end artifact of the task. In the above example the build will produce a container image artifact.</p>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>resources</strong> - the pipeline resources that will be used in the task e.g. builtImage</p>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>name</strong> - the name of the input resource using which it can be referenced and bound via <a href="#tekton-task-run">TaskRun</a></p>
+</li>
+<li>
+<p><strong>type</strong> - the type of the input resource, typically the pipeline resource type</p>
+</li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p><strong>steps</strong> - One or more sub-tasks that will be executed in the defined order. The step has all the attributes like a <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.14/#pod-v1-core">Pod spec</a></p>
+</li>
+<li>
+<p><strong>volumes</strong> - the task can also mount external volumes using the <strong>volumes</strong> attribute.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>The parameters that were part of the <span class="menuseq"><b class="menu">spec</b>&#160;<i class="fa fa-angle-right caret"></i> <b class="submenu">inputs</b>&#160;<i class="fa fa-angle-right caret"></i> <b class="menuitem">params</b></span> can be used in the steps using the notation <code>$(&lt;variable-name&gt;)</code>.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
 <h2 id="tekton-task-clone"><a class="anchor" href="#tekton-task-clone"></a>Clone Source Code</h2>
 <div class="sectionbody">
 <div class="paragraph">
@@ -372,7 +480,24 @@ tasks                            tekton.dev   true         Task</code></pre>
 <div class="listingblock">
 <div class="title">List application source code</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">Unresolved include directive in modules/ROOT/pages/tasks.adoc - include::ROOT:example$source-lister.yaml[]</code></pre>
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">apiVersion: tekton.dev/v1alpha1
+kind: Task
+metadata:
+  name: source-lister
+spec:
+  inputs:
+    resources:
+      - name: source
+        type: git
+    params:
+      - name: contextDir
+        description: "The context directory within the repository for sources"
+        default: apps/greeter/java/quarkus
+  outputs: {}
+  steps:
+    - name: ls-build-sources
+      image: busybox
+      command: ['ls','-ltr', "/workspace/source/$(inputs.params.contextDir)"]</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -403,7 +528,7 @@ source-lister   37 seconds ago</code></pre>
 </div>
 <div id="run-task-source-lister" class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">tkn task start source-lister --inputresource='source=git-source'</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">tkn task start source-lister --inputresource='source=git-source' <i class="conum" data-value="1"></i><b>(1)</b></code></pre>
 </div>
 </div>
 <button class="copybtn float-right" title="Copy to clipboard" data-clipboard-target="#run-task-source-lister"><i class="fa fa-clipboard"></i></button><br/>
@@ -507,10 +632,204 @@ Waiting for logs to be available...
 </div>
 </div>
 <div class="sect1">
-<h2 id="tekton-task-build-sources"><a class="anchor" href="#tekton-task-build-sources"></a>Build Sources</h2>
+<h2 id="tekton-task-build-sources"><a class="anchor" href="#tekton-task-build-sources"></a>Build Cloud Native Application</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>The following snippet shows what a Tekton Task YAML looks like:</p>
+<p>The Tekton Task can be of one or more steps. A Cloud Native Java Application at minimum comprises of the following steps:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Building the Application from sources using build tool like <a href="https://maven.apache.org">Apache Maven</a> or <a href="https://gradle.org">Gradle</a></p>
+</li>
+<li>
+<p>Building the linux container image from the build artifacts</p>
+</li>
+<li>
+<p>Pushing the built container image to remote registry like <a href="https://quay.io">Quay.io</a> or <a href="https://hub.docker.com">Docker Hub</a></p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>The task <code>build-app</code> is used to build the <a href="https://github.com/redhat-developer-demos/tekton-tutorial/tree/master/apps/greeter/java/quarkus">Java application</a> that is part of the tutorial. As a step one(<code>build-sources</code>) the application will be built using <a href="https://apache.maven.org">Apache Maven</a>, then the step two (<code>build-image</code>) the application artifacts a <strong>jar</strong> in this case will be used to built the linux container image using <a href="https://buildah.io">buildah</a>, the <a href="https://github.com/redhat-developer-demos/tekton-tutorial/tree/master/apps/greeter/java/quarkus/Dockerfile.jvm">Dockerfile</a> in the sources will be used as base to build the linux container image and as part of the last step(<code>build-push</code>) the built linux container image will be pushed to the container registry.</p>
+</div>
+<div class="paragraph">
+<p>The following section explains the three Task steps. The <a href="#tekton-task-deploy">Deploy a task</a> will finally deploy all these three steps together as one single <code>build-app</code> task.</p>
+</div>
+<div class="sect2">
+<h3 id="task-parameters"><a class="anchor" href="#task-parameters"></a>Step :: Task Inputs and Outputs</h3>
+<div class="listingblock">
+<div class="title"><a href="https://github.com/redhat-developer-demos/tekton-tutorial/blob/master/pipelines/build-app-task.yaml">task inputs and outputs</a></div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">inputs:
+    resources: <i class="conum" data-value="1"></i><b>(1)</b>
+      - name: source
+        type: git
+    params:
+      - name: contextDir <i class="conum" data-value="2"></i><b>(2)</b>
+        description: the context dir within source
+        default: .
+      - name: destinationImage <i class="conum" data-value="3"></i><b>(3)</b>
+        description: the fully qualified image name
+        default: "$(outputs.resources.builtImage.url)"
+      - name: dockerFile <i class="conum" data-value="4"></i><b>(4)</b>
+        description: the docker file to used for building the application
+        default: Dockerfile
+      - name: tlsVerify <i class="conum" data-value="5"></i><b>(5)</b>
+        description: tls verify
+        type: string
+        default: "false"
+outputs:
+  resources: <i class="conum" data-value="6"></i><b>(6)</b>
+    - name: builtImage
+      type: image</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>The input referred via <code>source</code>, which will be of type <code>git</code>. Having a input resource of type <code>git</code> will cause the TektonPipelines to add implict git clone step to download the sources to <code>workspace/source</code> directory</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td><code>conextDir</code> - specifies the directory under the sources, which will be the context for the Task</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td><code>destinationImage</code> - the linux container image name that will be built as part of this Task. Defaults to the <code>outputs.resources.builtImage.url</code></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td><code>dockerFile</code> - the Dockerfile that will be used to build the image</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td><code>tlsVerify</code> - enable or disable TLS when pushing the image to remote registry</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="6"></i><b>6</b></td>
+<td>The output specifices the final output of the Task, in this case the built linux container image referred via <code>builtImage</code></td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>For Task inputs and outputs - we will use the <a href="pipeline-resources.html#tkn-see-what-you-have-deployed" class="page">PipelineResources</a> that was created in previous chapter.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="build-sources"><a class="anchor" href="#build-sources"></a>Step 1 :: Build Application Sources</h3>
+<div class="listingblock">
+<div class="title"><a href="https://github.com/redhat-developer-demos/tekton-tutorial/blob/master/pipelines/build-app-task.yaml#L32-L43">step-build-sources</a></div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">- name: build-sources
+  image: docker.io/maven:3.6.3-jdk-8-slim
+  workingDir: "/workspace/source/$(inputs.params.contextDir)" <i class="conum" data-value="1"></i><b>(1)</b>
+  command: <i class="conum" data-value="2"></i><b>(2)</b>
+    - mvn
+  args: <i class="conum" data-value="3"></i><b>(3)</b>
+    - -DskipTests
+    - clean
+    - package
+  env: <i class="conum" data-value="4"></i><b>(4)</b>
+    - name: user.home
+      value: /home/tekton</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>the working dir or the context directory within the soruces from there the build command will be run</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>the build command to run</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>the build command arguments</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>The environment variables that will be set within the step container</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="build-linux-image"><a class="anchor" href="#build-linux-image"></a>Step 2 :: Build Application Linux Container Image</h3>
+<div class="listingblock">
+<div class="title"><a href="https://github.com/redhat-developer-demos/tekton-tutorial/blob/master/pipelines/build-app-task.yaml#L44-L62">step-build-image</a></div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">- name: build-image
+  image: quay.io/buildah/stable
+  workingDir: "/workspace/source/$(inputs.params.contextDir)"
+  command:
+    - "buildah"
+  args:
+    - "bud"
+    - "--layers"
+    - "-f"
+    - "$(inputs.params.dockerFile)"
+    - "-t"
+    - "$(inputs.params.destinationImage)"
+    - "."
+  securityContext: <i class="conum" data-value="1"></i><b>(1)</b>
+    runAsUser: 0
+  volumeMounts: <i class="conum" data-value="2"></i><b>(2)</b>
+    - name: varlibc
+      mountPath: /var/lib/containers</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Running buildah inside container needs to be run as root user and needs privilege esclation. These are set as part of security context.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>The buildah tool saves the built linux contianer layers in the local file system at <code>/var/lib/containers</code>, which can then be used in other <a href="#push-linux-image">steps</a> or to push the image to remote registry.</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="push-linux-image"><a class="anchor" href="#push-linux-image"></a>Step 3:: Push Application Linux Container Image</h3>
+<div class="listingblock">
+<div class="title"><a href="https://github.com/redhat-developer-demos/tekton-tutorial/blob/master/pipelines/build-app-task.yaml#L63-L78">step-build-image</a></div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">- name: push-image
+  image: quay.io/buildah/stable
+  workingDir: "/workspace/source/$(inputs.params.contextDir)"
+  command:
+    - "buildah"
+  args:
+    - "push"
+    - "--tls-verify=$(inputs.params.tlsVerify)"
+    - $(inputs.params.destinationImage)
+    - "docker://$(inputs.params.destinationImage)"
+  securityContext:
+    runAsUser: 0
+  volumeMounts:
+    - name: varlibc
+      mountPath: /var/lib/containers</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Having see the three individual steps of the <code>build-app</code> task, the following snippet shows all three chained together:</p>
 </div>
 <div class="listingblock">
 <div class="title"><a href="https://github.com/redhat-developer-demos/tekton-tutorial/blob/master/pipelines/build-app-task.yaml">build-app-task.yaml</a></div>
@@ -530,146 +849,80 @@ spec:
         default: .
       - name: mavenMirrorUrl
         description: the maven mirrror url
-        default: <a href="http://repo1.maven.apache.org/maven2" class="bare">http://repo1.maven.apache.org/maven2</a>
+        default: <a href="https://repo.maven.apache.org/maven2/" class="bare">https://repo.maven.apache.org/maven2/</a>
       - name: destinationImage
         description: the fully qualified image name
         default: "$(outputs.resources.builtImage.url)"
       - name: dockerFile
         description: the docker file to used for building the application
-        default: Dockerfile.jvm
+        default: Dockerfile
+      - name: tlsVerify
+        description: tls verify
+        type: string
+        default: "false"
   outputs:
     resources:
       - name: builtImage
         type: image
   steps:
     - name: build-sources
-      image: quay.io/quarkus/centos-quarkus-maven:20.0.0-java8
+      image: docker.io/maven:3.6.3-jdk-8-slim
       workingDir: "/workspace/source/$(inputs.params.contextDir)"
-      args:
+      command:
         - mvn
+      args:
         - -DskipTests
         - clean
         - package
       env:
-        - name: MAVEN_MIRROR_URL
-          value: "$(inputs.params.mavenMirrorUrl)"
-    - name: build-and-push
-      image: gcr.io/kaniko-project/executor:v0.19.0
-      # specifying DOCKER_CONFIG is required to allow kaniko to detect docker credential
-      env:
-        - name: "DOCKER_CONFIG"
-          value: "/tekton/home/.docker/"
+        - name: user.home
+          value: /home/tekton
+    - name: build-image
+      image: quay.io/buildah/stable
+      workingDir: "/workspace/source/$(inputs.params.contextDir)"
       command:
-        - /kaniko/executor
+        - "buildah"
       args:
-        - --dockerfile=$(params.pathToDockerFile)
-        - --destination=$(params.destinationImage)
-        - --context=$(params.contextDir)</code></pre>
+        - "bud"
+        - "--layers"
+        - "-f"
+        - "$(inputs.params.dockerFile)"
+        - "-t"
+        - "$(inputs.params.destinationImage)"
+        - "."
+      securityContext:
+        runAsUser: 0
+      volumeMounts:
+        - name: varlibc
+          mountPath: /var/lib/containers
+    - name: push-image
+      image: quay.io/buildah/stable
+      workingDir: "/workspace/source/$(inputs.params.contextDir)"
+      command:
+        - "buildah"
+      args:
+        - "push"
+        - "--tls-verify=$(inputs.params.tlsVerify)"
+        - $(inputs.params.destinationImage)
+        - "docker://$(inputs.params.destinationImage)"
+      securityContext:
+        runAsUser: 0
+      volumeMounts:
+        - name: varlibc
+          mountPath: /var/lib/containers
+  volumes:
+    - name: varlibc
+      emptyDir: {}</code></pre>
 </div>
 </div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="tekton-task-deploy"><a class="anchor" href="#tekton-task-deploy"></a>Deploy a task</h2>
+<div class="sectionbody">
 <div class="paragraph">
-<p>Each Task has the following:</p>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p><strong>name</strong> - the unique name using which the task can be referred</p>
-</li>
-<li>
-<p><strong>inputs</strong> - the inputs to the task</p>
-<div class="ulist">
-<ul>
-<li>
-<p><strong>resources</strong> - the pipeline resources that will be used in the task e.g. git-source</p>
-<div class="ulist">
-<ul>
-<li>
-<p><strong>name</strong> - the name of the input resource using which it can be referenced and bound via <a href="#tekton-task-run">TaskRun</a></p>
-</li>
-<li>
-<p><strong>type</strong> - the type of the input resource, typically the pipeline resource type</p>
-</li>
-</ul>
-</div>
-</li>
-<li>
-<p><strong>params</strong> - the parameters that will be used in the task steps. Each parameter has</p>
-<div class="ulist">
-<ul>
-<li>
-<p><strong>name</strong> - the name of the parameter</p>
-</li>
-<li>
-<p><strong>description</strong> - the description of the parameter</p>
-</li>
-<li>
-<p><strong>default</strong> - the default value of parameter</p>
-</li>
-</ul>
-</div>
-</li>
-</ul>
-</div>
-</li>
-</ul>
-</div>
-<div class="admonitionblock note">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-note" title="Note"></i>
-</td>
-<td class="content">
-The <a href="#tekton-task-run">TaskRun</a> could override the parameter values, if no parameter value is passed then the <strong>default</strong> value will be used.
-</td>
-</tr>
-</table>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p><strong>outputs</strong> the pipeline resource that will end artifact of the task. In the above example the build will produce a container image artifact.</p>
-<div class="ulist">
-<ul>
-<li>
-<p><strong>resources</strong> - the pipeline resources that will be used in the task e.g. builtImage</p>
-<div class="ulist">
-<ul>
-<li>
-<p><strong>name</strong> - the name of the input resource using which it can be referenced and bound via <a href="#tekton-task-run">TaskRun</a></p>
-</li>
-<li>
-<p><strong>type</strong> - the type of the input resource, typically the pipeline resource type</p>
-</li>
-</ul>
-</div>
-</li>
-</ul>
-</div>
-</li>
-<li>
-<p><strong>steps</strong> - One or more sub-tasks that will be executed in the defined order. The step has all the attributes like a <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.14/#pod-v1-core">Pod spec</a></p>
-</li>
-<li>
-<p><strong>volumes</strong> - the task can also mount external volumes using the <strong>volumes</strong> attribute.</p>
-</li>
-</ul>
-</div>
-<div class="paragraph">
-<p>The parameters that were part of the <span class="menuseq"><b class="menu">spec</b>&#160;<i class="fa fa-angle-right caret"></i> <b class="submenu">inputs</b>&#160;<i class="fa fa-angle-right caret"></i> <b class="menuitem">params</b></span> can be used in the steps using the notation <code>$(&lt;variable-name&gt;)</code>.</p>
-</div>
-<div class="paragraph">
-<p>The task <code>build-app</code> is used to build the <a href="https://github.com/redhat-developer-demos/tekton-tutorial/tree/master/apps/greeter/java/quarkus">Java application</a> that is part of the tutorial. As a step one(<code>build-sources</code>) the application will be built using <a href="https://apache.maven.org">Apache Maven</a>, then the step two (<code>build-image</code>) the application artifacts a <strong>jar</strong> in this case will be used to built the linux container image using <a href="https://buildah.io">buildah</a>, the <a href="https://github.com/redhat-developer-demos/tekton-tutorial/tree/master/apps/greeter/java/quarkus/Dockerfile.jvm">Dockerfile</a> in the sources will be used as base to build the linux container image and as part of the last step(<code>build-push</code>) the built linux container image will be pushed to the container registry.</p>
-</div>
-<div class="admonitionblock tip">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-tip" title="Tip"></i>
-</td>
-<td class="content">
-<div class="paragraph">
-<p>If you plan to do the build Task multiple times then its better to have a maven repository manager like Nexus to cache the maven artifacts for faster builds. You can deploy nexus using:</p>
+<p>The application build task could be created using the command:</p>
 </div>
 <div class="tabset is-loading">
 <div class="ulist tabs">
@@ -684,67 +937,17 @@ The <a href="#tekton-task-run">TaskRun</a> could override the parameter values, 
 </div>
 <div class="content">
 <div class="tab-pane" aria-labelledby="tabset3_kubernetes">
-<div id="tekton-nexus-deploy-k8s" class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl create -n tektontutorial \
-  -f $TUTORIAL_HOME/apps/nexus/<a href="https://github.com/redhat-developer-demos/tekton-tutorial/blob/master/apps/nexus/skaffold.yaml">app.yaml</a></code></pre>
-</div>
-</div>
-<button class="copybtn float-right" title="Copy to clipboard" data-clipboard-target="#tekton-nexus-deploy-k8s"><i class="fa fa-clipboard"></i></button><br/>
-<div class="paragraph">
-<p>It might take few minutes for nexus to be deployed, you can watch the status using the command <code>kubectl get pods -n tektontutorial -w</code>.</p>
-</div>
-</div>
-<div class="tab-pane" aria-labelledby="tabset3_openshift">
-<div id="tekton-nexus-deploy-oc" class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc create -n tektontutorial \
-  -f $TUTORIAL_HOME/apps/nexus/<a href="https://github.com/redhat-developer-demos/tekton-tutorial/blob/master/apps/nexus/skaffold.yaml">skaffold.yaml</a></code></pre>
-</div>
-</div>
-<button class="copybtn float-right" title="Copy to clipboard" data-clipboard-target="#tekton-nexus-deploy-oc"><i class="fa fa-clipboard"></i></button><br/>
-<div class="paragraph">
-<p>It might take few minutes for nexus to be deployed, you can watch the status using the command <code>oc get pods -n tektontutorial -w</code>.</p>
-</div>
-</div>
-</div>
-</div>
-</td>
-</tr>
-</table>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="tekton-task-deploy"><a class="anchor" href="#tekton-task-deploy"></a>Deploy a task</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>The application build task could be created using the command:</p>
-</div>
-<div class="tabset is-loading">
-<div class="ulist tabs">
-<ul>
-<li>
-<p><a id="tabset4_kubernetes"></a>Kubernetes</p>
-</li>
-<li>
-<p><a id="tabset4_openshift"></a>OpenShift</p>
-</li>
-</ul>
-</div>
-<div class="content">
-<div class="tab-pane" aria-labelledby="tabset4_kubernetes">
 <div id="tekton-task-deploy-to-k8s" class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl create -n tektontutorial -f <a href="https://github.com/redhat-developer-demos/tekton-tutorial/blob/master/pipelines/build-app-task.yaml">build-app-task.yaml</a></code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl apply -n tektontutorial -f <a href="https://github.com/redhat-developer-demos/tekton-tutorial/blob/master/pipelines/build-app-task.yaml">build-app-task.yaml</a></code></pre>
 </div>
 </div>
 <button class="copybtn float-right" title="Copy to clipboard" data-clipboard-target="#tekton-task-deploy-to-k8s"><i class="fa fa-clipboard"></i></button><br/>
 </div>
-<div class="tab-pane" aria-labelledby="tabset4_openshift">
+<div class="tab-pane" aria-labelledby="tabset3_openshift">
 <div id="tekton-task-deploy-to-oc" class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc create -n tektontutorial -f <a href="https://github.com/redhat-developer-demos/tekton-tutorial/blob/master/pipelines/build-app-task.yaml">build-app-task.yaml</a></code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc apply -n tektontutorial -f <a href="https://github.com/redhat-developer-demos/tekton-tutorial/blob/master/pipelines/build-app-task.yaml">build-app-task.yaml</a></code></pre>
 </div>
 </div>
 <button class="copybtn float-right" title="Copy to clipboard" data-clipboard-target="#tekton-task-deploy-to-oc"><i class="fa fa-clipboard"></i></button><br/>
@@ -794,107 +997,36 @@ source-lister   7 minutes ago</code></pre>
 <h2 id="tekton-task-run"><a class="anchor" href="#tekton-task-run"></a>TaskRun</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>The <a href="https://github.com/tektoncd/pipeline/blob/master/docs/taskruns.md">TaskRun</a> is used to run a specific task independently. In the following section we will run the <code>build-app</code> task created in the previous step</p>
-</div>
-<div class="paragraph">
-<p>Before we run the Task using TaskRun let us create the Kubernetes service account and attach the needed permissions to the service account, the following Kubernetes resource defines a service account called <code>pipeline</code> in namespace <code>tektontutorial</code> who will have administrative role within the <code>tektontutorial</code> namespace.</p>
-</div>
-<div class="tabset is-loading">
-<div class="ulist tabs">
-<ul>
-<li>
-<p><a id="tabset5_kubectl"></a>kubectl</p>
-</li>
-<li>
-<p><a id="tabset5_oc"></a>oc</p>
-</li>
-</ul>
-</div>
-<div class="content">
-<div class="tab-pane" aria-labelledby="tabset5_kubectl">
-<div id="create-pipeline-sa" class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl create -n tektontutorial pipeline-sa-role.yaml</code></pre>
-</div>
-</div>
-<button class="copybtn float-right" title="Copy to clipboard" data-clipboard-target="#create-pipeline-sa"><i class="fa fa-clipboard"></i></button><br/>
-</div>
-<div class="tab-pane" aria-labelledby="tabset5_oc">
-<div class="paragraph">
-<p>Service Account <strong>pipeline</strong> will be created automatically by OpenShift Pipelines operator.</p>
-</div>
-</div>
-</div>
-</div>
-<div class="admonitionblock important">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-important" title="Important"></i>
-</td>
-<td class="content">
-<div class="paragraph">
-<p>Since the TaskRun pod will be run as an underprivleged user with uid <code>1001</code>, its required that <code>fsGroup</code> of the pod is set correctly. This done by configuring the ConfigMap <code>config-defaults</code> of the <code>tekton-pipelines</code> namespace. In OpenShift the namespace is called <code>openshift-pipelines</code>.</p>
-</div>
-</td>
-</tr>
-</table>
-</div>
-<div class="paragraph">
-<p>Run the following command to patch the ConfigMap <code>config-defaults</code>:</p>
-</div>
-<div class="tabset is-loading">
-<div class="ulist tabs">
-<ul>
-<li>
-<p><a id="tabset6_kubectl"></a>kubectl</p>
-</li>
-<li>
-<p><a id="tabset6_oc"></a>oc</p>
-</li>
-</ul>
-</div>
-<div class="content">
-<div class="tab-pane" aria-labelledby="tabset6_kubectl">
-<div id="patch-tekton-config-defaults-k8s" class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl patch -n tekton-pipelines cm config-defaults \
-      --patch  "$(cat $TUTORIAL_HOME/pipelines/pod-template-patch.yaml)"</code></pre>
-</div>
-</div>
-<button class="copybtn float-right" title="Copy to clipboard" data-clipboard-target="#patch-tekton-config-defaults-k8s"><i class="fa fa-clipboard"></i></button><br/>
-</div>
-<div class="tab-pane" aria-labelledby="tabset6_oc">
-<div id="patch-tekton-config-defaults" class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc patch -n openshift-pipelines cm config-defaults \
-    --patch "$(cat $TUTORIAL_HOME/pipelines/pod-template-patch.yaml)"</code></pre>
-</div>
-</div>
-<button class="copybtn float-right" title="Copy to clipboard" data-clipboard-target="#patch-tekton-config-defaults"><i class="fa fa-clipboard"></i></button><br/>
-</div>
-</div>
+<p>The <a href="https://github.com/tektoncd/pipeline/blob/master/docs/taskruns.md">TaskRun</a> is used to run a specific task independently. In the following section we will run the <code>build-app</code> task created in the previous step.</p>
 </div>
 <div class="paragraph">
 <p>The application build task(<code>build-app</code>) could be run using the command:</p>
 </div>
 <div id="tekton-taskrun-sa-to-k8s" class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">tkn task start -n tektontutorial build-app \
-  --inputresource='source=git-source' \
-  --outputresource='builtImage=tekton-tutorial-greeter-image' \
-  --param contextDir='apps/greeter/java/springboot'</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">tkn task start -n tektontutorial build-app \<i class="conum" data-value="1"></i><b>(1)</b>
+  --inputresource='source=git-source' \<i class="conum" data-value="2"></i><b>(2)</b>
+  --outputresource='builtImage=tekton-tutorial-greeter-image' \<i class="conum" data-value="3"></i><b>(3)</b>
+  --param contextDir='apps/greeter/java/springboot' \<i class="conum" data-value="4"></i><b>(4)</b>
+  --showlog<i class="conum" data-value="5"></i><b>(5)</b></code></pre>
 </div>
 </div>
 <button class="copybtn float-right" title="Copy to clipboard" data-clipboard-target="#tekton-taskrun-sa-to-k8s"><i class="fa fa-clipboard"></i></button><br/>
-<div class="paragraph">
-<p>We will use the Tekton cli to inspect the created resources, the previous <code>task start</code> commmand will show an output to see the logs of the run like:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">In order to track the taskrun progress run:
-tkn taskrun logs build-app-run-mwjmh -f -n tektontutorial</code></pre>
-</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>The task that need to be run, in this case <code>build-app</code></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>The input resource mapping, i.e. mapping  input <code>source</code> to PipelineResource <code>git-source</code> of type <code>git</code></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>The output resource mapping, i.e. mapping output <code>builtImage</code> to PipelineResource <code>built-image</code> of type <code>image</code></td>
+</tr>
+</table>
 </div>
 <div class="admonitionblock note">
 <table>
@@ -949,17 +1081,46 @@ tkn tr logs -f -a &lt;task-run-name&gt; <i class="conum" data-value="1"></i><b>(
 </tr>
 </table>
 </div>
-<div class="admonitionblock important">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-important" title="Important"></i>
-</td>
-<td class="content">
-Each task step will be run within a container of its own.
-</td>
-</tr>
-</table>
+<div class="paragraph">
+<p>Each task step will be run within a container of its own. You can list the conainers of the build pod like:</p>
+</div>
+<div class="paragraph">
+<p>e.g. For a build pod <code>build-app-run-785vv-pod-6kpnb</code></p>
+</div>
+<div class="tabset is-loading">
+<div class="ulist tabs">
+<ul>
+<li>
+<p><a id="tabset4_kubectl"></a>kubectl</p>
+</li>
+<li>
+<p><a id="tabset4_oc"></a>oc</p>
+</li>
+</ul>
+</div>
+<div class="content">
+<div class="tab-pane" aria-labelledby="tabset4_kubectl">
+<div id="step-list-containers" class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl get pod build-app-run-785vv-pod-6kpnb \
+  -o jsonpath="{range .spec.containers[*] } {.name}{'\n'} {end}"</code></pre>
+</div>
+</div>
+<button class="copybtn float-right" title="Copy to clipboard" data-clipboard-target="#step-list-containers"><i class="fa fa-clipboard"></i></button><br/>
+</div>
+<div class="tab-pane" aria-labelledby="tabset4_oc">
+<div id="step-list-containers-oc" class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc get pod build-app-run-785vv-pod-6kpnb \
+  -o jsonpath="{range .spec.containers[*] } {.name}{'\n'} {end}"</code></pre>
+</div>
+</div>
+<button class="copybtn float-right" title="Copy to clipboard" data-clipboard-target="#step-list-containers-oc"><i class="fa fa-clipboard"></i></button><br/>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>As noted from the output each container will be prefixed by <code>step-</code> followed by the step-name from the Task definition. Apart from your step pods there will also be other Tekton pods that will be added to each TaskRun.</p>
 </div>
 <div class="paragraph">
 <p>If you see the TaskRun status as <code>Failed</code> or <code>Error</code> use the following command to check the reason for error:</p>
@@ -979,26 +1140,26 @@ Each task step will be run within a container of its own.
 <div class="ulist tabs">
 <ul>
 <li>
-<p><a id="tabset7_kubernetes"></a>Kubernetes</p>
+<p><a id="tabset5_kubernetes"></a>Kubernetes</p>
 </li>
 <li>
-<p><a id="tabset7_openshift"></a>OpenShift</p>
+<p><a id="tabset5_openshift"></a>OpenShift</p>
 </li>
 </ul>
 </div>
 <div class="content">
-<div class="tab-pane" aria-labelledby="tabset7_kubernetes">
+<div class="tab-pane" aria-labelledby="tabset5_kubernetes">
 <div id="tekton-app-run-to-k8s" class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl run demo-greeter -n tektontutorial \
  --generator='run-pod/v1' \
- --image='dev.local/rhdevelopers/tekton-tutorial-greeter' &amp;&amp; \
+ --image='example.com/rhdevelopers/tekton-tutorial-greeter' &amp;&amp; \
 kubectl expose pod demo-greeter -n tektontutorial --port 8080 --type=NodePort</code></pre>
 </div>
 </div>
 <button class="copybtn float-right" title="Copy to clipboard" data-clipboard-target="#tekton-app-run-to-k8s"><i class="fa fa-clipboard"></i></button><br/>
 </div>
-<div class="tab-pane" aria-labelledby="tabset7_openshift">
+<div class="tab-pane" aria-labelledby="tabset5_openshift">
 <div id="tekton-app-run-to-oc" class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc run demo-greeter -n tektontutorial --generator='run-pod/v1' --image='dev.local/rhdevelopers/tekton-tutorial-greeter' &amp;&amp; \
@@ -1011,8 +1172,76 @@ oc expose svc -n tektontutorial demo-greeter</code></pre>
 </div>
 </div>
 <div class="paragraph">
+<p>Wait for the <code>demo-greeter</code> to be up and running:</p>
+</div>
+<div class="tabset is-loading">
+<div class="ulist tabs">
+<ul>
+<li>
+<p><a id="tabset6_kubectl"></a>kubectl</p>
+</li>
+<li>
+<p><a id="tabset6_oc"></a>oc</p>
+</li>
+</ul>
+</div>
+<div class="content">
+<div class="tab-pane" aria-labelledby="tabset6_kubectl">
+<div class="paragraph">
+<p>watch kubectl get pods -n tektontutorial</p>
+</div>
+</div>
+<div class="tab-pane" aria-labelledby="tabset6_oc">
+<div class="paragraph">
+<p>watch oc get pods -n tektontutorial</p>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
 <p>Lets try checking the application:</p>
 </div>
+<div class="tabset is-loading">
+<div class="ulist tabs">
+<ul>
+<li>
+<p><a id="tabset7_kubernetes"></a>Kubernetes</p>
+</li>
+<li>
+<p><a id="tabset7_openshift"></a>OpenShift</p>
+</li>
+</ul>
+</div>
+<div class="content">
+<div class="tab-pane" aria-labelledby="tabset7_kubernetes">
+<div id="tekton-invoke-app-k8s" class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">SVC_URL=$(minikube -p tektontutorial -n tektontutorial service demo-greeter --url) &amp;&amp; \
+http --body $SVC_URL</code></pre>
+</div>
+</div>
+<button class="copybtn float-right" title="Copy to clipboard" data-clipboard-target="#tekton-invoke-app-k8s"><i class="fa fa-clipboard"></i></button><br/>
+</div>
+<div class="tab-pane" aria-labelledby="tabset7_openshift">
+<div id="tekton-invoke-app-oc" class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">SVC_URL=$(oc get routes -o yaml | yq r - 'spec.url.host' )
+http --body $SVC_URL</code></pre>
+</div>
+</div>
+<button class="copybtn float-right" title="Copy to clipboard" data-clipboard-target="#tekton-invoke-app-oc"><i class="fa fa-clipboard"></i></button><br/>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>The above command should show an output like <strong>hello</strong></p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="tekton-task-cleanup"><a class="anchor" href="#tekton-task-cleanup"></a>Cleanup</h2>
+<div class="sectionbody">
 <div class="tabset is-loading">
 <div class="ulist tabs">
 <ul>
@@ -1026,47 +1255,6 @@ oc expose svc -n tektontutorial demo-greeter</code></pre>
 </div>
 <div class="content">
 <div class="tab-pane" aria-labelledby="tabset8_kubernetes">
-<div id="tekton-invoke-app-k8s" class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">SVC_URL=$(minikube ip):$(kubectl get svc -n tektontutorial demo-greeter -o yaml | yq r - 'spec.ports[0].nodePort') &amp;&amp; \
-http --body $SVC_URL</code></pre>
-</div>
-</div>
-<button class="copybtn float-right" title="Copy to clipboard" data-clipboard-target="#tekton-invoke-app-k8s"><i class="fa fa-clipboard"></i></button><br/>
-</div>
-<div class="tab-pane" aria-labelledby="tabset8_openshift">
-<div id="tekton-invoke-app-oc" class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">SVC_URL=$(oc get routes -o yaml | yq r - 'spec.url.host' )
-http --body $SVC_URL</code></pre>
-</div>
-</div>
-<button class="copybtn float-right" title="Copy to clipboard" data-clipboard-target="#tekton-invoke-app-oc"><i class="fa fa-clipboard"></i></button><br/>
-</div>
-</div>
-</div>
-<div class="paragraph">
-<p>The above command should show an output like <strong>Hi  greeter &#8658; 'demo-greeter' : 1</strong></p>
-</div>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="tekton-task-cleanup"><a class="anchor" href="#tekton-task-cleanup"></a>Cleanup</h2>
-<div class="sectionbody">
-<div class="tabset is-loading">
-<div class="ulist tabs">
-<ul>
-<li>
-<p><a id="tabset9_kubernetes"></a>Kubernetes</p>
-</li>
-<li>
-<p><a id="tabset9_openshift"></a>OpenShift</p>
-</li>
-</ul>
-</div>
-<div class="content">
-<div class="tab-pane" aria-labelledby="tabset9_kubernetes">
 <div id="tekton-task-cleanup-k8s" class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl delete pod -n tektontutorial demo-greeter &amp;&amp;\
@@ -1075,7 +1263,7 @@ kubectl delete svc -n tektontutorial demo-greeter</code></pre>
 </div>
 <button class="copybtn float-right" title="Copy to clipboard" data-clipboard-target="#tekton-task-cleanup-k8s"><i class="fa fa-clipboard"></i></button><br/>
 </div>
-<div class="tab-pane" aria-labelledby="tabset9_openshift">
+<div class="tab-pane" aria-labelledby="tabset8_openshift">
 <div id="tekton-task-cleanup-oc" class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc delete pod -n tektontutorial demo-greeter &amp;&amp;\

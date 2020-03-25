@@ -1,23 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 <url>
+<loc>https://redhat-developer-demos.github.io/tekton-tutorial/tekton-tutorial/extras.html</loc>
+<lastmod>2020-03-25T10:27:55.431Z</lastmod>
+</url>
+<url>
 <loc>https://redhat-developer-demos.github.io/tekton-tutorial/tekton-tutorial/index.html</loc>
-<lastmod>2020-03-24T17:12:55.104Z</lastmod>
+<lastmod>2020-03-25T10:27:55.431Z</lastmod>
 </url>
 <url>
 <loc>https://redhat-developer-demos.github.io/tekton-tutorial/tekton-tutorial/pipeline-resources.html</loc>
-<lastmod>2020-03-24T17:12:55.104Z</lastmod>
+<lastmod>2020-03-25T10:27:55.431Z</lastmod>
 </url>
 <url>
 <loc>https://redhat-developer-demos.github.io/tekton-tutorial/tekton-tutorial/pipelines.html</loc>
-<lastmod>2020-03-24T17:12:55.104Z</lastmod>
+<lastmod>2020-03-25T10:27:55.431Z</lastmod>
 </url>
 <url>
 <loc>https://redhat-developer-demos.github.io/tekton-tutorial/tekton-tutorial/setup.html</loc>
-<lastmod>2020-03-24T17:12:55.104Z</lastmod>
+<lastmod>2020-03-25T10:27:55.431Z</lastmod>
 </url>
 <url>
 <loc>https://redhat-developer-demos.github.io/tekton-tutorial/tekton-tutorial/tasks.html</loc>
-<lastmod>2020-03-24T17:12:55.104Z</lastmod>
+<lastmod>2020-03-25T10:27:55.431Z</lastmod>
 </url>
 </urlset>

@@ -3,8 +3,8 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tekton Tutorial :: Tekton Tutorial</title>
-    <link rel="canonical" href="https://redhat-developer-demos.github.io/tekton-tutorial/tekton-tutorial/pipeline-resources.html">
+    <title>Untitled :: Tekton Tutorial</title>
+    <link rel="canonical" href="https://redhat-developer-demos.github.io/tekton-tutorial/tekton-tutorial/extras.html">
     <meta name="generator" content="Antora 2.2.0">
     <link rel="stylesheet" href="../_/css/site.css">
 <link rel="icon" href="../_/img/favicon.ico" type="image/x-icon">
@@ -61,21 +61,21 @@
   </li>
 </ul>
   </li>
-  <li class="nav-item is-current-page" data-depth="1">
+  <li class="nav-item" data-depth="1">
     <button class="nav-toggle"></button>
     <a class="nav-link" href="pipeline-resources.html">Pipeline Resources</a>
 <ul class="nav-list">
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="#tekton-res-prerequisite">Prerequisites</a>
+    <a class="nav-link" href="pipeline-resources.html#tekton-res-prerequisite">Prerequisites</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="#tekton-res-create">Create Pipeline Resource</a>
+    <a class="nav-link" href="pipeline-resources.html#tekton-res-create">Create Pipeline Resource</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="#tekton-res-deploy">Deploy Pipeline Resource</a>
+    <a class="nav-link" href="pipeline-resources.html#tekton-res-deploy">Deploy Pipeline Resource</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="#tkn-see-what-you-have-deployed">See what you have deployed</a>
+    <a class="nav-link" href="pipeline-resources.html#tkn-see-what-you-have-deployed">See what you have deployed</a>
   </li>
 </ul>
   </li>
@@ -166,359 +166,85 @@
   <button class="navigation-toggle"></button>
   <a href="index.html" class="home-link"></a>
   <nav class="crumbs" aria-label="breadcrumbs">
-  <ul>
-    <li class="crumb"><a href="index.html">Tekton Tutorial</a></li>
-    <li class="crumb"><a href="pipeline-resources.html">Pipeline Resources</a></li>
-  </ul>
 </nav>
 </div>
 <article class="doc">
-<h1>Tekton Tutorial</h1>
-<div class="sect1">
-<h2 id="_pipeline_resources"><a class="anchor" href="#_pipeline_resources"></a>Pipeline Resources</h2>
-<div class="sectionbody">
 <div class="paragraph">
-<p>At the end of this chapter you will be able to :</p>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p>Understand what is a <a href="https://github.com/tektoncd/pipeline/blob/master/docs/resources.md">pipeline resource</a> ?</p>
-</li>
-<li>
-<p>Create a pipeline resource</p>
-</li>
-</ul>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="tekton-res-prerequisite"><a class="anchor" href="#tekton-res-prerequisite"></a>Prerequisite</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>The following checks ensure that each chapter exercises are done with the right environment settings.</p>
+<p>Before we run the Task using TaskRun let us create the Kubernetes service account and attach the needed permissions to the service account, the following Kubernetes resource defines a service account called <code>pipeline</code> in namespace <code>tektontutorial</code> who will have administrative role within the <code>tektontutorial</code> namespace.</p>
 </div>
 <div class="tabset is-loading">
 <div class="ulist tabs">
 <ul>
 <li>
-<p><a id="tabset1_kubernetes"></a>Kubernetes</p>
+<p><a id="tabset1_kubectl"></a>kubectl</p>
 </li>
 <li>
-<p><a id="tabset1_openshift"></a>OpenShift</p>
+<p><a id="tabset1_oc"></a>oc</p>
 </li>
 </ul>
 </div>
 <div class="content">
-<div class="tab-pane" aria-labelledby="tabset1_kubernetes">
-<div class="ulist">
-<ul>
-<li>
-<p>Set your local docker to use minikube docker daemon</p>
-</li>
-</ul>
-</div>
-<div id="minikube-set-env" class="listingblock">
+<div class="tab-pane" aria-labelledby="tabset1_kubectl">
+<div id="create-pipeline-sa" class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">eval $(minikube docker-env)</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl create -n tektontutorial pipeline-sa-role.yaml</code></pre>
 </div>
 </div>
-<button class="copybtn float-right" title="Copy to clipboard" data-clipboard-target="#minikube-set-env"><i class="fa fa-clipboard"></i></button><br/>
-<div class="ulist">
-<ul>
-<li>
-<p>Kubernetes should be v1.15+</p>
-</li>
-</ul>
+<button class="copybtn float-right" title="Copy to clipboard" data-clipboard-target="#create-pipeline-sa"><i class="fa fa-clipboard"></i></button><br/>
 </div>
-<div id="kubectl-version" class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl version</code></pre>
-</div>
-</div>
-<button class="copybtn float-right" title="Copy to clipboard" data-clipboard-target="#kubectl-version"><i class="fa fa-clipboard"></i></button><br/>
-</div>
-<div class="tab-pane" aria-labelledby="tabset1_openshift">
-<div class="ulist">
-<ul>
-<li>
-<p>OpenShift CLI should be v4.3+</p>
-</li>
-</ul>
-</div>
-<div id="oc-version" class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc version</code></pre>
-</div>
-</div>
-<button class="copybtn float-right" title="Copy to clipboard" data-clipboard-target="#oc-version"><i class="fa fa-clipboard"></i></button><br/>
+<div class="tab-pane" aria-labelledby="tabset1_oc">
 <div class="paragraph">
-<p>The output should be like</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc version
-Client Version: openshift-clients-4.3.0-201910250623-88-g6a937dfe
-Kubernetes Version: v1.16.2</code></pre>
-</div>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p>Make sure to be on <code>tektontutorial</code> OpenShift project</p>
-</li>
-</ul>
-</div>
-<div id="right-openshift-project" class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc project -q</code></pre>
-</div>
-</div>
-<button class="copybtn float-right" title="Copy to clipboard" data-clipboard-target="#right-openshift-project"><i class="fa fa-clipboard"></i></button><br/>
-<div class="paragraph">
-<p>If you are not on <code>tektontutorial</code> project, then run following command to change to <code>tektontutorial</code> project:</p>
-</div>
-<div id="change-to-openshift-project" class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc project tektontutorial</code></pre>
-</div>
-</div>
-<button class="copybtn float-right" title="Copy to clipboard" data-clipboard-target="#change-to-openshift-project"><i class="fa fa-clipboard"></i></button><br/>
-</div>
-</div>
-</div>
-<div class="paragraph">
-<p>Ensure Tekton piplines is deployed and the API is available for use</p>
-</div>
-<div class="tabset is-loading">
-<div class="ulist tabs">
-<ul>
-<li>
-<p><a id="tabset2_kubernetes"></a>Kubernetes</p>
-</li>
-<li>
-<p><a id="tabset2_openshift"></a>OpenShift</p>
-</li>
-</ul>
-</div>
-<div class="content">
-<div class="tab-pane" aria-labelledby="tabset2_kubernetes">
-<div id="tekton-api-kind-k8s" class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl api-resources --api-group='tekton.dev'</code></pre>
-</div>
-</div>
-<button class="copybtn float-right" title="Copy to clipboard" data-clipboard-target="#tekton-api-kind-k8s"><i class="fa fa-clipboard"></i></button><br/>
-</div>
-<div class="tab-pane" aria-labelledby="tabset2_openshift">
-<div id="tekton-api-kind-oc" class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc api-resources --api-group='tekton.dev'</code></pre>
-</div>
-</div>
-<button class="copybtn float-right" title="Copy to clipboard" data-clipboard-target="#tekton-api-kind-oc"><i class="fa fa-clipboard"></i></button><br/>
-</div>
-</div>
-</div>
-<div class="paragraph">
-<p>The command show an output like:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">NAME                SHORTNAMES   APIGROUP     NAMESPACED   KIND
-clustertasks                     tekton.dev   false        ClusterTask
-conditions                       tekton.dev   true         Condition
-pipelineresources                tekton.dev   true         PipelineResource
-pipelineruns        pr,prs       tekton.dev   true         PipelineRun
-pipelines                        tekton.dev   true         Pipeline
-taskruns            tr,trs       tekton.dev   true         TaskRun
-tasks                            tekton.dev   true         Task</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Verify the Tekton cli</p>
-</div>
-<div id="tekton-install-cli" class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">tkn version</code></pre>
-</div>
-</div>
-<button class="copybtn float-right" title="Copy to clipboard" data-clipboard-target="#tekton-install-cli"><i class="fa fa-clipboard"></i></button><br/>
-<div class="paragraph">
-<p>The command should show a result like:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">Client version: 0.8.0</code></pre>
+<p>Service Account <strong>pipeline</strong> will be created automatically by OpenShift Pipelines operator.</p>
 </div>
 </div>
 </div>
 </div>
-<div class="sect1">
-<h2 id="tekton-res-create"><a class="anchor" href="#tekton-res-create"></a>Create a pipeline resource</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>If you are not in tutorial chapter folder, then navigate to the folder:</p>
-</div>
-<div id="tekton-res-nav-folder" class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">cd $TUTORIAL_HOME/pipelines</code></pre>
-</div>
-</div>
-<button class="copybtn float-right" title="Copy to clipboard" data-clipboard-target="#tekton-res-nav-folder"><i class="fa fa-clipboard"></i></button><br/>
-<div class="paragraph">
-<p>The following snippet shows what a Knative service YAML looks like:</p>
-</div>
-<div class="listingblock">
-<div class="title"><a href="https://github.com/redhat-developer-demos/tekton-tutorial/blob/master/pipelines/build-resources.yaml">build-resources.yaml</a></div>
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">apiVersion: tekton.dev/v1alpha1
-kind: PipelineResource
-metadata:
-  name: git-source
-spec:
-  type: git
-  params:
-    - name: url
-      value: <a href="https://github.com/redhat-developer-demos/tekton-tutorial" class="bare">https://github.com/redhat-developer-demos/tekton-tutorial</a>
-    - name: revision
-      value: master
----
-apiVersion: tekton.dev/v1alpha1
-kind: PipelineResource
-metadata:
-  name: tekton-tutorial-greeter-image
-spec:
-  type: image
-  params:
-    - name: url
-      value: "example.com/rhdevelopers/tekton-tutorial-greeter"
-      # if you are on OpenShift uncomment the line below
-      #value: "image-registry.openshift-image-registry.svc:5000/tutorial/helloworld"</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Each pipeline resource has:</p>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p><strong>name</strong>: the name using which it will be referred in other places</p>
-</li>
-<li>
-<p><strong>type</strong>: the type of the pipeline resource, in this example we have two types</p>
-<div class="ulist">
-<ul>
-<li>
-<p><em>git</em> - this type of resource refers to a GitHub repository</p>
-</li>
-<li>
-<p><em>image</em> - this type of resource is linux container image</p>
-</li>
-</ul>
-</div>
-</li>
-<li>
-<p><strong>params</strong>: each type can have one or more parameters that will be used to configure the underlying type. In the above example for the <code>git-source</code> pipeline resource, the parameters <code>url</code> and <code>revision</code> are used  to identify the GitHub repository url and revision of the sources respectively.</p>
-</li>
-</ul>
-</div>
-<div class="paragraph">
-<p>More details on other types of pipeline resource types is available <a href="https://github.com/tektoncd/pipeline/blob/master/docs/resources.md#resource-types">here</a>.</p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="tekton-res-deploy"><a class="anchor" href="#tekton-res-deploy"></a>Deploy a pipeline resource</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>The pipeline resource could be created using the command:</p>
-</div>
-<div class="tabset is-loading">
-<div class="ulist tabs">
-<ul>
-<li>
-<p><a id="tabset3_kubernetes"></a>Kubernetes</p>
-</li>
-<li>
-<p><a id="tabset3_openshift"></a>OpenShift</p>
-</li>
-</ul>
-</div>
-<div class="content">
-<div class="tab-pane" aria-labelledby="tabset3_kubernetes">
-<div id="tekton-build-res-deploy-to-k8s" class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl apply -n tektontutorial -f <a href="https://github.com/redhat-developer-demos/tekton-tutorial/blob/master/pipelines/build-resources.yaml">build-resources.yaml</a></code></pre>
-</div>
-</div>
-<button class="copybtn float-right" title="Copy to clipboard" data-clipboard-target="#tekton-build-res-deploy-to-k8s"><i class="fa fa-clipboard"></i></button><br/>
-</div>
-<div class="tab-pane" aria-labelledby="tabset3_openshift">
-<div id="tekton-build-res-deploy-to-oc" class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc apply -n tektontutorial -f <a href="https://github.com/redhat-developer-demos/tekton-tutorial/blob/master/pipelines/build-resources.yaml">build-resources.yaml</a></code></pre>
-</div>
-</div>
-<button class="copybtn float-right" title="Copy to clipboard" data-clipboard-target="#tekton-build-res-deploy-to-oc"><i class="fa fa-clipboard"></i></button><br/>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="tkn-see-what-you-have-deployed"><a class="anchor" href="#tkn-see-what-you-have-deployed"></a>See what you have deployed</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>We will use the Tekton cli to inspect the created resources</p>
-</div>
-<div id="tekton-inspect-pipeline-res" class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">tkn res ls</code></pre>
-</div>
-</div>
-<button class="copybtn float-right" title="Copy to clipboard" data-clipboard-target="#tekton-inspect-pipeline-res"><i class="fa fa-clipboard"></i></button><br/>
-<div class="paragraph">
-<p>The above command should list two resources as shown below:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">NAME                             TYPE    DETAILS
-git-source                       git     url: https://github.com/redhat-developer-demos/tekton-tutorial
-tekton-tutorial-greeter-image   image   url: registry.kube-system:80/rhdevelopers/tekton-tutorial-greeter</code></pre>
-</div>
-</div>
-<div class="admonitionblock tip">
+<div class="admonitionblock important">
 <table>
 <tr>
 <td class="icon">
-<i class="fa icon-tip" title="Tip"></i>
+<i class="fa icon-important" title="Important"></i>
 </td>
 <td class="content">
 <div class="paragraph">
-<p>Use the command <strong>help</strong> via <code>tkn res --help</code></p>
-</div>
-<div class="paragraph">
-<p>e.g. Running a command <code>tkn res describe git-source</code> will return an output like:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">Name:                    git-source
-Namespace:               tektontutorial
-PipelineResource Type:   git
-
-Params
-NAME       VALUE
-url        https://github.com/redhat-developer-demos/tekton-tutorial
-revision   master
-
-Secret Params
-No secret params</code></pre>
-</div>
+<p>Since the TaskRun pod will be run as an underprivleged user with uid <code>1001</code>, its required that <code>fsGroup</code> of the pod is set correctly. This done by configuring the ConfigMap <code>config-defaults</code> of the <code>tekton-pipelines</code> namespace. In OpenShift the namespace is called <code>openshift-pipelines</code>.</p>
 </div>
 </td>
 </tr>
 </table>
+</div>
+<div class="paragraph">
+<p>Run the following command to patch the ConfigMap <code>config-defaults</code>:</p>
+</div>
+<div class="tabset is-loading">
+<div class="ulist tabs">
+<ul>
+<li>
+<p><a id="tabset2_kubectl"></a>kubectl</p>
+</li>
+<li>
+<p><a id="tabset2_oc"></a>oc</p>
+</li>
+</ul>
+</div>
+<div class="content">
+<div class="tab-pane" aria-labelledby="tabset2_kubectl">
+<div id="patch-tekton-config-defaults-k8s" class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl patch -n tekton-pipelines cm config-defaults \
+      --patch  "$(cat $TUTORIAL_HOME/pipelines/pod-template-patch.yaml)"</code></pre>
+</div>
+</div>
+<button class="copybtn float-right" title="Copy to clipboard" data-clipboard-target="#patch-tekton-config-defaults-k8s"><i class="fa fa-clipboard"></i></button><br/>
+</div>
+<div class="tab-pane" aria-labelledby="tabset2_oc">
+<div id="patch-tekton-config-defaults" class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc patch -n openshift-pipelines cm config-defaults \
+    --patch "$(cat $TUTORIAL_HOME/pipelines/pod-template-patch.yaml)"</code></pre>
+</div>
+</div>
+<button class="copybtn float-right" title="Copy to clipboard" data-clipboard-target="#patch-tekton-config-defaults"><i class="fa fa-clipboard"></i></button><br/>
 </div>
 </div>
 </div>
