@@ -175,7 +175,8 @@ All the tutorial exercises will be deployed in namespace called `{tutorial-names
 [#setup-tekton-tutorial-ns]
 [source,bash,subs="+macros,+attributes"]
 ----
-kubectl create namespace {tutorial-namespace}
+kubectl create namespace {tutorial-namespace} &&\
+kubectl config set-context --current --namespace={tutorial-namespace}
 ----
 copyToClipboard::setup-tekton-tutorial-ns[]
 

@@ -105,4 +105,4 @@ ifdef::workshop[]
 include::workshop:partial$openshift-setup.adoc[]
 endif::[]
 
-include::partial$tutorial-dev-env.adoc[]
+//include::partial$tutorial-dev-env.adoc[]
