@@ -13,7 +13,7 @@ spec:
     spec:
       containers:
         - name: greeter
-          image: quay.io/workspace7/dnmc-tekton-greeter
+          image: quay.io/rhdevelopers/tekton-tutorial-greeter:quarkus
           resources:
             limits:
               memory: "2000m"
