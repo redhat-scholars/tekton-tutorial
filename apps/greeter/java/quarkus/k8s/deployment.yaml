@@ -13,10 +13,10 @@ spec:
     spec:
       containers:
         - name: greeter
-          image: quay.io/rhdevelopers/tekton-tutorial-greeter:quarkus
+          image: quay.io/rhdevelopers/tekton-tutorial-greeter:springboot
           resources:
             limits:
-              memory: "2000m"
-              cpu: "1000m"
+              memory: "2Gi"
+              cpu: "1"
           ports:
             - containerPort: 8080
