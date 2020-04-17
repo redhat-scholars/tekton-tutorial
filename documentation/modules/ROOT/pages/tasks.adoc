@@ -9,7 +9,7 @@ At the end of this chapter you will be able to :
 * Understand how to clone your build resources using Task
 * Understand where cloned sources reside i.e. Workspace
 * Create a Task that can build the sources
-* How to run a Task 
+* How to run a Task
 * Use the pipeline resource with TaskRun
 
 [#tekton-task-prerequisite]
@@ -33,7 +33,7 @@ Each Task has the following:
 ** **resources** - the pipeline resources that will be used in the task e.g. git-source
 *** **name** - the name of the input resource using which it can be referenced and bound via <<tekton-task-run>>
 *** **type** - the type of the input resource, typically the pipeline resource type
-** **params** - the parameters that will be used in the task steps. Each parameter has 
+** **params** - the parameters that will be used in the task steps. Each parameter has
 *** **name** - the name of the parameter
 *** **description** - the description of the parameter
 *** **default** - the default value of parameter
@@ -177,7 +177,7 @@ inputs:
     resources: #<.>
       - name: source
         type: git
-    params: 
+    params:
       - name: contextDir #<.>
         description: the context dir within source
         default: .
@@ -191,14 +191,14 @@ inputs:
         description: tls verify
         type: string
         default: "false"
-outputs: 
+outputs:
   resources: #<.>
     - name: builtImage
       type: image
 ----
 
 <.> The input referred via `source`, which will be of type `git`. Having a input resource of type `git` will cause the TektonPipelines to add implict git clone step to download the sources to `workspace/source` directory
-<.> `conextDir` - specifies the directory under the sources, which will be the context for the Task
+<.> `contextDir` - specifies the directory under the sources, which will be the context for the Task
 <.> `destinationImage` - the linux container image name that will be built as part of this Task. Defaults to the `outputs.resources.builtImage.url`
 <.> `dockerFile` - the Dockerfile that will be used to build the image
 <.> `tlsVerify` - enable or disable TLS when pushing the image to remote registry
@@ -293,7 +293,7 @@ include::ROOT:example$build-app-task.yaml[]
 ----
 
 [#tekton-task-deploy]
-== Deploy a task 
+== Deploy a task
 
 The application build task could be created using the command:
 
@@ -374,7 +374,7 @@ NOTE: It will take few seconds for the TaskRun to show status as `Running` as it
 
 [TIP]
 ====
-* Use the command **help** via `tkn taskrun --help` 
+* Use the command **help** via `tkn taskrun --help`
 * Use `tr` as shorcut for taskrun commands e.g to list taskruns run the command `tkn tr ls`
 ====
 
@@ -614,7 +614,7 @@ The command should an output like :
 
  step-build-sources
  map[privileged:true runAsUser:0]
- 
+
  step-build-image
  map[privileged:true runAsUser:0]
 
