@@ -481,7 +481,7 @@ source-lister      10 minutes ago</code></pre>
 <p>Using a Pipeline we can run multiple Task together in a user defined sequence or order.</p>
 </div>
 <div class="paragraph">
-<p>Let us use the <code>build-app</code> task that we created in <a href="#03-tasks.adoc.adoc#tekton-task-create" class="page unresolved">previous chapter</a> and <code>kn</code> task that we deployed in previous step to make Pipeline that will build the application from sources and deploy the built linux container image as Knative serverless service.</p>
+<p>Let us use the <code>build-app</code> task that we created in <a href="#03-tasks.adoc.adoc#tekton-task-create" class="page unresolved">previous chapter</a> and <code>openshift-client</code> task that we deployed in previous step to make Pipeline that will build the application from sources and deploy the built linux container image.</p>
 </div>
 <div class="paragraph">
 <p>If you are not in tutorial chapter folder, then navigate to the folder:</p>
@@ -539,7 +539,7 @@ spec:
           value:
             - "apply"
             - "-f"
-            - "k8s/app.yaml"</code></pre>
+            - "/workspace/source/$(params.contextDir)/k8s/deployment.yaml"</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -608,7 +608,7 @@ spec:
 </ul>
 </div>
 <div class="paragraph">
-<p>In this demo the <code>build-app</code> Task needs bind two resources namely <code>source</code> and <code>builtImage</code>. The Pipeline <code>kn-svc-deploy</code> defines two resources <code>appSource</code> and <code>appImage</code> that can be configured via <a href="#tekton-pipeline-run">Run Pipeline</a>.</p>
+<p>In this demo the <code>build-app</code> Task needs bind two resources namely <code>source</code> and <code>builtImage</code>. The Pipeline <code>deploy-kubernetes-service</code> defines two resources <code>appSource</code> and <code>appImage</code> that can be configured via <a href="#tekton-pipeline-run">Run Pipeline</a>.</p>
 </div>
 <div class="paragraph">
 <p>The binding between the Pipeline resource and Task resources is done via the task&#8217;s <code>resources</code> attribute. In this demo we bind <code>appSource</code> &#8594; <code>source</code> and <code>appImage</code> &#8594; <code>builtImage</code>.</p>
@@ -631,7 +631,7 @@ Only pipeline resources of same type can be bound. e.g. resource of type <code>g
 <h2 id="tekton-pipeline-deploy"><a class="anchor" href="#tekton-pipeline-deploy"></a>Deploy Pipeline</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>The Knative service deployment Pipeline could be created using the command:</p>
+<p>The Kubernetes service deployment Pipeline could be created using the command:</p>
 </div>
 <div class="tabset is-loading">
 <div class="ulist tabs">
