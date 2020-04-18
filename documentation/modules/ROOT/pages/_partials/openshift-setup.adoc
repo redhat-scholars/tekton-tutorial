@@ -54,7 +54,7 @@ It will take few minutes for the openshift-pipelines components to be installed,
 [#check-pipelines]
 [source,bash,subs="+macros,+attributes"]
 ----
-oc get pods -n openshift-pipelines -w 
+oc get pods -n openshift-pipelines -w
 ----
 copyToClipboard::check-pipelines[]
 
@@ -68,6 +68,15 @@ NAME                                           READY   STATUS    RESTARTS   AGE
 tekton-pipelines-controller-855f895846-jgh99   1/1     Running   0          2m20s
 tekton-pipelines-webhook-c98b564d5-dtt5z       1/1     Running   0          2m21s
 -----
+
+All the tutorial exercises will be deployed in namespace called `{tutorial-namespace}`:
+
+[#setup-tekton-tutorial-ns]
+[source,bash,subs="+macros,+attributes"]
+----
+oc new-project {tutorial-namespace}
+----
+copyToClipboard::setup-tekton-tutorial-ns[]
 
 **Congratulations!** You have now installed all the OpenShift pipelines components to run the tutorial exercises. You can terminate the WATCH_WINDOW using kbd:[Ctrl+c].
 
