@@ -23,7 +23,7 @@ include::partial$tekton-cli.adoc[]
 
 include::partial$tekton-nav-to-folder.adoc[]
 
-The following snippet shows what a Knative service YAML looks like:
+The following snippet shows what a Tekton `PipelineResource` YAML looks like:
 
 .link:{github-repo}/{pipelines-repo}/build-resources.yaml[build-resources.yaml]
 [source,yaml,subs="+macros,attributes+"]

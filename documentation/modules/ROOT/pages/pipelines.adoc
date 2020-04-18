@@ -117,7 +117,7 @@ source-lister      10 minutes ago
 
 Using a Pipeline we can run multiple Task together in a user defined sequence or order.
 
-Let us use the `build-app` task that we created in xref:03-tasks.adoc.adoc#tekton-task-create[previous chapter] and `kn` task that we deployed in previous step to make Pipeline that will build the application from sources and deploy the built linux container image as Knative serverless service.
+Let us use the `build-app` task that we created in xref:03-tasks.adoc.adoc#tekton-task-create[previous chapter] and `openshift-client` task that we deployed in previous step to make Pipeline that will build the application from sources and deploy the built linux container image.
 
 include::partial$tekton-nav-to-folder.adoc[]
 
@@ -150,7 +150,7 @@ Each Task in the Pipeline has
 ** **name** - the local name of the resource
 ** **resource** - the Pipeline resource (defined under `resources`) name
 
-In this demo the `build-app` Task needs bind two resources namely `source` and `builtImage`. The Pipeline `kn-svc-deploy` defines two resources `appSource` and `appImage` that can be configured via <<tekton-pipeline-run>>. 
+In this demo the `build-app` Task needs bind two resources namely `source` and `builtImage`. The Pipeline `deploy-kubernetes-service` defines two resources `appSource` and `appImage` that can be configured via <<tekton-pipeline-run>>. 
 
 The binding between the Pipeline resource and Task resources is done via the task's `resources` attribute. In this demo we bind `appSource` -> `source` and `appImage` -> `builtImage`.
 
@@ -159,7 +159,7 @@ IMPORTANT: Only pipeline resources of same type can be bound. e.g. resource of t
 [#tekton-pipeline-deploy]
 == Deploy Pipeline
 
-The Knative service deployment Pipeline could be created using the command:
+The Kubernetes service deployment Pipeline could be created using the command:
 
 ifndef::workshop[]
 [tabs]
