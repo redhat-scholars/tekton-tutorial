@@ -1167,7 +1167,7 @@ kubectl expose pod demo-greeter -n tektontutorial --port 8080 --type=NodePort</c
 <div class="tab-pane" aria-labelledby="tabset5_openshift">
 <div id="tekton-app-run-to-oc" class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc run demo-greeter -n tektontutorial --generator='run-pod/v1' --image='dev.local/rhdevelopers/tekton-tutorial-greeter' &amp;&amp; \
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc run demo-greeter -n tektontutorial --generator='run-pod/v1' --image='image-registry.openshift-image-registry.svc:5000/tektontutorial/helloworld' &amp;&amp; \
 oc expose pod demo-greeter -n tektontutorial --port 8080 --type=NodePort &amp;&amp; \
 oc expose svc -n tektontutorial demo-greeter</code></pre>
 </div>
