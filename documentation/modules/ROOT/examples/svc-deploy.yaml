@@ -39,4 +39,4 @@ spec:
           value:
             - "apply"
             - "-f"
-            - "k8s/app.yaml"
+            - "/workspace/source/$(params.contextDir)/k8s/deployment.yaml"

@@ -228,7 +228,7 @@ For Task inputs and outputs - we will use the xref:pipeline-resources.adoc#tkn-s
       value: /home/tekton
 ----
 
-<.> the working dir or the context directory within the soruces from there the build command will be run
+<.> the working dir or the context directory within the sources from there the build command will be run
 <.> the build command to run
 <.> the build command arguments
 <.> The environment variables that will be set within the step container
@@ -259,7 +259,7 @@ For Task inputs and outputs - we will use the xref:pipeline-resources.adoc#tkn-s
       mountPath: /var/lib/containers
 ----
 <.> Running buildah inside container needs to be run as root user and needs privilege esclation. These are set as part of security context.
-<.> The buildah tool saves the built linux contianer layers in the local file system at `/var/lib/containers`, which can then be used in other <<push-linux-image,steps>> or to push the image to remote registry.
+<.> The buildah tool saves the built linux container layers in the local file system at `/var/lib/containers`, which can then be used in other <<push-linux-image,steps>> or to push the image to remote registry.
 
 [[push-linux-image]]
 === Step 3:: Push Application Linux Container Image
@@ -391,7 +391,7 @@ tkn tr logs -f -a <task-run-name> #<1>
 copyToClipboard::tekton-taskrun-logs[]
 <1> The `-f` or `-a` allows to tail the logs from all the containers of the task. For more options run `tkn tr --help`
 
-Each task step will be run within a container of its own. You can list the conainers of the build pod like:
+Each task step will be run within a container of its own. You can list the containers of the build pod like:
 
 e.g. For a build pod `build-app-run-785vv-pod-6kpnb`
 
