@@ -460,7 +460,7 @@ endif::[]
 [#tekton-app-run-to-oc]
 [source,bash,subs="+macros,attributes+"]
 ----
-oc run demo-greeter -n {tutorial-namespace} --generator='run-pod/v1' --image='dev.local/rhdevelopers/tekton-tutorial-greeter' && \
+oc run demo-greeter -n {tutorial-namespace} --generator='run-pod/v1' --image='image-registry.openshift-image-registry.svc:5000/tektontutorial/helloworld' && \
 oc expose pod demo-greeter -n {tutorial-namespace} --port 8080 --type=NodePort && \
 oc expose svc -n {tutorial-namespace} demo-greeter
 ----
