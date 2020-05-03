@@ -1,7 +1,7 @@
 [#start-minikube]
 **Configure and Start Minikube**
 
-Before installing Knative and its components, we need to create a Minikube virtual machine and deploy Kubernetes into it.
+Before installing Tekton and its components, we need to create a Minikube virtual machine and deploy Kubernetes into it.
 
 Download https://kubernetes.io/docs/setup/minikube[minikube] and add it to your path.
 

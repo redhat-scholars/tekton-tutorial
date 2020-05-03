@@ -295,7 +295,7 @@ Kubernetes::
 [#tekton-invoke-app-k8s]
 [source,bash,subs="+macros,attributes+"]
 ----
-SVC_URL=$(minikube -p {tutorial-namespace} -n {tutorial-namespace} service helloworld --url) && \
+SVC_URL=$(minikube -p {tutorial-namespace} -n {tutorial-namespace} service greeter --url) && \
 http --body $SVC_URL
 ----
 copyToClipboard::tekton-invoke-app-k8s[]
@@ -308,7 +308,7 @@ endif::[]
 [source,bash,subs="+macros,attributes+"]
 ----
 oc expose svc helloworld
-SVC_URL=$(oc get routes helloworld -o yaml | yq r - 'spec.url.host' )
+SVC_URL=$(oc get routes greeter -o yaml | yq r - 'spec.url.host' )
 http --body $SVC_URL
 ----
 copyToClipboard::tekton-invoke-app-oc[]

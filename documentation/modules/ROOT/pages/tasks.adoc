@@ -86,7 +86,7 @@ Now you can use the `tkn` CLI tool to run the Task, you can pass the parameters 
 [#run-task-source-lister]
 [source,bash,subs="+macros,+attributes"]
 ----
-tkn task start source-lister --inputresource='source=git-source' #<1>
+tkn task start source-lister --inputresource='source=git-source' #<1> --showlog
 ----
 copyToClipboard::run-task-source-lister[]
 
@@ -585,7 +585,7 @@ kubectl::
 [source,bash,subs="+macros,+attributes"]
 ----
 kubectl get pod -n {tutorial-namespace} build-app-run-bsr4k-pod-xbxwg\
--o=jsonpath="{range .spec.containers[*]} {.name} {'\n'} {.volumeMounts[?(@.name=='varlibc')]} {'\n'} {end}"
+-o=jsonpath="{range .spec.containers[*]} {.name} {'\n'} {.securityContext} {'\n'} {end}"
 ----
 copyToClipboard::apply-check-sc[]
 --
@@ -596,7 +596,7 @@ oc::
 [source,bash,subs="+macros,+attributes"]
 ----
 oc get pod -n {tutorial-namespace} build-app-run-bsr4k-pod-xbxwg\
--o=jsonpath="{range .spec.containers[*]} {.name} {'\n'} {.volumeMounts[?(@.name=='varlibc')]} {'\n'} {end}"
+-o=jsonpath="{range .spec.containers[*]} {.name} {'\n'} {.securityContext} {'\n'} {end}"
 ----
 copyToClipboard::oc-check-sc[]
 --

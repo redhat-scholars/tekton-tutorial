@@ -7,7 +7,7 @@ set -o pipefail
 minikube -p tektontutorial addons enable registry
 
 sleep 5; 
-while (echo && oc get pods -n kube-system --selector='kubernetes.io/minikube-addons=registry' \
+while (echo && kubectl get pods -n kube-system --selector='kubernetes.io/minikube-addons=registry' \
    | grep -v -E "(Running|Completed|STATUS)"); 
 do 
   sleep 5; 

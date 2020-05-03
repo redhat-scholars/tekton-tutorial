@@ -11,7 +11,7 @@ Kubernetes::
 [#minikube-set-env]
 [source,bash,subs="+macros,+attributes"]
 ----
-eval $(minikube docker-env)
+eval $(minikube docker-env -p tektontutorial)
 ----
 copyToClipboard::minikube-set-env[]
 
