@@ -8,7 +8,7 @@ At the end of this chapter you will be able to :
 * Create a Pipeline
 * Execute a Pipeline to build and deploy a Knative service 
 
-include::partial$tekton-nav-to-folder.adoc[]
+include::partial$tekton-nav-to-folder.adoc[tags="folder-all,pipelines"]
 
 Ensure the pipeline Resources and Tasks are available:
 
@@ -165,7 +165,7 @@ A Kubernetes Service Account is required to deploy applications in to a Kubernet
 [.console-input]
 [source,bash,subs="+macros,+attributes"]
 ----
-kubectl apply -n {tutorial-namespace} -f pipeline-sa-role.yaml
+kubectl apply -n {tutorial-namespace} -f +$TUTORIAL_HOME/kubernetes/pipeline-sa-role.yaml+
 ----
 
 NOTE: OpenShift Pipelines creates and uses the `pipeline` SA by default.

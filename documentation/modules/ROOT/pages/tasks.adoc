@@ -10,7 +10,7 @@ At the end of this chapter you will be able to :
 * How to run a Task
 * Use the pipeline resource with TaskRun
 
-include::partial$tekton-nav-to-folder.adoc[]
+include::partial$tekton-nav-to-folder.adoc[tags="folder-all,tasks"]
 
 [#tekton-tasks]
 == Tekton Task

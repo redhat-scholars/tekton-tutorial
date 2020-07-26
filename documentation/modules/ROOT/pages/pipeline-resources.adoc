@@ -22,7 +22,7 @@ include::partial$tekton-api.adoc[]
 [#tekton-res-create]
 == Create a pipeline resource
 
-include::partial$tekton-nav-to-folder.adoc[]
+include::partial$tekton-nav-to-folder.adoc[tags="folder-all,resources"]
 
 The following snippet shows what a Tekton `PipelineResource` YAML looks like:
 
