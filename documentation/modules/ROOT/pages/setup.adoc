@@ -1,6 +1,4 @@
-
-
-== Setup
+= Setup
 
 [[tutorial-all-local]]
 == CLI tools

@@ -668,7 +668,7 @@ e.g. For a build-app TaskRun pod `build-app-run-lj7sm-pod-s74bp`
 [source,bash,subs="+macros,+attributes"]
 ----
 kubectl get pod build-app-run-lj7sm-pod-s74bp \
-  -o jsonpath="{range .spec.containers[*] }{.name}{'\n'}{end}"
+  -o jsonpath=+"{range .spec.containers[*] }{.name}{'\n'}{end}"+
 ----
 
 The command should show an output like:
@@ -810,8 +810,8 @@ Assuming the build-app-run pod to be `build-app-run-dnbwp-pod-4hcvr`:
 [source,bash,subs="+macros,+attributes"]
 ----
 kubectl get pod -n {tutorial-namespace} build-app-run-dnbwp-pod-4hcvr \
--o=jsonpath="{range .spec.containers[*]}{.name}{'\n'}\
-  {'\t'}{'Privileged: '}{.securityContext.privileged}{'\t'}{'User: '}{.securityContext.runAsUser}{'\n'}{end}"
+-o=jsonpath=+"{range .spec.containers[*]}{.name}{'\n'}\
+  {'\t'}{'Privileged: '}{.securityContext.privileged}{'\t'}{'User: '}{.securityContext.runAsUser}{'\n'}{end}"+
 ----
 
 The command should an output like :
@@ -841,7 +841,7 @@ As you noticed that all steps have inherited the `securityContext` from the `Ste
 [source,bash,subs="+macros,+attributes"]
 ----
 kubectl get pod -n {tutorial-namespace} build-app-run-dnbwp-pod-4hcvr \
--o=jsonpath="{range .spec.containers[*]}{.name}{'\n'}{'\t'}{'Mount Path: '}{.volumeMounts[?(@.name=='varlibc')].mountPath} {'\n'}{end}"
+-o=jsonpath=+"{range .spec.containers[*]}{.name}{'\n'}{'\t'}{'Mount Path: '}{.volumeMounts[?(@.name=='varlibc')].mountPath} {'\n'}{end}"+
 ----
 
 The command should an output like :

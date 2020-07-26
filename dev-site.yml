@@ -13,7 +13,6 @@ content:
 asciidoc:
   attributes:
     tutorial-namespace: tektontutorial
-    title: Tekton Tutorial
     workshop-domain: guru.devx.red
     kubernetes-version: v1.15.0
     release-version: master
