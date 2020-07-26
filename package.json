@@ -7,9 +7,19 @@
     "name": "Kamesh Sampath",
     "url": "https://twitter.com/@kamesh_sampath"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/redhat-developer-demos/tekton-tutorial.git"
+  },
+  "license": "Apache-2.0",
+  "babel": {
+    "presets": [
+      "@babel/preset-env"
+    ]
+  },
   "dependencies": {
-    "@antora/cli": "2.2",
-    "@antora/site-generator-default": "2.2.0",
+    "@antora/cli": "^2.3.1",
+    "@antora/site-generator-default": "^2.3.1",
     "@babel/cli": "^7.5.5",
     "@babel/core": "^7.5.5",
     "@babel/polyfill": "^7.4.4",
@@ -25,15 +35,5 @@
     "dev": "gulp",
     "clean": "gulp clean",
     "workshop": "gulp workshopSite"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/redhat-developer-demos/tekton-tutorial.git"
-  },
-  "license": "Apache-2.0",
-  "babel": {
-    "presets": [
-      "@babel/preset-env"
-    ]
   }
 }

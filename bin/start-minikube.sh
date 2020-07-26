@@ -19,4 +19,6 @@ MutatingAdmissionWebhook"
 minikube start -p $PROFILE_NAME \
   --memory=$MEMORY --cpus=$CPUS \
   --disk-size=50g \
-  --insecure-registry='10.0.0.0/24' 
+  --insecure-registry='10.0.0.0/24'
+  
+minikube profile $PROFILE_NAME

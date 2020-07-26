@@ -1,66 +1,53 @@
 ifndef::workshop[]
-[#tutorial-dev-env]
-== Development Ennvironment
-
-You have two options to choose your development environment,
-
-* <<tutorial-all-local,install everything locally>>
-* <<dev-env-all-in-one,all in one>>
-
-[#tutorial-all-local]
-
-[#dev-env-all-in-one]
-== All in one Environment
-
-If you don't wish to install the aforementioned tools, you could get started with tutorial using the **all-in-one-environment** based on https://eclipse.org/che[Eclipse Che] -- a browser based IDE --. 
+You could get started with tutorial using the **all-in-one-environment** based on https://eclipse.org/che[Eclipse Che] -- a browser based IDE --. 
 
 [#dev-env-install-chectl]
-=== Install chectl 
+*Install chectl*
 
 To get started in setting up this environment, we need to have https://www.eclipse.org/che/docs/che-7/installing-the-chectl-management-tool/[chectl]. You can follow the https://www.eclipse.org/che/docs/che-7/installing-the-chectl-management-tool/[instructions] to have it installed locally.
 
 You can verify the install using the command:
-[#chectl-env-verify]
+
+[.console-input]
 [source,bash,subs="+macros,attributes+"]
-----
+-----
 chectl version
-----
-copyToClipboard::chectl-env-verify[]
+-----
 
 The command above should return an output like:
 
+[.console-output]
 [source,bash]
-----
-chectl/7.7.1 darwin-x64 node-v10.18.1
-----
+-----
+chectl/7.12.2 darwin-x64 node-v12.16.3
+-----
 
 NOTE: The above output is an example from macOS (darwin), the OS information in output may vary based on your OS
 
 Navigate to `$TUTORIAL_HOME`:
 
-[#nav-to-tutorial-home]
+[.console-input]
 [source,bash,subs="+macros,attributes+"]
-----
+-----
 cd pass:[$TUTORIAL_HOME]
-----
-copyToClipboard::nav-to-tutorial-home[]
+-----
 
 [#dev-env-che-server]
-=== Create Che server
+*Create Che server*
 
-[#dev-env-che-server-run]
+[.console-input]
 [source,bash,subs="+macros,attributes+"]
-----
+-----
 chectl server:start --platform minikube 
-----
-copyToClipboard::dev-env-che-server-run[]
+-----
 
 It will take few minutes for Che server to be started, watch the output of `chectl` command for the status.
 
 A successful Che install should show an output like:
 
 [source,bash]
-----
+[.console-output]
+-----
 chectl server:start --platform minikube
   ✔ Verify Kubernetes API...OK
   ✔ 👀  Looking for an already existing Che instance
@@ -101,63 +88,59 @@ nip.io.
     ✔ Retrieving Che Server URL...http://che-che.192.168.64.166.nip.io
     ✔ Che status check
 Command server:start has completed successfully.
-----
+-----
 
 NOTE: The Che server url will be matching to your minikube ip `minikube ip`
 
-=== Configure Che server
+*Configure Che server*
 
 The default Che server Kubernetes service account has limited privileges, for this tutorial we will use a different service account called `tutorial-tools` which is a cluster-admin within your Kubernetes cluster:  
 
 Create the service account, tutorial-tools configmap:
 
-[#dev-env-k8s-resources]
+[.console-input]
 [source,bash,subs="+macros,attributes+"]
-----
+-----
 kubectl apply -n che -f $TUTORIAL_HOME/install/tutorial-tools.yaml 
-----
-copyToClipboard::dev-env-k8s-resources[]
+-----
 
 Patch the Che configmap to use `tutorial-tools` service account 
 
-[#dev-env-patch-che-cm]
+[.console-input]
 [source,bash,subs="+macros,attributes+"]
-----
+-----
 kubectl patch configmaps -n che che \
   --patch '{"data": {"CHE_INFRA_KUBERNETES_SERVICE__ACCOUNT__NAME": "tutorial-tools"} }'
-----
-copyToClipboard::dev-env-patch-che-cm[]
+-----
 
 We need to restart the `che` pod to make it pick up the new service account from the configmap:
 
-[#dev-env-bounce-che-pod]
+[.console-input]
 [source,bash,subs="+macros,attributes+"]
-----
+-----
 kubectl delete -n che pod che 
-----
-copyToClipboard::dev-env-bounce-che-pod[]
+-----
 
 [NOTE]
-====
+=====
 It will take few mins for the new che pod to come up, you can watch the status using the command `kubectl get -n che pods -w`. Use kbd:[Ctrl+c] to terminate the watch
-====
+=====
 
 [#dev-env-create-workspace]
-=== Create workspace
+*Create workspace*
 
 Create Che workspace and clone the knative tutorial sources in it:
 
-[#dev-env-create-workspace-run]
+[.console-input]
 [source,bash,subs="+macros,attributes+"]
-----
+-----
 chectl workspace:start -f $TUTORIAL_HOME/devfile.yaml 
-----
-copyToClipboard::dev-env-create-workspace-run[]
+-----
 
 A successful workspace creation will show the following output
 
-[source,bash,subs="+macros,attributes+"]
-----
+[.console-output]
+-----
 chectl workspace:start -f devfile.yaml
   ✔ Retrieving Che Server URL...http://che-che.192.168.64.166.nip.io
   ✔ Verify if Che server is running...RUNNING (auth disabled)
@@ -165,7 +148,7 @@ chectl workspace:start -f devfile.yaml
 
 Workspace IDE URL:
 pass:[http://che-che.192.168.64.166.nip.io/dashboard/#/ide/che/tekton-tutorial]
-----
+-----
 
 NOTE: The IP used in the Che workspace url will be your minikube ip(`minikube ip`)
 
@@ -174,7 +157,7 @@ Open your environment using the **Workspace IDE URL** listed in the output to st
 NOTE: It will take few minutes for the workspace to be up and running. 
 
 [#dev-env-workspace-familiarize]
-=== Familiarize your workspace
+*Familiarize your workspace*
 
 Opening your Che workspace using the `Workspace IDE URL` will show browser window like:
 
@@ -183,11 +166,11 @@ image::che_env_overview.png[]
 You can open the `New Terminal` to start running the tutorial exercises.
 
 [NOTE]
-=====
+======
 The editor has been pre-configured with all common and popular vscode plugins:
 
 * Java
 * Xml
 * YAML
 * Kubernetes 
-=====
+======

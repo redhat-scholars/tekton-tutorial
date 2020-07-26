@@ -13,7 +13,6 @@
 ** xref:pipeline-resources.adoc#tkn-see-what-you-have-deployed[See what you have deployed]
 
 * xref:tasks.adoc[Tasks]
-** xref:tasks.adoc#tekton-task-prerequisite[Prerequisites]
 ** xref:tasks.adoc#tekton-task-clone[Clone Source Code]
 ** xref:tasks.adoc#tekton-task-list-ws[List workspace]
 ** xref:tasks.adoc#tekton-task-build-sources[Build Cloud Native Application]
@@ -27,10 +26,12 @@
 **  xref:tasks.adoc#tekton-task-cleanup[Clean]
 
 * xref:pipelines.adoc[Pipelines]
-** xref:pipelines.adoc#tekton-task-prerequisite[Prerequisites]
 ** xref:pipelines.adoc#tekton-add-tasks[Add Tasks from Catalog]
 ** xref:pipelines.adoc#tekton-pipeline-create[Create Pipeline]
 ** xref:pipelines.adoc#tekton-pipeline-deploy[Deploy Pipeline]
 ** xref:pipelines.adoc#tekton-pipeline-run[Run Pipeline]
 ** xref:pipelines.adoc#tekton-test-pipeline[Test Pipeline]
 ** xref:pipelines.adoc#tekton-pipeline-cleanup[Clean]
+
+// * xref:pipelines.adoc[Workspaces]
+// * xref:pipelines.adoc[Triggers]

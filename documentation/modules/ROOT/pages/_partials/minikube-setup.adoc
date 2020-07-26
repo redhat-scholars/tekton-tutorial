@@ -5,191 +5,126 @@ Before installing Knative and its components, we need to create a Minikube virtu
 
 Download https://kubernetes.io/docs/setup/minikube[minikube] and add it to your path.
 
-[#setup-minikube-start]
+[.console-input]
 [source,bash,subs="+macros,+attributes"]
 ----
 $TUTORIAL_HOME/bin/start-minikube.sh
 ----
-copyToClipboard::setup-minikube-start[]
 
 .Minikube starting
+[.console-output]
 [source,bash,subs="+macros,+attributes"]
 ----
 ❌  profile "{tutorial-namespace}" not found
 ✅  Created a new profile : {tutorial-namespace}
 ✅  minikube profile was successfully set to {tutorial-namespace}
-😄  [{tutorial-namespace}] minikube v1.6.2 on Darwin 10.15.2
-✨  Selecting 'virtualbox' driver from user configuration (alternates: [hyperkit])
-🔥  Creating virtualbox VM (CPUs=4, Memory=8192MB, Disk=50000MB) ...
-🐳  Preparing Kubernetes v1.14.0 on Docker '19.03.5' ...
-    ▪ apiserver.enable-admission-plugins=LimitRanger,NamespaceExists,NamespaceLifecycle,ResourceQuota,ServiceAccount,DefaultStorageClass,MutatingAdmissionWebhook
-🚜  Pulling images ...
-🚀  Launching Kubernetes ...
-⌛  Waiting for cluster to come online ...
+😄  [{tutorial-namespace}] minikube v1.12.1 on Darwin 10.15.6
+✨  Automatically selected the hyperkit driver
+👍  Starting control plane node {tutorial-namespace} in cluster {tutorial-namespace}
+🔥  Creating hyperkit VM (CPUs=4, Memory=8192MB, Disk=51200MB) ...
+🐳  Preparing Kubernetes v1.18.3 on Docker 19.03.12 ...
+🔎  Verifying Kubernetes components...
+🌟  Enabled addons: default-storageclass, storage-provisioner
 🏄  Done! kubectl is now configured to use "{tutorial-namespace}"
 ----
 
-**Navigate to registry helper folder:**
+Switch to the new minikube profile *{tutorial-namespace}*, so that all your commands gets executed in the right context:
 
-[#minikube-registry-helper-nav]
-[source,bash,subs="attributes+,+macros"]
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
 ----
-cd $TUTORIAL_HOME/apps/minikube-registry-helper
+minikube profile {tutorial-namespace}
 ----
-copyToClipboard::minikube-registry-helper-nav[]
+
+[.console-output]
+[source,bash,subs="+macros,+attributes"]
+----
+✅  minikube profile was successfully set to {tutorial-namespace}
+----
 
 **Deploy Registry Helper**
 
-As part of some exercises in the tutorial, we need to push and pull images to local internal registry. To make push and pull smoother we will have a helper deployed so that we can use some common names like `dev.local`, `example.com` as registry aliases for internal registry
+To enable pushing and pulling container images from local internal minikube registry, we will deploy the minikube https://github.com/kubernetes/minikube/tree/master/deploy/addons/registry-aliases[registry-aliases] addon:
 
-[#minikube-add-entry-to-host]
-[source,bash,subs="attributes+,+macros"]
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
 ----
-./configure.sh
-----
-copyToClipboard::minikube-add-entry-to-host[]
-
-[IMPORTANT]
-=====
-Wait for the Daemonset to be running before proceeding to next step, the status of the Daemonset can be viewed via `kubectl get pods -n kube-system -w`, you can do kbd:[CTRL+c] to end the watch.
-=====
-
-A successful configure run will show the minikube node `/etc/hosts` file with the following entries:
-
-[source,bash]
-----
-127.0.0.1       localhost
-127.0.1.1 demo
-10.111.151.121  example.com
-10.111.151.121  example.org
-10.111.151.121  test.com
-10.111.151.121  test.org
+minikube addons enable registry && minikube addons enable registry-aliases
 ----
 
-[NOTE]
-======
-The IP for `test.com` and `example.com` will match the **CLUSTER-IP** of the internal registry. To know the Cluster IP run the command:
-
-[#minikube-check-registry-ip]
-[source,bash,subs="attributes+,+macros"]
+[.console-output]
+[source,bash,subs="+macros,+attributes"]
 ----
-kubectl get svc registry -n kube-system
-----
-copyToClipboard::minikube-check-registry-ip[]
-======
-
-[source,bash,subs="attributes+,+macros"]
-----
-NAME       TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)                  AGE
-registry   ClusterIP   10.111.151.121   <none>        80/TCP                  178m
+🔎  Verifying registry addon...
+🌟  The 'registry' addon is enabled
+🌟  The 'registry-aliases' addon is enabled
 ----
 
+The registry-aliases addon should allow you to build local container images with names like:
 
-A successful patch will have the coredns updated ConfigMap `coredns` in `kube-system`
+- example.com/foo/bar
+- example.org/foo/bar
+- test.com/foo/bar
+- test.org/foo/bar
 
-[source,yaml]
-----
-apiVersion: v1
-data:
-  Corefile: |-
-    .:53 {
-        errors
-         rewrite name example.com  registry.kube-system.svc.cluster.local
-    rewrite name example.org  registry.kube-system.svc.cluster.local
-    rewrite name test.com  registry.kube-system.svc.cluster.local
-    rewrite name test.org  registry.kube-system.svc.cluster.local
-
-        health {
-           lameduck 5s
-        }
-        ready
-        kubernetes cluster.local in-addr.arpa ip6.arpa {
-           pods insecure
-           fallthrough in-addr.arpa ip6.arpa
-           ttl 30
-        }
-        prometheus :9153
-        forward . /etc/resolv.conf
-        cache 30
-        loop
-        reload
-        loadbalance
-    }
-kind: ConfigMap
-metadata:
-  name: coredns
-----
+The images build with the example.org, example.com, test.com and test.org will then be pushed and pulled from local internal registry, which was enable using minkube `registry` addon.
 
 [#deploy-tekton]
 *Deploy Tekton Pipelines*
 
 To deploy the Tekton pipelines:
 
-[#tekton-deploy-pipelines]
+[.console-input]
 [source,bash,subs="+macros,attributes+"]
 ----
 kubectl apply --filename \
 https://github.com/tektoncd/pipeline/releases/download/{tekton-version}/release.yaml
 ----
-copyToClipboard::tekton-deploy-pipelines[]
 
 [NOTE]
 ======
 It will take few mins for the Tekton pipeline components to be installed, you an watch the status using the command:
-[#watch-tekton-deploy]
+
+[.console-input]
 [source,bash,subs="+macros,attributes+"]
 ----
-kubectl get pods -n tekton-pipelines -w
+watch kubectl get pods -n tekton-pipelines
 ----
-copyToClipboard::watch-tekton-deploy[]
 
 You can use kbd:[Ctrl+c] to terminate the watch
 ======
 
 A successful deployment of Tekton pipelines will show the following pods:
 
+[.console-output]
 [source,bash]
 -----
-NAME                                         READY   STATUS    RESTARTS   AGE
-tekton-pipelines-controller-9b8cccff-j6hvr   1/1     Running   0          2m33s
-tekton-pipelines-webhook-6fc9d4d9b6-kpkp7    1/1     Running   0          2m33s
+NAME                                           READY   STATUS    AGE
+tekton-pipelines-controller-849ccccd7f-gc6dp   1/1     Running   85s
+tekton-pipelines-webhook-75bc7666c-9crwq       1/1     Running   85s
 -----
-
-[#install-tekton-cli]
-*Install Tekton CLI*
-https://github.com/tektoncd/cli[Tekton CLI] is command line utility used to interact with the Tekton resources.
-
-Download the Tekton cli and add to your path:
-
-* https://github.com/tektoncd/cli/releases/download/v{tekton-cli-version}/tkn_{tekton-cli-version}_Darwin_x86_64.tar.gz[Download for macOS]
-
-* https://github.com/tektoncd/cli/releases/download/v{tekton-cli-version}/tkn_{tekton-cli-version}_Linux_x86_64.tar.gz[Download for Linux]
-
-* https://github.com/tektoncd/cli/releases/download/v{tekton-cli-version}/tkn_{tekton-cli-version}_Windows_x86_64.tar.gz[Download for Windows]
 
 include::partial$tekton-cli.adoc[]
 **Configuring Kubernetes namespace**
 
 All the tutorial exercises will be deployed in namespace called `{tutorial-namespace}`:
 
-[#setup-tekton-tutorial-ns]
+[.console-input]
 [source,bash,subs="+macros,+attributes"]
 ----
 kubectl create namespace {tutorial-namespace} &&\
 kubectl config set-context --current --namespace={tutorial-namespace}
 ----
-copyToClipboard::setup-tekton-tutorial-ns[]
 
 [TIP]
 =====
 The https://github.com/ahmetb/kubens[kubens] utility installed as part of https://github.com/ahmetb/kubectx[kubectx] allows for easy switching between Kubernetes namespaces.
 
-[#setup-tekton-tutorial-kubens]
+[.console-output]
 [source,bash,subs="+macros,+attributes"]
 ----
 kubens {tutorial-namespace}
 ----
-copyToClipboard::setup-tekton-tutorial-kubens[]
 
 =====
 

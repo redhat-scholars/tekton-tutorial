@@ -1,5 +1,3 @@
-= {title}
-
 == Pipeline Resources
 include::_attributes.adoc[]
 :k8s-resource: build-resources.yaml
@@ -9,14 +7,17 @@ At the end of this chapter you will be able to :
 * Understand what is a https://github.com/tektoncd/pipeline/blob/master/docs/resources.md[pipeline resource] ?
 * Create a pipeline resource
 
+[WARNING]
+====
+PipelineResources will deprecated in future Tekton releases in favour of Workspaces. Expect this chapter to be removed in future release of the tutorial.
+====
+
 [#tekton-res-prerequisite]
 == Prerequisite
 
 include::ROOT:partial$prereq-cli.adoc[]
 
 include::partial$tekton-api.adoc[]
-
-include::partial$tekton-cli.adoc[]
 
 [#tekton-res-create]
 == Create a pipeline resource
@@ -46,61 +47,51 @@ More details on other types of pipeline resource types is available https://gith
 
 The pipeline resource could be created using the command:
 
-ifndef::workshop[]
-[tabs]
-====
-Kubernetes::
-+
---
-[#tekton-build-res-deploy-to-k8s]
+[.console-input]
 [source,bash,subs="+macros,attributes+"]
 ----
 kubectl apply -n {tutorial-namespace} -f link:{github-repo}/{pipelines-repo}/build-resources.yaml[build-resources.yaml]
 ----
-copyToClipboard::tekton-build-res-deploy-to-k8s[]
---
-OpenShift::
-+
---
-endif::[]
-[#tekton-build-res-deploy-to-oc]
+
+[.console-output]
 [source,bash,subs="+macros,attributes+"]
 ----
-oc apply -n {tutorial-namespace} -f link:{github-repo}/{pipelines-repo}/build-resources.yaml[build-resources.yaml]
+pipelineresource.tekton.dev/git-source created
+pipelineresource.tekton.dev/tekton-tutorial-greeter-image created
 ----
-copyToClipboard::tekton-build-res-deploy-to-oc[]
-ifndef::workshop[]
---
-====
-endif::[]
 
 [#tkn-see-what-you-have-deployed]
 == See what you have deployed
 
 We will use the Tekton cli to inspect the created resources
 
-[#tekton-inspect-pipeline-res]
+[.console-input]
 [source,bash,subs="+macros,attributes+"]
 ----
 tkn res ls
 ----
-copyToClipboard::tekton-inspect-pipeline-res[]
 
 The above command should list two resources as shown below:
 
+[.console-output]
 [source,bash]
 ----
-NAME                             TYPE    DETAILS
-git-source                       git     url: https://github.com/redhat-developer-demos/tekton-tutorial
-tekton-tutorial-greeter-image   image   url: registry.kube-system:80/rhdevelopers/tekton-tutorial-greeter
+NAME                            TYPE    DETAILS
+git-source                      git     url: https://github.com/redhat-developer-demos/tekton-tutorial
+tekton-tutorial-greeter-image   image   url: example.com/rhdevelopers/tekton-tutorial-greeter
 ----
 
-[TIP]
-====
-Use the command **help** via `tkn res --help`
+All Tekton API resources/objects has the *describe* option that gives more details of respective Tekton API object.
 
-e.g. Running a command `tkn res describe git-source` will return an output like:
+e.g. To describe the PipelineResource that we just created, run:
 
+[.console-input]
+[source,bash,subs="+macros,attributes+"]
+----
+tkn res describe git-source
+----
+
+[.console-output]
 [source,bash]
 ----
 Name:                    git-source
@@ -115,4 +106,9 @@ revision   master
 Secret Params
 No secret params
 ----
+
+[TIP]
 ====
+Use the command **help** via `tkn res --help`
+====
+

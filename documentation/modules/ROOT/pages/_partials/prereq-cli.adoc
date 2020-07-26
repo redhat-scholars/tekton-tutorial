@@ -8,59 +8,66 @@ Kubernetes::
 --
 * Set your local docker to use minikube docker daemon
 
-[#minikube-set-env]
+[.console-input]
 [source,bash,subs="+macros,+attributes"]
 ----
-eval $(minikube docker-env)
+eval $(minikube docker-env) &&\
+minikube profile {tutorial-namespace}
 ----
-copyToClipboard::minikube-set-env[]
 
-* Kubernetes should be v1.15+
+* Kubernetes should be v1.18+
 
-[#kubectl-version]
+[.console-input]
 [source,bash,subs="+macros,+attributes"]
 ----
-kubectl version
+kubectl version --short
 ----
-copyToClipboard::kubectl-version[]
+
+The output should be like
+
+[.console-output]
+[source,bash]
+----
+Client Version: v1.18.6
+Server Version: v1.18.3
+----
+
 --
 OpenShift::
 +
 --
 * OpenShift CLI should be v4.3+
 
-[#oc-version]
+[.console-input]
 [source,bash,subs="+macros,+attributes"]
 ----
 oc version 
 ----
-copyToClipboard::oc-version[]
 
 The output should be like
 
+[.console-output]
 [source,bash]
 ----
-oc version
-Client Version: openshift-clients-4.3.0-201910250623-88-g6a937dfe
-Kubernetes Version: v1.16.2
+Client Version: 4.5.3
+Server Version: 4.5.3
+Kubernetes Version: v1.18.3
 ----
 
 * Make sure to be on `tektontutorial` OpenShift project
 
-[#right-openshift-project]
+[.console-input]
 [source,bash,subs="+macros,+attributes"]
 ----
 oc project -q 
 ----
-copyToClipboard::right-openshift-project[]
 
 If you are not on `{tutorial-namespace}` project, then run following command to change to `{tutorial-namespace}` project:
 
-[#change-to-openshift-project]
+[.console-input]
 [source,bash,subs="+macros,+attributes"]
 ----
 oc project {tutorial-namespace}
 ----
-copyToClipboard::change-to-openshift-project[]
 --
 ====

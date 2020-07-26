@@ -1,17 +1,16 @@
-apiVersion: tekton.dev/v1alpha1
+apiVersion: tekton.dev/v1beta1
 kind: Task
 metadata:
   name: build-and-list-target
 spec:
-  inputs:
-    resources:
+  resources:
+    inputs:
       - name: source
         type: git
-    params:
-      - name: contextDir
-        description: "The context directory within the repository for sources"
-        default: apps/greeter/java/quarkus
-  outputs: {}
+  params:
+    - name: contextDir
+      description: 'The context directory within the repository for sources'
+      default: apps/greeter/java/quarkus
   stepTemplate:
     resources:
       limits:
@@ -25,7 +24,7 @@ spec:
   steps:
     - name: maven-build
       image: quay.io/rhdevelopers/tutorial-tools:0.0.3
-      workingDir: "/workspace/source/$(inputs.params.contextDir)"
+      workingDir: '/workspace/source/$(inputs.params.contextDir)'
       args:
         - mvn
         - -DskipTests
@@ -33,4 +32,5 @@ spec:
         - package
     - name: ls-target
       image: busybox
-      command: ['ls','-ltr', "/workspace/source/$(inputs.params.contextDir)/target"]
+      command:
+        ['ls', '-ltr', '/workspace/source/$(inputs.params.contextDir)/target']

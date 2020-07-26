@@ -1,4 +1,4 @@
-= {title}
+
 
 == Setup
 
@@ -55,15 +55,11 @@ The following CLI tools are required for running the exercises in this tutorial.
 
 [#download-tutorial-sources]
 == Download Tutorial Sources
+
 Before we start setting up the environment, let's clone the tutorial sources and set the `TUTORIAL_HOME` environment variable to point to the root directory of the tutorial:
 
-[#cloneRepo]
-[source,bash,subs="attributes+,+macros"]
-----
-git clone https://github.com/redhat-developer-demos/tekton-tutorial &&\
-export TUTORIAL_HOME="$(pwd)/tekton-tutorial"
-----
-copyToClipboard::cloneRepo[]
+:tutorial-url: https://github.com/redhat-developer-demos/tekton-tutorial
+:folder: tekton-tutorial
 
 include::_attributes.adoc[]
 

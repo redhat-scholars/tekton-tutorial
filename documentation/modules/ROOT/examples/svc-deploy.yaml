@@ -1,4 +1,4 @@
-apiVersion: tekton.dev/v1alpha1
+apiVersion: tekton.dev/v1beta1
 kind: Pipeline
 metadata:
   name: svc-deploy
@@ -7,9 +7,9 @@ spec:
     - name: contextDir
       description: the context directory from where to build the application
   resources:
-    - name: source
+    - name: appSource
       type: git
-    - name: builtImage
+    - name: appImage
       type: image
   tasks:
     - name: build-java-app
@@ -21,10 +21,10 @@ spec:
       resources:
         inputs:
           - name: source
-            resource: source
+            resource: appSource
         outputs:
           - name: builtImage
-            resource: builtImage
+            resource: appImage
     - name: deploy-kubernetes-service
       taskRef:
         name: openshift-client
@@ -32,11 +32,13 @@ spec:
         - build-java-app
       resources:
         inputs:
-          - name: image
-            resource: appImage
+          - name: source
+            resource: appSource
       params:
         - name: ARGS
           value:
-            - "apply"
-            - "-f"
-            - "/workspace/source/$(params.contextDir)/k8s/deployment.yaml"
+            - 'apply'
+            - '-f'
+            - '/workspace/source/$(params.contextDir)/k8s/deployment.yaml'
+            - '-f'
+            - '/workspace/source/$(params.contextDir)/k8s/service.yaml'

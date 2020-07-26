@@ -1,5 +1,3 @@
-= {title}
-
 == Pipelines
 include::_attributes.adoc[]
 
@@ -10,26 +8,19 @@ At the end of this chapter you will be able to :
 * Create a Pipeline
 * Execute a Pipeline to build and deploy a Knative service 
 
-[#tekton-task-prerequisite]
-== Prerequisite
-
-include::ROOT:partial$prereq-cli.adoc[]
-
-include::partial$tekton-api.adoc[]
-
-include::partial$tekton-cli.adoc[]
+include::partial$tekton-nav-to-folder.adoc[]
 
 Ensure the pipeline Resources and Tasks are available:
 
-[#tekton-prerreq-resources]
+[.console-input]
 [source,bash,subs="+macros,attributes+"]
 ----
 tkn res ls 
 ----
-copyToClipboard::tekton-prerreq-resources[]
 
 The command above should show an output like:
 
+[.console-output]
 [source,bash]
 ----
 NAME                            TYPE    DETAILS
@@ -38,13 +29,15 @@ tekton-tutorial-greeter-image   image   url: example.com/rhdevelopers/tekton-tut
 ----
 
 
-[#tekton-prerreq-task-resources]
+[.console-input]
 [source,bash,subs="+macros,attributes+"]
 ----
 tkn task ls 
 ----
-copyToClipboard::tekton-prerreq-task-resources[]
 
+The command should show a output like:
+
+[.console-output]
 [source,bash]
 ----
 NAME            AGE
@@ -62,48 +55,26 @@ The Tekton Pipelines catalog allows you to reuse the catalog from community repo
 * https://github.com/tektoncd/catalog[Tekton Pipelines Catalog]
 * https://github.com/openshift/pipelines-catalog[OpenShift Pipelines Catalog]
 
-For the exercise of this chapter we need `kubectl` or OpenShift client task that will be used to deploy the built the application. 
+Since there is no `kubectl` task available in https://github.com/tektoncd/catalog[Tekton Pipelines Catalog] repository, we can use the OpenShift client task to deploy the app:
 
-Since there is no `kubectl` task avaibale in https://github.com/tektoncd/catalog[Tekton Pipelines Catalog] repository, we can use the OpenShift client task to deploy the app:
-
-ifndef::workshop[]
-[tabs]
-====
-Kubernetes::
-+
---
-[#tekton-pipeline-add-tasks-k8s]
+[.console-input]
 [source,bash,subs="+macros,attributes+"]
 ----
 kubectl create -n {tutorial-namespace} \
-  -f https://raw.githubusercontent.com/tektoncd/catalog/master/openshift-client/openshift-client-task.yaml
+  -f https://raw.githubusercontent.com/tektoncd/catalog/v1beta1/openshift-client/openshift-client-task.yaml
 ----
-copyToClipboard::tekton-pipeline-add-tasks-k8s[]
---
-OpenShift::
-+
---
-endif::[]
-[#tekton-pipeline-add-tasks-oc]
-[source,bash,subs="+macros,attributes+"]
-----
-oc create -n {tutorial-namespace} \
-  -f  https://raw.githubusercontent.com/tektoncd/catalog/master/openshift-client/openshift-client-task.yaml
-----
-copyToClipboard::tekton-pipeline-add-tasks-oc[]
---
-====
 
 Check the created tasks using the command:
-[#tekton-task-ls]
+
+[.console-input]
 [source,bash]
 ----
 tkn task ls
 ----
-copyToClipboard::tekton-task-ls[] 
 
 The Task list should now list the following two Tasks:
 
+[.console-output]
 [source,bash,subs="+macros,attributes+"]
 ----
 NAME               AGE
@@ -118,8 +89,6 @@ source-lister      10 minutes ago
 Using a Pipeline we can run multiple Task together in a user defined sequence or order.
 
 Let us use the `build-app` task that we created in xref:03-tasks.adoc.adoc#tekton-task-create[previous chapter] and `openshift-client` task that we deployed in previous step to make Pipeline that will build the application from sources and deploy the built linux container image.
-
-include::partial$tekton-nav-to-folder.adoc[]
 
 The following snippet shows what a Tekton Pipeline YAML looks like:
 
@@ -161,45 +130,23 @@ IMPORTANT: Only pipeline resources of same type can be bound. e.g. resource of t
 
 The Kubernetes service deployment Pipeline could be created using the command:
 
-ifndef::workshop[]
-[tabs]
-====
-Kubernetes::
-+
---
-[#tekton-pipeline-deploy-to-k8s]
+[.console-input]
 [source,bash,subs="+macros,attributes+"]
 ----
 kubectl apply -n {tutorial-namespace} -f link:{github-repo}/{pipelines-repo}/svc-deploy.yaml[svc-deploy.yaml]
 ----
-copyToClipboard::tekton-pipeline-deploy-to-k8s[]
---
-OpenShift::
-+
---
-endif::[]
-[#tekton-pipeline-deploy-to-oc]
-[source,bash,subs="+macros,attributes+"]
-----
-oc apply -n {tutorial-namespace} -f link:{github-repo}/{pipelines-repo}/svc-deploy.yaml[svc-deploy.yaml]
-----
-copyToClipboard::tekton-pipeline-deploy-to-oc[]
-ifndef::workshop[]
---
-====
-endif::[]
 
 We will use the Tekton cli to inspect the created resources
 
-[#tekton-inspect-pipeline]
+[.console-input]
 [source,bash,subs="+macros,attributes+"]
 ----
 tkn pipeline ls
 ----
-copyToClipboard::tekton-inspect-pipeline[]
 
 The above command should list one Pipeline as shown below:
 
+[.console-output]
 [source,bash]
 ----
 NAME            AGE             LAST RUN   STARTED   DURATION   STATUS
@@ -216,28 +163,18 @@ Use the command **help** via `tkn pipeline --help` to see more options
 
 A Kubernetes Service Account is required to deploy applications in to a Kubernetes namespace. The following resource defines a service account called `pipeline` in namespace `{tutorial-namespace}`, which will have needed permissions in the `{tutorial-namespace}` namespace to perform Tekton tasks.
 
-[tabs]
-====
-kubectl::
-+
---
-[#create-pipeline-sa]
+[.console-input]
 [source,bash,subs="+macros,+attributes"]
 ----
 kubectl apply -n {tutorial-namespace} -f pipeline-sa-role.yaml
 ----
-copyToClipboard::create-pipeline-sa[]
---
-oc::
-+
---
-OpenShift Pipelines creates and uses the `pipeline` SA by default.
---
-====
+
+NOTE: OpenShift Pipelines creates and uses the `pipeline` SA by default.
+
 
 Run the following command to start the pipeline:
 
-[#tekton-trigger-pipelinerun]
+[.console-input]
 [source,bash,subs="+macros,attributes+"]
 ----
 tkn pipeline start svc-deploy \#<.>
@@ -247,14 +184,13 @@ tkn pipeline start svc-deploy \#<.>
  --serviceaccount='pipeline'\#<.>
  --showlog
 ----
-copyToClipboard::tekton-trigger-pipelinerun[]
 
 <.> The resources of the Pipeline could be bound via `--resource` option, here we bind the Pipeline `appSource` to pipeline resource `git-source`
 <.> Bind the Pipeline `appImage` to pipeline resource `tekton-tutorial-greeter-image`
 <.> Set the context directory to build the application sources
 <.> The service account to use with Pipeline run
 
-NOTE: It will take few seconds for the PipelineRun to show status as `Running` as it needs to download the container images.
+It will take few seconds for the PipelineRun to show status as `Running` as it needs to download the container images.
 
 [TIP]
 ====
@@ -264,58 +200,58 @@ NOTE: It will take few seconds for the PipelineRun to show status as `Running` a
 
 To check the status of the PipelineRun use the `logs` command of pipelinerun like:
 
-[#tekton-pipelinerun-logs]
+[.console-input]
 [source,bash,subs="+macros,attributes+"]
 ----
-#list running using the command tkn pr ls
 tkn pr ls
-# use one task run for which you need the log from list above
-tkn pr logs -f -a <pipeline-run-name> #<1>
 ----
-copyToClipboard::tekton-pipelinerun-logs[]
-<1> The `-f` or `-a` allows to tail the logs from all the containers of the pipeline tasks. For more options run `tkn pr --help`
+
+Use one task run for which you need the log from list above:
+
+[.console-input]
+[source,bash,subs="+macros,attributes+"]
+----
+tkn pr logs -f -a <pipeline-run-name> #<.>
+----
+<.> The `-f` or `-a` allows to tail the logs from all the containers of the pipeline tasks. For more options run `tkn pr --help`
 
 If you see the PipelineRun status as `Failed` or `Error` use the following command to check the reason for error:
 
-[#tekton-desc-pipelinerun]
+[.console-input]
 [source,bash,subs="+macros,attributes+"]
 ----
 tkn pipelinerun describe <pipelinerun-name>
 ----
-copyToClipboard::tekton-desc-pipelinerun[]
 
 [#tekton-test-pipeline]
 == Invoke Service
-ifndef::workshop[]
-[tabs]
-====
-Kubernetes::
-+
---
-[#tekton-invoke-app-k8s]
+
+Get the service URL,
+
+[.console-input]
 [source,bash,subs="+macros,attributes+"]
 ----
-SVC_URL=$(minikube -p {tutorial-namespace} -n {tutorial-namespace} service helloworld --url) && \
-http --body $SVC_URL
+SVC_URL=$(minikube -p {tutorial-namespace} -n {tutorial-namespace} service greeter --url)
 ----
-copyToClipboard::tekton-invoke-app-k8s[]
---
-OpenShift::
-+
---
-endif::[]
-[#tekton-invoke-app-oc]
+
+[NOTE]
+====
+In OpenShift you can use the routes like:
+[.console-input]
 [source,bash,subs="+macros,attributes+"]
 ----
-oc expose svc helloworld
-SVC_URL=$(oc get routes helloworld -o yaml | yq r - 'spec.url.host' )
+oc expose svc greeter
+SVC_URL=$(oc get routes greeter -o yaml | yq r - 'spec.url.host' )
+----
+====
+
+Run the service,
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
 http --body $SVC_URL
 ----
-copyToClipboard::tekton-invoke-app-oc[]
-ifndef::workshop[]
---
-====
-endif::[]
 
 The `http` command should return a response containing a line similar to **hello**
 
@@ -324,42 +260,8 @@ The `http` command should return a response containing a line similar to **hello
 
 Delete the pipeline service account and its related permissions:
 
-ifndef::workshop[]
-[tabs]
-====
-Kubernetes::
-+
---
-[#tekton-pipeline-cleanup-sa-k8s]
+[.console-input]
 [source,bash,subs="+macros,attributes+"]
 ----
-kubectl delete -n {tutorial-namespace} tasks --all ||\
-kubectl delete -n {tutorial-namespace} tr --all ||\
-kubectl delete -n {tutorial-namespace} pipelines --all ||\
-kubectl delete -n {tutorial-namespace} pr --all ||\
-kubectl delete -n {tutorial-namespace} pipelineresourcs --all ||\
-kubectl delete -n {tutorial-namespace} -f TUTORIAL_HOME/apps/greeter/java/springboot/k8s ||\
-kubectl delete -n {tutorial-namespace} -f TUTORIAL_HOME/pipelines/pipeline-sa-role.yaml \
-|| true
+$TUTORIAL_HOME/bin/cleanup.sh
 ----
-copyToClipboard::tekton-pipeline-cleanup-sa-k8s[]
---
-OpenShift::
-+
---
-endif::[]
-[#tekton-pipeline-cleanup-sa-oc]
-[source,bash,subs="+macros,attributes+"]
-----
-oc delete -n {tutorial-namespace} tasks --all ||\
-oc delete -n {tutorial-namespace} taskruns--all ||\
-oc delete -n {tutorial-namespace} pipelines --all ||\
-oc delete -n {tutorial-namespace} pipelineruns --all ||\
-oc delete -n {tutorial-namespace} pipelineresources --all ||\
-oc delete -n {tutorial-namespace} -f TUTORIAL_HOME/apps/greeter/java/springboot/k8s ||\
-oc delete -n {tutorial-namespace} -f TUTORIAL_HOME/pipelines/pipeline-sa-role.yaml || true
-----
-copyToClipboard::tekton-pipeline-cleanup-sa-oc[]
-ifndef::workshop[]
---
-====

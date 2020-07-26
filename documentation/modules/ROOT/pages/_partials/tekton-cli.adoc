@@ -1,15 +1,33 @@
-Verify the Tekton cli
+[#install-tekton-cli]
+*Install Tekton CLI*
 
-[#tekton-install-cli]
+https://github.com/tektoncd/cli[Tekton CLI] is command line utility used to interact with the Tekton resources.
+
+Download the Tekton cli and add to your path:
+
+* https://github.com/tektoncd/cli/releases/download/v{tekton-cli-version}/tkn_{tekton-cli-version}_Darwin_x86_64.tar.gz[Download for macOS]
+
+* https://github.com/tektoncd/cli/releases/download/v{tekton-cli-version}/tkn_{tekton-cli-version}_Linux_x86_64.tar.gz[Download for Linux]
+
+* https://github.com/tektoncd/cli/releases/download/v{tekton-cli-version}/tkn_{tekton-cli-version}_Windows_x86_64.zip[Download for Windows]
+
+
+*Verify the Tekton cli*
+
+[.console-input]
 [source,bash,subs="+macros,attributes+"]
 ----
 tkn version
 ----
-copyToClipboard::tekton-install-cli[]
 
 The command should show a result like:
 
+[.console-output]
 [source,bash,subs="+macros,attributes+"]
 ----
 Client version: {tekton-cli-version}
+Pipeline version: {tekton-version}
+Triggers version: unknown
 ----
+
+NOTE: Since Tekton Triggers is not installed, the version is shown as unknown

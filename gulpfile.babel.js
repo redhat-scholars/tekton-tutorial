@@ -3,7 +3,7 @@
 import { series, watch } from "gulp";
 import { remove } from "fs-extra";
 import { readFileSync } from "fs";
-import {load as yamlLoad} from "yaml-js";
+import { load as yamlLoad } from "yaml-js";
 import generator from "@antora/site-generator-default";
 import browserSync from "browser-sync";
 
@@ -19,7 +19,7 @@ function watchGlobs() {
     `${source.url}/**/**.yml`,
     `${source.url}/**/**.adoc`,
     `${source.url}/**/**.hbs`
-  ]); 
+  ]);
   dirs.push(["dev-site.yml"]);
   dirs = [].concat(...dirs);
   //console.log(dirs);
@@ -42,8 +42,8 @@ function build(done) {
     });
 }
 
-function workshopSite(done){
-  generator(["--pull", "--stacktrace","--playbook","workshop-site.yaml"], process.env)
+function workshopSite(done) {
+  generator(["--pull", "--stacktrace", "--playbook", "workshop-site.yaml"], process.env)
     .then(() => {
       done();
     })

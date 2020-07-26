@@ -15,22 +15,15 @@ content:
 asciidoc:
   attributes:
     tutorial-namespace: tektontutorial
-    title: Tekton Tutorial(Staging)
-    workshop-domain: guru.devx.red
-    kubernetes-version: v1.15.0
+    kubernetes-version: v1.18.2
     release-version: master
-    openshift-console-url: https://console-openshift-console.apps.example.com
-    etherpad-url: http://example.com
   extensions:
-    - ./lib/copy-to-clipboard.js
+    - ./lib/remote-include-processor.js
     - ./lib/tab-block.js
 ui:
   bundle:
-    url: https://github.com/redhat-developer-demos/rhd-tutorial-ui/releases/download/v0.0.4/ui-bundle.zip
-  supplemental_files: 
-    - path: ./supplemental-ui
-    - path: .nojekyll
-    - path: ui.yml
-      contents: "static_files: [ .nojekyll ]"
+    url: https://github.com/redhat-developer-demos/rhd-tutorial-ui/releases/download/v0.1.9/ui-bundle.zip
+    snapshot: true
+  supplemental_files: ./supplemental-ui
 output:
   dir: ./gh-pages

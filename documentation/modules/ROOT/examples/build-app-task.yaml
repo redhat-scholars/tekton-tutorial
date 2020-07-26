@@ -1,37 +1,36 @@
-apiVersion: tekton.dev/v1alpha1
+apiVersion: tekton.dev/v1beta1
 kind: Task
 metadata:
   name: build-app
 spec:
-  inputs:
-    resources:
+  params:
+    - name: contextDir
+      description: the context dir within source
+      default: .
+    - name: mavenMirrorUrl
+      description: the maven mirrror url
+      default: https://repo.maven.apache.org/maven2/
+    - name: destinationImage
+      description: the fully qualified image name
+      default: '$(outputs.resources.builtImage.url)'
+    - name: dockerFile
+      description: the docker file to used for building the application
+      default: Dockerfile
+    - name: tlsVerify
+      description: tls verify
+      type: string
+      default: 'false'
+  resources:
+    inputs:
       - name: source
         type: git
-    params:
-      - name: contextDir
-        description: the context dir within source
-        default: .
-      - name: mavenMirrorUrl
-        description: the maven mirrror url
-        default: https://repo.maven.apache.org/maven2/
-      - name: destinationImage
-        description: the fully qualified image name
-        default: "$(outputs.resources.builtImage.url)"
-      - name: dockerFile
-        description: the docker file to used for building the application
-        default: Dockerfile
-      - name: tlsVerify
-        description: tls verify
-        type: string
-        default: "false"
-  outputs:
-    resources:
+    outputs:
       - name: builtImage
         type: image
   steps:
     - name: build-sources
       image: docker.io/maven:3.6.3-jdk-8-slim
-      workingDir: "/workspace/source/$(inputs.params.contextDir)"
+      workingDir: '/workspace/source/$(inputs.params.contextDir)'
       command:
         - mvn
       args:
@@ -43,17 +42,17 @@ spec:
           value: /home/tekton
     - name: build-image
       image: quay.io/buildah/stable
-      workingDir: "/workspace/source/$(inputs.params.contextDir)"
+      workingDir: '/workspace/source/$(inputs.params.contextDir)'
       command:
-        - "buildah"
+        - 'buildah'
       args:
-        - "bud"
-        - "--layers"
-        - "-f"
-        - "$(inputs.params.dockerFile)"
-        - "-t"
-        - "$(inputs.params.destinationImage)"
-        - "."
+        - 'bud'
+        - '--layers'
+        - '-f'
+        - '$(inputs.params.dockerFile)'
+        - '-t'
+        - '$(inputs.params.destinationImage)'
+        - '.'
       securityContext:
         privileged: true
         runAsUser: 0
@@ -62,14 +61,14 @@ spec:
           mountPath: /var/lib/containers
     - name: push-image
       image: quay.io/buildah/stable
-      workingDir: "/workspace/source/$(inputs.params.contextDir)"
+      workingDir: '/workspace/source/$(inputs.params.contextDir)'
       command:
-        - "buildah"
+        - 'buildah'
       args:
-        - "push"
-        - "--tls-verify=$(inputs.params.tlsVerify)"
+        - 'push'
+        - '--tls-verify=$(inputs.params.tlsVerify)'
         - $(inputs.params.destinationImage)
-        - "docker://$(inputs.params.destinationImage)"
+        - 'docker://$(inputs.params.destinationImage)'
       securityContext:
         runAsUser: 0
         privileged: true
