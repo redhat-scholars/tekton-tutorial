@@ -18,6 +18,7 @@ asciidoc:
     release-version: master
     openshift-console-url: https://console-openshift-console.apps.example.com
     etherpad-url: http://example.com
+    page-pagination: true
   extensions:
     - ./lib/remote-include-processor.js
     - ./lib/tab-block.js

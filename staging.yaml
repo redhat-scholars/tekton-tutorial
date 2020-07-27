@@ -17,6 +17,7 @@ asciidoc:
     tutorial-namespace: tektontutorial
     kubernetes-version: v1.18.2
     release-version: master
+    page-pagination: true
   extensions:
     - ./lib/remote-include-processor.js
     - ./lib/tab-block.js
