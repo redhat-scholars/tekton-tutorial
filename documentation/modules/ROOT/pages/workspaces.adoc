@@ -1,0 +1,654 @@
+= Workspaces
+include::_attributes.adoc[]
+
+WARNING: This chapter build is in progress, expect to change and not working as expected
+
+At the end of this chapter you will be able to :
+
+* Understand what is a https://github.com/tektoncd/pipeline/blob/master/docs/workspaces.md[Workspaces] ?
+* Mount ConfigMap based configurations as Workspace
+* Mount a PersistenceVolume as Workspace
+* Share and Cache build artifacts
+* Use workspace in TaskRun
+* Use workspace in PipelineRun
+
+include::partial$tekton-nav-to-folder.adoc[tags="folder-all,workspaces"]
+
+[#ws-overview]
+== Overview
+
+As part of `workspaces` exercies, we will be building the Java application https://maven.apache.org[Apache Maven]. Using Java Application usecase allows us to explore all possible applications of workspaces:
+
+* Mount ConfigMap based configurations as Workspace
+* Mount a PersistenceVolume as Workspace
+* Share and Cache build artifacts
+
+[#ws-tasks-deploy]
+== Deploy Tasks from Catalog
+
+All exercises of this chapter will be done a namesapace `workspace-demo`, lets create and switch to the `workspace-demo` namespace.
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+kubectl create ns workspace-demo && \
+kubectl config set-context --current --namespace workspace-demo
+----
+
+As part of this exercise we will need to install the following external tasks to be installed in the namespace:
+
+- https://github.com/tektoncd/catalog/tree/master/task/git-clone/0.1[git-clone]
+- https://github.com/tektoncd/catalog/tree/master/task/maven/0.1[maven]
+- https://github.com/tektoncd/catalog/tree/master/task/buildah/0.1[buildah]
+- https://github.com/tektoncd/catalog/tree/master/task/kn/0.1[knative client(kn)]
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+kubectl apply -n workspace-demo \
+  -f https://raw.githubusercontent.com/tektoncd/catalog/master/task/git-clone/0.1/git-clone.yaml \
+  -f https://raw.githubusercontent.com/tektoncd/catalog/master/task/maven/0.1/maven.yaml \
+  -f https://raw.githubusercontent.com/tektoncd/catalog/master/task/buildah/0.1/buildah.yaml \
+  -f https://raw.githubusercontent.com/tektoncd/catalog/master/task/kn/0.1/kn.yaml \
+  -f list-directory-task.yaml
+----
+
+Check if all the tasks are available:
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+tkn task ls
+----
+
+The command should show an output like:
+
+[.console-output]
+[source,bash,subs="+macros,+attributes"]
+----
+NAME               DESCRIPTION              AGE
+buildah            Buildah task builds...   11 hours ago
+git-clone          These Tasks are Git...   11 hours ago
+kn                 This Task performs ...   9 minutes ago
+list-directory     Simple directory li...   11 hours ago
+maven              This Task can be us...   11 hours ago
+----
+
+[#ws-prepare]
+== Prepare for using workspaces
+
+The Java Application build pipeline will,
+
+- Git clone using `git-clone` task, the https://github.com/redhat-developer-demos/tekton-helloworld repo and build the apps/greeter/java/springboot application
+- Will use maven task, maven task require two workspaces one for source and other for maven-settings
+- Build the container image using the `buildah` task and push to the internal container registry
+- Finally deploy the application onto Kubernetes using `openshift-client` task
+
+[#ws-deploy-nexus]
+=== Deploy Nexus
+
+To show maven artifact caching and using customized maven `settings.xml` we will deploy Sonatype Nexus to the cluster:
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+kubectl apply -n workspace-demo -f $TUTORIAL_HOME/install/utils/nexus.yaml
+----
+
+Wait for the nexus3 pod to come up before proceeding further with exercises:
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+watch kubectl -n workspace-demo get pods,svc
+----
+
+A sucessfully running nexus3 pod should show the following services and pods:
+
+[.console-output]
+[source,bash]
+----
+NAME                         READY   STATUS    RESTARTS   AGE
+pod/nexus-75fff8bbbd-cmlxs   1/1     Running   0          3m25s
+
+NAME                 TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)          AGE
+service/nexus        NodePort    10.100.205.22   <none>        8081:31743/TCP   3m25s
+----
+
+The nexus maven repository could be opened using the url:
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+$(minikube service nexus -n workspace-demo)
+----
+
+[NOTE]
+=====
+* OpenShift users can use routes to expose the service
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+oc expose svc -n workspace-demo nexus
+----
+=====
+
+[#ws-create-maven-settings-cm]
+=== Create maven-settings ConfigMap
+
+For us to mount the maven `settings.xml`, we will create ConfigMap holding the settings.xml shown in the below listing:
+
+.link:{github-repo}/{workspaces-repo}/maven-settings.xml[setttings.xml]
+[source,xml]
+----
+include::ROOT:example$maven-settings.xml[]
+----
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+kubectl create -n workspace-demo cm maven-settings \
+  --from-file=settings.xml=maven-settings.xml
+----
+
+You can check the ConfigMap contents using the command:
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+kubectl get -n workspace-demo cm maven-settings -oyaml \
+  | yq r - data['settings.xml']
+----
+
+The output of the above command should be as same as settings.xml listing above.
+
+Before we create our pipeline ensure that the kubernetes cluster has a default storage class defined:
+
+[#ws-deploy-knative]
+=== Deploy Knative Serving
+
+As we will be dpeloying a https://knative.dev[Knative] serverless application as part of the pipeline we will be running later in this chapter, lets deploy Knative to the cluster:
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+$TUTORIAL_HOME/bin/link:{github-repo}/bin/enable_knative.sh[enable_knative.sh]
+----
+
+Wait for the serving deployment to complete without errors. 
+
+[#ws-check-sc]
+=== Check Default Storage Class
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+kubectl get sc
+----
+
+In minkube cluster it should show an output like:
+
+[.console-output]
+[source,subs="+quotes"]
+----
+NAME                 PROVISIONER                RECLAIMPOLICY   VOLUMEBINDINGMODE   ALLOWVOLUMEEXPANSION   AGE
+standard (#default#)   k8s.io/minikube-hostpath   Delete          Immediate           false                  9h
+----
+
+In OpenShift cluster the default storage class varies based on the underlying cloud platform.
+
+[NOTE]
+====
+If you dont have one please check https://kubernetes.io/docs/concepts/storage/storage-classes/[Kubernetes Docs] on how to have one configured.
+====
+
+[#ws-use-pvc]
+== Using PVC As Workspace
+
+As part of this exercise we will use PersitenceVolume(PV) and PersistenceVolumeClaim(PVC) as Tekton workspace.
+
+[#ws-use-pvc-git-clone]
+=== Git Clone TaskRun
+
+Since we will be using the same git repo for all the exercises, lets clone it. As git clone task requires https://github.com/tektoncd/catalog/blob/master/task/git-clone/0.1/git-clone.yaml#L21-L23[`output` workspace], we will attach a PersistenceVolumeClaim to it. 
+
+Since the cluster as *default* Storage Class, just specifying the PersistenceVolumeClaim will  bind the PVC automatically to underlying storage. Create the `tekton-tutorial-sources` PVC:
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+kubectl apply -n workspace-demo -f link:{github-repo}/{workspaces-repo}/sources-pvc.yaml[sources-pvc.yaml]
+----
+
+Let us run the `git-clone` Task with the `TaskRun` definition as shown below:
+
+.link:{github-repo}/{workspaces-repo}/git-clone-taskrun.yaml[git-clone-taskrun]
+[source,yaml,attributes]
+----
+apiVersion: tekton.dev/v1beta1
+kind: TaskRun
+metadata:
+  genrateName: git-clone- #<.>
+  labels: #<.>
+    tekton.dev/task: git-clone
+spec:
+  taskRef:
+    name: git-clone
+  params: #<.>
+    - name: url
+      value: https://github.com/redhat-developer-demos/tekton-tutorial
+    - name: revision
+      value: master
+  workspaces: #<.>
+    - name: output
+      persistentVolumeClaim:
+        claimName: tekton-tutorial-sources
+
+----
+<.> As its required have unqiue name for each TaskRun we use create, as that will have new names genrated using `generateName` prefix
+<.> Just marking this TaskRun as part of `git-clone` Task
+<.> The GitHub Url and revision to use, for more details check the https://github.com/tektoncd/catalog/blob/master/task/git-clone/0.1/[Task]
+<.> Setting the workspace `output` mapped to PVC `tekton-tutorial-sources`
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+kubectl create -n workspace-demo -f git-clone-taskrun.yaml
+----
+
+Grab the taskrun id to moinitor the logs,
+
+[.console-output]
+[source,bash]
+----
+taskrun.tekton.dev/#git-clone-dpd7t# created
+----
+
+Check for the logs using:
+
+[.console-input]
+[source,bash]
+----
+tkn tr logs -f -a git-clone-dpd7t
+----
+
+It will take few minutes for the TaskRun to start.
+
+[NOTE]
+====
+
+Watch the status of the Task run using:
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+tkn tr ls
+----
+====
+
+You can also check the PVC is bound, as the git-clone-task output workspace is bound to it:
+
+[.console-output]
+[source,bash]
+----
+NAME                      STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   AGE
+tekton-tutorial-sources   Bound    pvc-48aa86ae-ec20-4f0c-a2d0-65d906d41bed   1Gi        RWO            standard       6s
+----
+
+A successful git-clone TaskRun will show the following output:
+
+[.console-output]
+[source,bash]
+----
+[clone] + CHECKOUT_DIR=/workspace/output/
+[clone] + '[[' false '==' true ]]
+[clone] + test -z
+[clone] + test -z
+[clone] + test -z
+[clone] + /ko-app/git-init -url https://github.com/redhat-developer-demos/tekton-helloworld -revision master -refspec  -path /workspace/output/ '-sslVerify=true' '-submodules=true' -depth 1
+[clone] {"level":"info","ts":1595778607.616774,"caller":"git/git.go:139","msg":"Successfully cloned https://github.com/redhat-developer-demos/tekton-helloworld @ 2e3336657cc1bbf22e3db183a517dcb0a62207b9 (grafted, HEAD, origin/master) in path /workspace/output/"}
+[clone] {"level":"info","ts":1595778607.6473103,"caller":"git/git.go:180","msg":"Successfully initialized and updated submodules in path /workspace/output/"}
+[clone] + cd /workspace/output/
+[clone] + git rev-parse+ tr -d '\n'
+[clone]  HEAD
+[clone] + RESULT_SHA=2e3336657cc1bbf22e3db183a517dcb0a62207b9
+[clone] + EXIT_CODE=0
+[clone] + '[' 0 '!=' 0 ]
+[clone] + echo -n 2e3336657cc1bbf22e3db183a517dcb0a62207b9
+----
+
+[#ws-use-pvc-listdir-run]
+=== List Directory TaskRun
+
+As explained in the overview one of the advantages of the `workspaces` is that it can be shared, lets run a simple list-directory Task to verify the same:
+
+.link:{github-repo}/{workspaces-repo}/list-dir-taskrun.yaml[list-dir-taskrun.yaml]
+[source,yaml,attributes]
+----
+apiVersion: tekton.dev/v1beta1
+kind: TaskRun
+metadata:
+  generateName: list-directory-
+  labels:
+    tekton.dev/task: list-directory
+spec:
+  taskRef:
+    name: list-directory
+  workspaces: #<.>
+    - name: directory
+      persistentVolumeClaim:
+        claimName: tekton-tutorial-sources
+----
+<.> Notice that we bind the same PVC to workspace `directory` parameter of the `list-directory`.
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+kubectl create -n workspace-demo -f list-dir-taskrun.yaml
+----
+
+[.console-output]
+[source,bash]
+----
+taskrun.tekton.dev/list-directory-mbkvl created
+----
+
+Grab the TaskRun id from the output of the earlier command to watch the logs:
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+tkn tr logs -f -a list-directory-mbkvl
+----
+
+If all went well the list directory should show the directory listing of https://github.com/redhat-developer-demos/tekton-helloworld.
+
+[.console-output]
+[source,bash]
+----
+[list-directory] total 32
+[list-directory] drwxr-xr-x    4 root     root          4096 Jul 26 15:50 src
+[list-directory] -rw-r--r--    1 root     root          4092 Jul 26 15:50 pom.xml
+[list-directory] -rwxr-xr-x    1 root     root          6607 Jul 26 15:50 mvnw.cmd
+[list-directory] -rwxr-xr-x    1 root     root         10069 Jul 26 15:50 mvnw
+[list-directory] -rw-r--r--    1 root     root          1200 Jul 26 15:50 README.md
+----
+
+[#ws-pvc-points-to-ponder]
+=== Points to Ponder
+
+- What is a workspace
+- How to bind a workspace to a TaskRun using PVC
+- How to share the workaapce across multiple TaskRuns 
+
+[#ws-use-cm]
+== Using ConfigMap as Workspace
+
+As part of this exercise we will use and configure Tekton `workspace` with ConfigMap.
+
+[#ws-use-cm-mvn-run]
+=== Run maven Task
+
+In this exercise, we will use maven-settings ConfigMap that we created earlier as one of workspace parameter https://github.com/tektoncd/catalog/blob/master/task/maven/0.1/maven.yaml#L16[maven-settings] and for the https://github.com/tektoncd/catalog/blob/master/task/maven/0.1/maven.yaml#L15[source] workspace paramter we use the `tekton-tutorial-sources` PVC.
+
+Let run the maven task to build the tekton-helloworld project we cloned earlier.
+
+.link:{github-repo}/{workspaces-repo}/maven-taskrun.yaml[maven-taskrun.yaml]
+[source,yaml,attributes]
+----
+apiVersion: tekton.dev/v1beta1
+kind: TaskRun
+metadata:
+  generateName: maven-build-
+  labels:
+    tekton.dev/task: maven
+spec:
+  taskRef:
+    name: maven
+  params:
+    - name: GOALS #<.>
+      value:
+        - -B
+        - -DskipTests
+        - clean
+        - package
+  workspaces:
+    - name: maven-settings
+      configmap: #<.>
+        name: maven-settings
+    - name: source
+      persistentVolumeClaim: #<.>
+        claimName: tekton-tutorial-sources
+
+----
+<.> Specifying the maven goals to be run as a part of the build
+<.> Configure the maven-settings configmap to be used for `maven-settings` workspace
+<.> Configure the tekton-tutorial-sources PVC to be used for `source` workspace
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+kubectl create -n workspace-demo -f maven-taskrun.yaml 
+----
+
+[.console-output]
+[source,bash]
+----
+taskrun.tekton.dev/maven-build-9cjws created
+----
+
+Grab the id from the output above and use that to watch logs:
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+tkn tr logs -f -a maven-build-9cjws
+----
+
+A successfull run should have output like(output trimmed for brevity):
+
+[.console-output]
+[source,bash]
+----
+...
+[mvn-goals] [INFO] [org.jboss.threads] JBoss Threads version 3.1.1.Final
+[mvn-goals] [INFO] [io.quarkus.deployment.pkg.steps.JarResultBuildStep] Building thin jar: /workspace/source/target/helloworld-1.0.0-SNAPSHOT-runner.jar
+[mvn-goals] [INFO] [io.quarkus.deployment.QuarkusAugmentor] Quarkus augmentation completed in 1343ms
+[mvn-goals] [INFO] ------------------------------------------------------------------------
+[mvn-goals] [INFO] BUILD SUCCESS
+[mvn-goals] [INFO] ------------------------------------------------------------------------
+[mvn-goals] [INFO] Total time:  05:15 min
+[mvn-goals] [INFO] Finished at: 2020-07-26T16:45:44Z
+[mvn-goals] [INFO] ------------------------------------------------------------------------
+...
+----
+
+[NOTE]
+====
+When the TaskRun runs for the first , it will run loner as  it will maven artifacts for the first time and caches the artifacts nexus repository manager. Try running the command again to see it will run a lot quicker.
+====
+
+[#ws-use-cm-list-target-dir]
+=== List build target directory
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+kubectl create -n workspace-demo -f link:{github-repo}/{workspaces-repo}/list-target-dir-taskrun.yaml[list-target-dir-taskrun.yaml]
+----
+
+[.console-output]
+[source,bash]
+----
+taskrun.tekton.dev/list-directory-xbzpq created
+----
+
+Grab the id from the output above and use that to watch logs:
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+tkn tr logs -f -a list-directory-xbzpq
+----
+
+A successful command should show the following output:
+
+The output of the command should be like:
+
+[.console-output]
+[source,bash]
+----
+[list-directory] total 252
+[list-directory] drwxr-xr-x    3 root     root          4096 Jul 26 16:47 maven-status
+[list-directory] drwxr-xr-x    3 root     root          4096 Jul 26 16:47 generated-sources
+[list-directory] drwxr-xr-x    3 root     root          4096 Jul 26 16:47 generated-test-sources
+[list-directory] drwxr-xr-x    4 root     root          4096 Jul 26 16:47 classes
+[list-directory] drwxr-xr-x    3 root     root          4096 Jul 26 16:47 test-classes
+[list-directory] drwxr-xr-x    2 root     root          4096 Jul 26 16:47 maven-archiver
+[list-directory] -rw-r--r--    1 root     root          4899 Jul 26 16:47 helloworld-1.0.0-SNAPSHOT.jar
+[list-directory] drwxr-xr-x    2 root     root          4096 Jul 26 16:47 lib
+[list-directory] -rw-r--r--    1 root     root        218817 Jul 26 16:47 helloworld-1.0.0-SNAPSHOT-runner.jar
+----
+
+[#use-cm-points-to-ponder]
+=== Points to Ponder
+
+- How to mount a ConfigMap as workspace
+- Use the workspace across TaskRuns in this case used the git-clone output in maven build using `tekton-tutorial-sources` PVC as workspace
+
+[#ws-deploy-pipeline]
+== Deploy Pipeline
+
+Let us now apply what we learned with workspace to build and deploy the application pipeline as shown:
+
+.link:{github-repo}/{workspaces-repo}/helloworld-app-deploy.yaml[helloworld-app-deploy.yaml]
+[source,yaml,subs="+macros,attributes+,quotes+"]
+----
+include::ROOT:example$helloworld-app-deploy.yaml[]
+----
+<.> The parameters for the Pipeline
+<.> A workpace named `source`, we will map it to the PVC`tekton-tutorial-sources`  in PipelineRun in upcoming section
+<.> A workapce named `maven-settings`, we will map it to ConfigMap `maven-settings` in the PipelineRun in upcming section
+<.> The `buildah` build image task returns a output, the built Image digest via https://github.com/tektoncd/catalog/blob/master/task/buildah/0.1/buildah.yaml#L53-L55[IMAGE_DIGEST]. We use the that as part of the `--image` parameter to `kn` Task
+
+[#ws-create-pipeline]
+=== Create the Pipeline
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+kubectl apply -n workspace-demo -f helloworld-app-deploy.yaml
+----
+
+[.console-output]
+[source,bash]
+----
+pipeline.tekton.dev/helloworld-app-deploy created
+----
+
+=== Create Service Account 
+
+We need to create the Service Account(SA) that is authorized to Knative Service deployments. To create the SA run:
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+wget -q -O- \
+  https://raw.githubusercontent.com/tektoncd/catalog/master/task/kn/0.1/kn-deployer.yaml \
+  | yq w - -d0 metadata.namespace workspace-demo \
+  | yq w - -d2 subjects.[0].namespace workspace-demo \
+  | kubectl apply -f -
+----
+
+The successful command should show an output like:
+
+[.console-output]
+[source,bash]
+----
+serviceaccount/kn-deployer-account created
+clusterrole.rbac.authorization.k8s.io/kn-deployer created
+clusterrolebinding.rbac.authorization.k8s.io/kn-deployer-binding created
+----
+
+[#ws-run-pipeline]
+=== Run the Pipeline
+
+.link:{github-repo}/{workspaces-repo}/helloworld-app-deploy-run.yaml[helloworld-app-deploy-run.yaml]
+[source,yaml,attributes]
+----
+include::ROOT:example$helloworld-app-deploy-run.yaml[]
+----
+<.> The service account to be used with the PipelineRun
+<.> The Pipeline workspaces mapping
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+kubectl create -n workspace-demo -f helloworld-app-deploy-run.yaml
+----
+
+[.console-output]
+[source,bash]
+----
+pipelinerun.tekton.dev/helloworld-app-7k9cw created
+----
+
+Grab the id from the previous output and use the same to watch the logs
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+tkn pr logs -f -a helloworld-app-7k9cw
+----
+
+A successfull Pipelinerun should have the `helloworld` application up and running as shown:
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+kubectl get ksvc -n workspace-demo
+----
+
+The command should show an output like :
+
+[.console-output]
+[source,bash]
+----
+NAME         URL                                                    LATESTCREATED        LATESTREADY          READY   REASON
+helloworld   http://helloworld.workspace-demo.192.168.64.5.nip.io   helloworld-kffxd-1   helloworld-kffxd-1   True
+----
+
+[#ws-verify-service]
+=== Verify Deployed Service
+
+Let us now verify the deployed Knative Service:
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+KSVC_URL=$(kubectl get routes helloworld -o yaml | yq r - status.url)
+----
+
+Now do a invoke the service like:
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+http --body +$KSVC_URL/hello+
+----
+
+A successfull pipeline deployment should show an output like:
+
+[.console-output]
+[source,bash]
+----
+Hello World!
+----
+
+[#tekton-ws-cleanup]
+== Cleanup
+
+[.console-input]
+[source,bash,subs="+macros,attributes+"]
+----
+kubectl delete ns workspace-demo
+----

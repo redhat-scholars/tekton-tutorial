@@ -11,3 +11,7 @@
 :tekton-triggers-version: v0.4.0
 :tekton-cli-version: 0.11.0
 :pipelines-repo: pipelines
+:tasks-repo: tasks
+:workspaces-repo: workspaces
+:resources-repo: resources
+:triggers-repo: triggers

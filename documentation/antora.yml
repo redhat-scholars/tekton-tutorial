@@ -2,5 +2,10 @@ name: tekton-tutorial
 title: Tekton Tutorial
 version: master
 start_page: ROOT:index.adoc
+attributes:
+  source-language: asciidoc@
+  xrefstyle: short@
+  listing-caption: Example@
+  example-caption: false
 nav:
   - modules/ROOT/nav.adoc

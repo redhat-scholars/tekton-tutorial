@@ -26,10 +26,6 @@ spec:
       containers:
         - name: nexus
           image: docker.io/sonatype/nexus3
-          resources:
-            limits:
-              memory: '1024Mi'
-              cpu: '750m'
           ports:
             - containerPort: 8081
               name: 8081-tcp
@@ -40,7 +36,6 @@ spec:
             # nexus has lots of init to do first time so lets give
             # more time for that to happen
             initialDelaySeconds: 180
-            periodSeconds: 3
           readinessProbe:
             httpGet:
               path: /
@@ -48,7 +43,6 @@ spec:
             # nexus has lots of init to do first time so lets give
             # more time for that to happen
             initialDelaySeconds: 180
-            periodSeconds: 3
           volumeMounts:
             - name: nexus-data
               mountPath: /nexus-data

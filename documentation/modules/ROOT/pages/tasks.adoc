@@ -39,7 +39,7 @@ NOTE: The <<tekton-task-run>> could override the parameter values, if no paramet
 The parameters that were part of the menu:spec[inputs > params] can be used in the steps using the notation `$(<variable-name>)`.
 
 [[tekton-task-clone]]
-== Clone Source Code
+=== Clone Source Code
 
 The following listing shows a simple Task that clones the sources using git command and lists the sources:
 
@@ -151,6 +151,9 @@ The command might ask your to confirm any default values, in this task we have a
 ----
 ? Value for param `contextDir` of type `string`? (Default is `apps/greeter/java/quarkus`) (apps/greeter/java/quarkus)
 ----
+
+Be sure press kbd:[Enter] to start the TaskRun after providing inputs to the prompts.
+
 ====
 
 The command should show an output like:
@@ -202,6 +205,7 @@ NAME                                 READY   STATUS       AGE
 source-lister-run-6kt8d-pod-67b326   0/2     Completed    41s
 ----
 
+[#tekton-watch-logs]
 == Watching logs
 
 If the Task ran successfully you will notice the following logs in your terminal (lines truncated for brevity):
@@ -239,6 +243,7 @@ Logs starting with **[ls-build-sources]** are from the container that is respons
 
 In the example above, there is a log which shows the `git clone` command that cloned the application sources to the `/workspace/source` directory. The *workspace* directory is where your Task/Pipeline sources/build atrifacts will be cloned and generated. The `source` sub-path under is the directory where Tekton cloned the applicaiton sources. It is usually the name of the resources --> inputs --> Resource of type Git.
 
+[[tekton-task-clustertask]]
 == Cluster Task
 
 The tasks are by default tied to namespace i.e their visibility is restricted to the namespace where they were created. E.g. the `source-lister` that we created and ran earlier is tied to {tutorial-namespace}.
@@ -248,11 +253,11 @@ To check lets create a new namespace called `clustertask-demo`:
 [.console-input]
 [source,bash]
 ----
-kubectl create namespace clustertask-demo &&\
+kubectl create namespace clustertask-demo
 kubectl config set-context --current --namespace clustertask-demo
 ----
 
-Listing the tasks in the `customertask-demo` will not show any Tasks as shown in the command output below. 
+Listing the tasks in the `clustertask-demo` will not show any Tasks as shown in the command output below. 
 
 [.console-input]
 [source,bash]
@@ -310,7 +315,7 @@ spec:
 kubectl apply -n clustertask-demo -f echoer.yaml
 ----
 
-=== List and Describe ClusterTask s
+=== List and Describe ClusterTasks
 
 [.console-input]
 [source,bash,subs="+macros,+attributes"]
@@ -403,6 +408,7 @@ tkn clustertask start echoer --showlog
 
 The command should produce an identical output as show <<tekton-rocks-output,above>>.
 
+[#tekton-tasks-points-to-ponder]
 == Points to Ponder
 
 - Tasks are namespace bound i.e. available only in namespace(s) where they were created
@@ -425,7 +431,7 @@ The following section explains the three Task steps. The <<tekton-task-deploy>> 
 
 [[task-parameters]]
 === Step :: Task Inputs and Outputs
-.link:{github-repo}/{pipelines-repo}/build-app-task.yaml[task inputs and outputs]
+.link:{github-repo}/{tasks-repo}/build-app-task.yaml[task inputs and outputs]
 [source,yaml,subs="+macros,attributes+"]
 ----
 inputs:
@@ -466,7 +472,7 @@ For Task inputs and outputs - we will use the xref:pipeline-resources.adoc#tkn-s
 
 [[build-sources]]
 === Step 1 :: Build Application Sources
-.link:{github-repo}/{pipelines-repo}/build-app-task.yaml#L32-L43[step-build-sources]
+.link:{github-repo}/{tasks-repo}/build-app-task.yaml#L32-L43[step-build-sources]
 [source,yaml,subs="+macros,attributes+"]
 ----
 - name: build-sources
@@ -491,7 +497,7 @@ For Task inputs and outputs - we will use the xref:pipeline-resources.adoc#tkn-s
 [[build-linux-image]]
 === Step 2 :: Build Application Linux Container Image
 
-.link:{github-repo}/{pipelines-repo}/build-app-task.yaml#L44-L62[step-build-image]
+.link:{github-repo}/{tasks-repo}/build-app-task.yaml#L44-L62[step-build-image]
 [source,yaml,subs="+macros,attributes+"]
 ----
 - name: build-image
@@ -519,7 +525,7 @@ For Task inputs and outputs - we will use the xref:pipeline-resources.adoc#tkn-s
 [[push-linux-image]]
 === Step 3:: Push Application Linux Container Image
 
-.link:{github-repo}/{pipelines-repo}/build-app-task.yaml#L63-L78[step-build-image]
+.link:{github-repo}/{tasks-repo}/build-app-task.yaml#L63-L78[step-build-image]
 [source,yaml,subs="+macros,attributes+"]
 ----
 - name: push-image
@@ -541,7 +547,7 @@ For Task inputs and outputs - we will use the xref:pipeline-resources.adoc#tkn-s
 
 Having see the three individual steps of the `build-app` task, the following snippet shows all three chained together:
 
-.link:{github-repo}/{pipelines-repo}/build-app-task.yaml[build-app-task.yaml]
+.link:{github-repo}/{tasks-repo}/build-app-task.yaml[build-app-task.yaml]
 [source,yaml,subs="+macros,attributes+"]
 ----
 include::ROOT:example$build-app-task.yaml[]
@@ -571,7 +577,7 @@ The application build task could be created using the command:
 [.console-input]
 [source,bash,subs="+macros,attributes+"]
 ----
-kubectl apply -n {tutorial-namespace} -f link:{github-repo}/{pipelines-repo}/build-app-task.yaml[build-app-task.yaml]
+kubectl apply -n {tutorial-namespace} -f link:{github-repo}/{tasks-repo}/build-app-task.yaml[build-app-task.yaml]
 ----
 
 We will use the Tekton cli to inspect the created resources
@@ -625,6 +631,9 @@ It will take few seconds for the TaskRun to show status as `Running` as it needs
 * Use the command **help** via `tkn taskrun --help`
 * Use `tr` as shorcut for taskrun commands e.g to list taskruns run the command `tkn tr ls`
 ====
+
+[#tekton-tr-logs]
+=== Watch TaskRun logs
 
 To check the status of the TaskRun use the `logs` command of taskrun like:
 
@@ -792,7 +801,19 @@ Now you can apply the task as shown:
 kubectl apply -n {tutorial-namespace} -f build-app-task-step-template.yaml
 ----
 
-Now try <<tekton-task-run,running>> task again. When you examine the TaskRun pods should notice `stepTemplate` added to all the step containers including `build-sources`.
+Now try running `build-app` Task again:
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+tkn task start -n {tutorial-namespace} build-app \
+  --inputresource='source=git-source' \
+  --outputresource='builtImage=tekton-tutorial-greeter-image' \
+  --param contextDir='apps/greeter/java/springboot' \
+  --showlog
+----
+
+When you examine the TaskRun pods should notice `stepTemplate` added to all the step containers including `build-sources`.
 
 List the pods that were part of the TaskRun for Task `build-app`:
 

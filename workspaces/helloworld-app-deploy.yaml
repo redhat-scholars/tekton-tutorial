@@ -1,0 +1,92 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: helloworld-app-deploy
+spec:
+  description: >-
+    The Pipline to buld and deploy the Hello World Java App https://github.com/redhat-developer-demos/tekton-helloworld as Knative Service.
+  params:
+    - name: image-name #<.>
+      description: The fully qualified image name e.g example.com/tekton-tutorial/helloworld
+      default: example.com/tekton-tutorial/helloworld
+    - name: kn-service-name
+      description: The Knative Service name
+      default: helloworld
+    - name: github-repo-url
+      description: The GitHub Repo of the Java Application
+      default: https://github.com/redhat-developer-demos/tekton-helloworld
+    - name: github-repo-revision
+      description: The GitHub revision to use
+      default: master
+  workspaces:
+    - name: source #<.>
+    - name: maven-settings #<.>
+  tasks:
+    - name: clone-sources
+      taskRef:
+        name: git-clone
+      params:
+        - name: url
+          value: $(params.github-repo-url)
+        - name: revision
+          value: $(params.github-repo-revision)
+        # just to do a fresh clone, as we already have the directory cloned
+        # to reuse it we can exlude this step
+        - name: deleteExisting
+          value: 'true'
+      workspaces:
+        - name: output
+          workspace: source
+    - name: build-java-test
+      taskRef:
+        name: maven
+      runAfter:
+        - clone-sources
+      params:
+        - name: GOALS
+          value: ['-B', 'clean', 'test']
+      workspaces:
+        - name: maven-settings
+          workspace: maven-settings
+        - name: source
+          workspace: source
+    - name: build-java-app
+      taskRef:
+        name: maven
+      runAfter:
+        - build-java-test
+      params:
+        - name: GOALS
+          value: ['-B', '-DskipTests', 'clean', 'package']
+      workspaces:
+        - name: maven-settings
+          workspace: maven-settings
+        - name: source
+          workspace: source
+    - name: build-java-app-image
+      taskRef:
+        name: buildah
+      runAfter:
+        - build-java-app
+      params:
+        - name: IMAGE
+          value: '$(params.image-name)'
+        # since pushing to internal registry we skip TLS verify
+        - name: TLSVERIFY
+          value: 'false'
+      workspaces:
+        - name: source
+          workspace: source
+    - name: deploy-kn-service
+      taskRef:
+        name: kn
+      runAfter:
+        - build-java-app-image
+      params:
+        - name: ARGS
+          value:
+            - 'service'
+            - 'create'
+            - '$(params.kn-service-name)'
+            - '--force'
+            - '--image=$(params.image-name)@$(tasks.build-java-app-image.results.IMAGE_DIGEST)' #<.>

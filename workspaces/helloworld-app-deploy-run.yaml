@@ -1,0 +1,17 @@
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  generateName: helloworld-app-
+  labels:
+    tekton.dev/pipeline: helloworld-app-deploy
+spec:
+  serviceAccountName: kn-deployer-account
+  pipelineRef:
+    name: helloworld-app-deploy
+  workspaces:
+    - name: maven-settings
+      configmap:
+        name: maven-settings
+    - name: source
+      persistentVolumeClaim:
+        claimName: tekton-tutorial-sources

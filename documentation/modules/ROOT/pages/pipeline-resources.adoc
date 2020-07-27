@@ -9,7 +9,7 @@ At the end of this chapter you will be able to :
 
 [WARNING]
 ====
-PipelineResources will deprecated in future Tekton releases in favour of Workspaces. Expect this chapter to be removed in future release of the tutorial.
+PipelineResources will deprecated in future Tekton releases in favour of xref:workspaces.adoc[Workspaces]. Expect this chapter to be removed in future release of the tutorial.
 ====
 
 [#tekton-res-prerequisite]
@@ -26,7 +26,7 @@ include::partial$tekton-nav-to-folder.adoc[tags="folder-all,resources"]
 
 The following snippet shows what a Tekton `PipelineResource` YAML looks like:
 
-.link:{github-repo}/{pipelines-repo}/build-resources.yaml[build-resources.yaml]
+.link:{github-repo}/{resources-repo}/build-resources.yaml[build-resources.yaml]
 [source,yaml,subs="+macros,attributes+"]
 ----
 include::ROOT:example$build-resources.yaml[]
@@ -50,7 +50,7 @@ The pipeline resource could be created using the command:
 [.console-input]
 [source,bash,subs="+macros,attributes+"]
 ----
-kubectl apply -n {tutorial-namespace} -f link:{github-repo}/{pipelines-repo}/build-resources.yaml[build-resources.yaml]
+kubectl apply -n {tutorial-namespace} -f link:{github-repo}/{resources-repo}/build-resources.yaml[build-resources.yaml]
 ----
 
 [.console-output]

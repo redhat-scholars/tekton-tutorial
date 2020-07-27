@@ -1,0 +1,24 @@
+---
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: list-directory
+spec:
+  description: >-
+    Simple directory lister
+  params:
+    - name: sub-dirs
+      type: array
+      description: the sub-directories under workspace
+      default: ['.']
+  workspaces:
+    - name: directory
+  steps:
+    - name: list-directory
+      image: busybox
+      command:
+        - ls
+      args:
+        - -ltr
+        - '$(params.sub-dirs)'
+      workingDir: '$(workspaces.directory.path)'

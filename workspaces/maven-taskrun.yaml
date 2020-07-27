@@ -1,0 +1,23 @@
+apiVersion: tekton.dev/v1beta1
+kind: TaskRun
+metadata:
+  generateName: maven-build-
+  labels:
+    tekton.dev/task: maven
+spec:
+  taskRef:
+    name: maven
+  params:
+    - name: GOALS
+      value:
+        - -B
+        - -DskipTests
+        - clean
+        - package
+  workspaces:
+    - name: maven-settings
+      configmap:
+        name: maven-settings
+    - name: source
+      persistentVolumeClaim:
+        claimName: tekton-tutorial-sources

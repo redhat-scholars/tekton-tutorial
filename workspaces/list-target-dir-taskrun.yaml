@@ -1,0 +1,17 @@
+apiVersion: tekton.dev/v1beta1
+kind: TaskRun
+metadata:
+  generateName: list-directory-
+  labels:
+    tekton.dev/task: list-directory
+spec:
+  taskRef:
+    name: list-directory
+  params:
+    - name: sub-dirs
+      value:
+        - target
+  workspaces:
+    - name: directory
+      persistentVolumeClaim:
+        claimName: tekton-tutorial-sources
