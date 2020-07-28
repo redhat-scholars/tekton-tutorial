@@ -133,7 +133,7 @@ The Kubernetes service deployment Pipeline could be created using the command:
 [.console-input]
 [source,bash,subs="+macros,attributes+"]
 ----
-kubectl apply -n {tutorial-namespace} -f link:{github-repo}/{pipelines-repo}/svc-deploy.yaml[svc-deploy.yaml]
+kubectl apply -n {tutorial-namespace} -f link:{github-repo}/{pipelines-repo}/svc-deploy.yaml[svc-deploy.yaml^]
 ----
 
 We will use the Tekton cli to inspect the created resources

@@ -15,4 +15,4 @@
 :workspaces-repo: workspaces
 :resources-repo: resources
 :triggers-repo: triggers
-:auth-repo: auth
+:auth-repo: private_repos_reg

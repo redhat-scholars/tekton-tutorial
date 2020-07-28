@@ -92,7 +92,8 @@ To show maven artifact caching and using customized maven `settings.xml` we will
 [.console-input]
 [source,bash,subs="+macros,+attributes"]
 ----
-kubectl apply -n {chapter-namespace} -f $TUTORIAL_HOME/install/utils/nexus.yaml
+kubectl apply -n {chapter-namespace} \
+  -f link:{github-repo}/install/utils/nexus.yaml[$TUTORIAL_HOME/install/utils/nexus.yaml^]
 ----
 
 Wait for the nexus3 pod to come up before proceeding further with exercises:
@@ -142,7 +143,7 @@ For us to mount the maven `settings.xml`, we will create ConfigMap holding the c
 [source,bash,subs="+macros,+attributes"]
 ----
 kubectl create -n {chapter-namespace} cm maven-settings \
-  --from-file=settings.xml=link:{github-repo}/{workspaces-repo}/maven-settings.xml[+$TUTORIAL_HOME+/{workspaces-repo}/maven-settings.xml]
+  --from-file=settings.xml=link:{github-repo}/{workspaces-repo}/maven-settings.xml[+$TUTORIAL_HOME+/{workspaces-repo}/maven-settings.xml^]
 ----
 
 You can check the ConfigMap contents using the command:
@@ -171,7 +172,7 @@ OpenShift users can install Knative i.e https://docs.openshift.com/container-pla
 [.console-input]
 [source,bash,subs="+macros,+attributes"]
 ----
-$TUTORIAL_HOME/bin/link:{github-repo}/bin/enable_knative.sh[enable_knative.sh]
+$TUTORIAL_HOME/bin/link:{github-repo}/bin/enable_knative.sh[enable_knative.sh^]
 ----
 
 Wait for the serving deployment to complete without errors. 
@@ -208,7 +209,7 @@ Create the PVC `tekton-tutorial-sources`, which we will use as part of the exerc
 [.console-input]
 [source,bash,subs="+macros,+attributes"]
 ----
-kubectl apply -n {chapter-namespace} -f link:{github-repo}/{workspaces-repo}/sources-pvc.yaml[+$TUTORIAL_HOME+/{workspaces-repo}/sources-pvc.yaml]
+kubectl apply -n {chapter-namespace} -f link:{github-repo}/{workspaces-repo}/sources-pvc.yaml[+$TUTORIAL_HOME+/{workspaces-repo}/sources-pvc.yaml^]
 ----
 
 [#ws-pipeline-overview]
@@ -235,7 +236,7 @@ Since the cluster as *default* Storage Class, just specifying the PersistenceVol
 
 Let us run the `git-clone` Task with the `TaskRun` definition as shown below:
 
-.link:{github-repo}/{workspaces-repo}/git-clone-taskrun.yaml[git-clone-taskrun]
+.link:{github-repo}/{workspaces-repo}/git-clone-taskrun.yaml[git-clone-taskrun^]
 [source,yaml,attributes]
 ----
 apiVersion: tekton.dev/v1beta1
@@ -320,7 +321,7 @@ A successful git-clone TaskRun will show the following output:
 
 As explained in the overview one of the advantages of the `workspaces` is that it can be shared, lets run a simple list-directory Task to verify the same:
 
-.link:{github-repo}/{workspaces-repo}/list-dir-taskrun.yaml[list-dir-taskrun.yaml]
+.link:{github-repo}/{workspaces-repo}/list-dir-taskrun.yaml[list-dir-taskrun.yaml^]
 [source,yaml,attributes]
 ----
 apiVersion: tekton.dev/v1beta1
@@ -385,7 +386,7 @@ In this exercise, we will use maven-settings ConfigMap that we created earlier a
 
 Let run the maven task to build the tekton-helloworld project we cloned earlier.
 
-.link:{github-repo}/{workspaces-repo}/maven-taskrun.yaml[maven-taskrun.yaml]
+.link:{github-repo}/{workspaces-repo}/maven-taskrun.yaml[maven-taskrun.yaml^]
 [source,yaml,attributes]
 ----
 apiVersion: tekton.dev/v1beta1
@@ -501,7 +502,7 @@ The output of the command should be like:
 
 Let us now apply what we learned with workspace to build and deploy the application pipeline as shown:
 
-.link:{github-repo}/{workspaces-repo}/helloworld-app-deploy.yaml[helloworld-app-deploy.yaml]
+.link:{github-repo}/{workspaces-repo}/helloworld-app-deploy.yaml[helloworld-app-deploy.yaml^]
 [source,yaml,subs="+macros,attributes+,quotes+"]
 ----
 include::ROOT:example$helloworld-app-deploy.yaml[]
@@ -553,7 +554,7 @@ clusterrolebinding.rbac.authorization.k8s.io/kn-deployer-binding created
 [#ws-run-pipeline]
 === Run the Pipeline
 
-.link:{github-repo}/{workspaces-repo}/helloworld-app-deploy-run.yaml[helloworld-app-deploy-run.yaml]
+.link:{github-repo}/{workspaces-repo}/helloworld-app-deploy-run.yaml[helloworld-app-deploy-run.yaml^]
 [source,yaml,attributes]
 ----
 include::ROOT:example$helloworld-app-deploy-run.yaml[]

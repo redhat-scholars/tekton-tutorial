@@ -432,7 +432,7 @@ The following section explains the three Task steps. The <<tekton-task-deploy>> 
 
 [[task-parameters]]
 === Step :: Task Inputs and Outputs
-.link:{github-repo}/{tasks-repo}/build-app-task.yaml[task inputs and outputs]
+.link:{github-repo}/{tasks-repo}/build-app-task.yaml[task inputs and outputs^]
 [source,yaml,subs="+macros,attributes+"]
 ----
 inputs:
@@ -473,7 +473,7 @@ For Task inputs and outputs - we will use the xref:pipeline-resources.adoc#tkn-s
 
 [[build-sources]]
 === Step 1 :: Build Application Sources
-.link:{github-repo}/{tasks-repo}/build-app-task.yaml#L32-L43[step-build-sources]
+.link:{github-repo}/{tasks-repo}/build-app-task.yaml#L32-L43[step-build-sources^]
 [source,yaml,subs="+macros,attributes+"]
 ----
 - name: build-sources
@@ -498,7 +498,7 @@ For Task inputs and outputs - we will use the xref:pipeline-resources.adoc#tkn-s
 [[build-linux-image]]
 === Step 2 :: Build Application Linux Container Image
 
-.link:{github-repo}/{tasks-repo}/build-app-task.yaml#L44-L62[step-build-image]
+.link:{github-repo}/{tasks-repo}/build-app-task.yaml#L44-L62[step-build-image^]
 [source,yaml,subs="+macros,attributes+"]
 ----
 - name: build-image
@@ -526,7 +526,7 @@ For Task inputs and outputs - we will use the xref:pipeline-resources.adoc#tkn-s
 [[push-linux-image]]
 === Step 3:: Push Application Linux Container Image
 
-.link:{github-repo}/{tasks-repo}/build-app-task.yaml#L63-L78[step-build-image]
+.link:{github-repo}/{tasks-repo}/build-app-task.yaml#L63-L78[step-build-image^]
 [source,yaml,subs="+macros,attributes+"]
 ----
 - name: push-image
@@ -548,7 +548,7 @@ For Task inputs and outputs - we will use the xref:pipeline-resources.adoc#tkn-s
 
 Having see the three individual steps of the `build-app` task, the following snippet shows all three chained together:
 
-.link:{github-repo}/{tasks-repo}/build-app-task.yaml[build-app-task.yaml]
+.link:{github-repo}/{tasks-repo}/build-app-task.yaml[build-app-task.yaml^]
 [source,yaml,subs="+macros,attributes+"]
 ----
 include::ROOT:example$build-app-task.yaml[]

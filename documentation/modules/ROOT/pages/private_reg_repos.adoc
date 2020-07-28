@@ -359,7 +359,8 @@ Create the build and push app pipeline:
 [.console-input]
 [source,bash,subs="+macros,+attributes"]
 ----
-kubectl apply -n {chapter-namespace} -f helloworld-app-build.yaml
+kubectl apply -n {chapter-namespace} \
+  -f link:{github-repo}/{auth-repo}/helloworld-app-build.yaml[helloworld-app-build.yaml^]
 ----
 
 [.console-output]
