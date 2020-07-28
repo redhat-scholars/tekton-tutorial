@@ -3,10 +3,9 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Pipeline Resources :: Tekton Tutorial</title>
-    <link rel="canonical" href="https://redhat-developer-demos.github.io/tekton-tutorial/tekton-tutorial/pipeline-resources.html">
-    <link rel="prev" href="setup.html">
-    <link rel="next" href="tasks.html">
+    <title>Using Private Repositories and Registries :: Tekton Tutorial</title>
+    <link rel="canonical" href="https://redhat-developer-demos.github.io/tekton-tutorial/tekton-tutorial/private_reg_repos.html">
+    <link rel="prev" href="workspaces.html">
     <meta name="generator" content="Antora 2.3.3">
     <link rel="stylesheet" href="../_/css/site.css">
   </head>
@@ -75,21 +74,21 @@
   </li>
 </ul>
   </li>
-  <li class="nav-item is-current-page" data-depth="1">
+  <li class="nav-item" data-depth="1">
     <button class="nav-item-toggle"></button>
     <a class="nav-link" href="pipeline-resources.html">Pipeline Resources</a>
 <ul class="nav-list">
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="#tekton-res-prerequisite">Prerequisites</a>
+    <a class="nav-link" href="pipeline-resources.html#tekton-res-prerequisite">Prerequisites</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="#tekton-res-create">Create Pipeline Resource</a>
+    <a class="nav-link" href="pipeline-resources.html#tekton-res-create">Create Pipeline Resource</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="#tekton-res-deploy">Deploy Pipeline Resource</a>
+    <a class="nav-link" href="pipeline-resources.html#tekton-res-deploy">Deploy Pipeline Resource</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="#tkn-see-what-you-have-deployed">See what you have deployed</a>
+    <a class="nav-link" href="pipeline-resources.html#tkn-see-what-you-have-deployed">See what you have deployed</a>
   </li>
 </ul>
   </li>
@@ -246,30 +245,30 @@
   </li>
 </ul>
   </li>
-  <li class="nav-item" data-depth="1">
+  <li class="nav-item is-current-page" data-depth="1">
     <button class="nav-item-toggle"></button>
     <a class="nav-link" href="private_reg_repos.html">Using Private Registries and Repositories</a>
 <ul class="nav-list">
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="private_reg_repos.html#tkn-prr-overview">Overview</a>
+    <a class="nav-link" href="#tkn-prr-overview">Overview</a>
   </li>
   <li class="nav-item" data-depth="2">
     <button class="nav-item-toggle"></button>
-    <a class="nav-link" href="private_reg_repos.html#tekton-push-to-external-reg">Pushing To External Registry</a>
+    <a class="nav-link" href="#tekton-push-to-external-reg">Pushing To External Registry</a>
 <ul class="nav-list">
   <li class="nav-item" data-depth="3">
-    <a class="nav-link" href="private_reg_repos.html#tekton-push-registry-secret">Create Registry Secret</a>
+    <a class="nav-link" href="#tekton-push-registry-secret">Create Registry Secret</a>
   </li>
   <li class="nav-item" data-depth="3">
-    <a class="nav-link" href="private_reg_repos.html#tekton-build-sa">Create Service Account</a>
+    <a class="nav-link" href="#tekton-build-sa">Create Service Account</a>
   </li>
   <li class="nav-item" data-depth="3">
-    <a class="nav-link" href="private_reg_repos.html#tekton-create-build-push-pipeline">Create Pipeline</a>
+    <a class="nav-link" href="#tekton-create-build-push-pipeline">Create Pipeline</a>
   </li>
 </ul>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="private_reg_repos.html#tekton-auth-cleanup">Cleanup</a>
+    <a class="nav-link" href="#tekton-auth-cleanup">Cleanup</a>
   </li>
 </ul>
   </li>
@@ -288,305 +287,82 @@
 <nav class="breadcrumbs" aria-label="breadcrumbs">
   <ul>
     <li><a href="index.html">Tekton Tutorial</a></li>
-    <li><a href="pipeline-resources.html">Pipeline Resources</a></li>
+    <li><a href="private_reg_repos.html">Using Private Registries and Repositories</a></li>
   </ul>
 </nav>
-  <div class="edit-this-page"><a href="https://github.com/redhat-developer-demos/tekton-tutorial/edit/master/documentation/modules/ROOT/pages/pipeline-resources.adoc">Edit this Page</a></div>
+  <div class="edit-this-page"><a href="https://github.com/redhat-developer-demos/tekton-tutorial/edit/master/documentation/modules/ROOT/pages/private_reg_repos.adoc">Edit this Page</a></div>
   </div>
   <div class="content">
 <article class="doc">
-<h1 class="page">Pipeline Resources</h1>
+<h1 class="page">Using Private Repositories and Registries</h1>
 <div id="preamble">
 <div class="sectionbody">
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+This chapter build is in progress, expect to change and not working as expected
+</td>
+</tr>
+</table>
+</div>
 <div class="paragraph">
 <p>At the end of this chapter you will be able to :</p>
 </div>
 <div class="ulist">
 <ul>
 <li>
-<p>Understand what is a <a href="https://github.com/tektoncd/pipeline/blob/master/docs/resources.md">pipeline resource</a> ?</p>
+<p>Tekton Authentication Secrets</p>
 </li>
 <li>
-<p>Create a pipeline resource</p>
+<p>How to push linux contianer image to external registry</p>
+</li>
+<li>
+<p>How to clone from a private Github respository</p>
 </li>
 </ul>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="tekton-res-prerequisite"><a class="anchor" href="#tekton-res-prerequisite"></a>Prerequisite</h2>
+<h2 id="tkn-prr-overview"><a class="anchor" href="#tkn-prr-overview"></a>Overview</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>The following checks ensure that each chapter exercises are done with the right environment settings.</p>
+<p>In many parctical usecase you might need to pull from private Git repsoitories or might need to push to external container registry such as <a href="https://quay.io">Quay.io</a>. In both the cases the access requires you to authenticate. With Tekton this is achieved using the Kubernetes Service Account(SA) and Kubernetes Secret.</p>
 </div>
-<div class="tabset is-loading">
-<div class="ulist tabs">
-<ul>
-<li>
-<p><a id="tabset1_kubernetes"></a>Kubernetes</p>
-</li>
-<li>
-<p><a id="tabset1_openshift"></a>OpenShift</p>
-</li>
-</ul>
-</div>
-<div class="content">
-<div class="tab-pane" aria-labelledby="tabset1_kubernetes">
-<div class="ulist">
-<ul>
-<li>
-<p>Set your local docker to use minikube docker daemon</p>
-</li>
-</ul>
-</div>
-<div class="listingblock console-input">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">eval $(minikube docker-env) &amp;&amp;\
-minikube profile tektontutorial</code></pre>
-</div>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p>Kubernetes should be v1.18+</p>
-</li>
-</ul>
-</div>
-<div class="listingblock console-input">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl version --short</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>The output should be like</p>
-</div>
-<div class="listingblock console-output">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">Client Version: v1.18.6
-Server Version: v1.18.3</code></pre>
-</div>
-</div>
-</div>
-<div class="tab-pane" aria-labelledby="tabset1_openshift">
-<div class="ulist">
-<ul>
-<li>
-<p>OpenShift CLI should be v4.3+</p>
-</li>
-</ul>
-</div>
-<div class="listingblock console-input">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc version</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>The output should be like</p>
-</div>
-<div class="listingblock console-output">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">Client Version: 4.5.3
-Server Version: 4.5.3
-Kubernetes Version: v1.18.3</code></pre>
-</div>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p>Make sure to be on <code>tektontutorial</code> OpenShift project</p>
-</li>
-</ul>
-</div>
-<div class="listingblock console-input">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc project -q</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>If you are not on <code>tektontutorial</code> project, then run following command to change to <code>tektontutorial</code> project:</p>
-</div>
-<div class="listingblock console-input">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc project tektontutorial</code></pre>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="paragraph">
-<p>Ensure Tekton piplines is deployed and the API is available for use</p>
-</div>
-<div class="listingblock console-input">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl api-resources --api-group='tekton.dev'</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>The command show an output like:</p>
-</div>
-<div class="listingblock cosole-output">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">NAME                SHORTNAMES   APIGROUP     NAMESPACED   KIND
-clustertasks                     tekton.dev   false        ClusterTask
-conditions                       tekton.dev   true         Condition
-pipelineresources                tekton.dev   true         PipelineResource
-pipelineruns        pr,prs       tekton.dev   true         PipelineRun
-pipelines                        tekton.dev   true         Pipeline
-taskruns            tr,trs       tekton.dev   true         TaskRun
-tasks                            tekton.dev   true         Task</code></pre>
-</div>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="tekton-res-create"><a class="anchor" href="#tekton-res-create"></a>Create a pipeline resource</h2>
-<div class="sectionbody">
 <div class="paragraph">
 <p>If you are not in tutorial chapter folder, then navigate to the folder:</p>
 </div>
 <div class="listingblock console-input">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">cd $TUTORIAL_HOME/resources</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">cd $TUTORIAL_HOME/private_repos_reg</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>The following snippet shows what a Tekton <code>PipelineResource</code> YAML looks like:</p>
+<p>Let us create a new namespace called <code>workspace-auth-demo</code> and switch to that namespace context.</p>
 </div>
-<div class="listingblock">
-<div class="title"><a href="https://github.com/redhat-developer-demos/tekton-tutorial/blob/master/resources/build-resources.yaml">build-resources.yaml</a></div>
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">apiVersion: tekton.dev/v1alpha1
-kind: PipelineResource
-metadata:
-  name: git-source
-spec:
-  type: git
-  params:
-    - name: url
-      value: <a href="https://github.com/redhat-developer-demos/tekton-tutorial" class="bare">https://github.com/redhat-developer-demos/tekton-tutorial</a>
-    - name: revision
-      value: master
----
-apiVersion: tekton.dev/v1alpha1
-kind: PipelineResource
-metadata:
-  name: tekton-tutorial-greeter-image
-spec:
-  type: image
-  params:
-    - name: url
-      # use internal registry
-      value: example.com/rhdevelopers/tekton-tutorial-greeter
-      # if you are on OpenShift uncomment the line below
-      #value: "image-registry.openshift-image-registry.svc:5000/tektontutorial/helloworld"</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Each pipeline resource has:</p>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p><strong>name</strong>: the name using which it will be referred in other places</p>
-</li>
-<li>
-<p><strong>type</strong>: the type of the pipeline resource, in this example we have two types</p>
-<div class="ulist">
-<ul>
-<li>
-<p><em>git</em> - this type of resource refers to a GitHub repository</p>
-</li>
-<li>
-<p><em>image</em> - this type of resource is linux container image</p>
-</li>
-</ul>
-</div>
-</li>
-<li>
-<p><strong>params</strong>: each type can have one or more parameters that will be used to configure the underlying type. In the above example for the <code>git-source</code> pipeline resource, the parameters <code>url</code> and <code>revision</code> are used  to identify the GitHub repository url and revision of the sources respectively.</p>
-</li>
-</ul>
-</div>
-<div class="paragraph">
-<p>More details on other types of pipeline resource types is available <a href="https://github.com/tektoncd/pipeline/blob/master/docs/resources.md#resource-types">here</a>.</p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="tekton-res-deploy"><a class="anchor" href="#tekton-res-deploy"></a>Deploy a pipeline resource</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>The pipeline resource could be created using the command:</p>
-</div>
-<div class="listingblock console-input">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl apply -n tektontutorial -f <a href="https://github.com/redhat-developer-demos/tekton-tutorial/blob/master/resources/build-resources.yaml">build-resources.yaml</a></code></pre>
-</div>
-</div>
-<div class="listingblock console-output">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">pipelineresource.tekton.dev/git-source created
-pipelineresource.tekton.dev/tekton-tutorial-greeter-image created</code></pre>
-</div>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="tkn-see-what-you-have-deployed"><a class="anchor" href="#tkn-see-what-you-have-deployed"></a>See what you have deployed</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>We will use the Tekton cli to inspect the created resources</p>
-</div>
-<div class="listingblock console-input">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">tkn res ls</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>The above command should list two resources as shown below:</p>
-</div>
-<div class="listingblock console-output">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">NAME                            TYPE    DETAILS
-git-source                      git     url: https://github.com/redhat-developer-demos/tekton-tutorial
-tekton-tutorial-greeter-image   image   url: example.com/rhdevelopers/tekton-tutorial-greeter</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>All Tekton API resources/objects has the <strong>describe</strong> option that gives more details of respective Tekton API object.</p>
-</div>
-<div class="paragraph">
-<p>e.g. To describe the PipelineResource that we just created, run:</p>
-</div>
-<div class="listingblock console-input">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">tkn res describe git-source</code></pre>
-</div>
-</div>
-<div class="listingblock console-output">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">Name:                    git-source
-Namespace:               tektontutorial
-PipelineResource Type:   git
-
-Params
-NAME       VALUE
-url        https://github.com/redhat-developer-demos/tekton-tutorial
-revision   master
-
-Secret Params
-No secret params</code></pre>
-</div>
-</div>
-<div class="admonitionblock tip">
+<div class="admonitionblock note assumptions">
 <table>
 <tr>
 <td class="icon">
-<i class="fa icon-tip" title="Tip"></i>
+<i class="fa icon-note" title="ASSUMPTIONS"></i>
 </td>
 <td class="content">
-<div class="paragraph">
-<p>Use the command <strong>help</strong> via <code>tkn res --help</code></p>
+<div class="ulist">
+<ul>
+<li>
+<p>It is assumed that you have completed <a href="workspaces.html" class="page">Workspaces</a> and the reusing the same namespace that was <a href="workspaces.html#ws-prepare" class="page">prepared</a> in that chapter.</p>
+</li>
+<li>
+<p>You have container registry account with <a href="https://quay.io">Quay.io</a> or <a href="https://hub.docker.com">Docker Hub</a></p>
+</li>
+<li>
+<p>You have GitHub account and a private repository</p>
+</li>
+</ul>
 </div>
 </td>
 </tr>
@@ -594,9 +370,221 @@ No secret params</code></pre>
 </div>
 </div>
 </div>
+<div class="sect1">
+<h2 id="tekton-push-to-external-reg"><a class="anchor" href="#tekton-push-to-external-reg"></a>Pusing to external registry</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>To able push to external container registry, its requried that the Pipline is run with a ServiceAccount that has container registry credentials configured via ServiceAccount secrets.  Kubernetes provider a Secret type called <code>docker-registry</code>, that can be used to configure the container registry credentials.</p>
+</div>
+<div class="paragraph">
+<p>Set the requried environment variables to be used when creating the container-registry-secret:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">export CONTAINER_REGISTRY_SERVER='https://quay.io' <i class="conum" data-value="1"></i><b>(1)</b>
+export CONTAINER_REGISTRY_USER='&lt;your registry user&gt;'
+export CONTAINER_REGISTRY_PASSWORD='&lt;your registry user password&gt;'</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>The container registry server URL, for Quay.io its <a href="https://quay.io" class="bare">https://quay.io</a> and for DockerHub it is <a href="https://index.docker.io/v2/" class="bare">https://index.docker.io/v2/</a></td>
+</tr>
+</table>
+</div>
+<div class="sect2">
+<h3 id="tekton-push-registry-secret"><a class="anchor" href="#tekton-push-registry-secret"></a>Create Container Registry Secret</h3>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl create secret -n workspace-auth-demo docker-registry container-registry-secret \
+  --docker-server=$CONTAINER_REGISTRY_SERVER \
+  --docker-username=$CONTAINER_REGISTRY_USER \
+  --docker-password=$CONTAINER_REGISTRY_PASSWORD</code></pre>
+</div>
+</div>
+<div class="listingblock console-output">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">secret/container-registry-secret created</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="tekton-build-sa"><a class="anchor" href="#tekton-build-sa"></a>Create Service Account</h3>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl create sa -n workspace-auth-demo build-bot</code></pre>
+</div>
+</div>
+<div class="listingblock console-output">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">serviceaccount/build-bot created</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="tekton-patch-build-sa"><a class="anchor" href="#tekton-patch-build-sa"></a>Patch Service Account</h3>
+<div class="paragraph">
+<p>Now patch the <code>build-bot</code> service account to use the <code>container-registry-secret</code> credentials:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl patch serviceaccount build-bot \
+  -p '{"secrets": [{"name": "container-registry-secret"}]}'</code></pre>
+</div>
+</div>
+<div class="listingblock console-output">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">serviceaccount/build-bot patched</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Lets verify if the service account has the secret added:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl get sa -n workspace-auth-demo build-bot -o yaml</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The command should show an output like:</p>
+</div>
+<div class="listingblock console-output">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">apiVersion: v1
+kind: ServiceAccount
+metadata:
+  creationTimestamp: "2020-07-28T03:34:32Z"
+  name: build-bot
+  namespace: auth-demo
+  resourceVersion: "53879"
+  selfLink: /api/v1/namespaces/auth-demo/serviceaccounts/build-bot
+  uid: 628067fd-91d1-4cdd-b6a6-88b4f7280ff0
+secrets:
+<mark>- name: container-registry-secret</mark>
+- name: build-bot-token-8nl2v</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="tekton-create-build-push-pipeline"><a class="anchor" href="#tekton-create-build-push-pipeline"></a>Create Pipeline</h3>
+<div class="paragraph">
+<p>Create the build and push app pipeline:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl apply -n workspace-auth-demo -f helloworld-app-build.yaml</code></pre>
+</div>
+</div>
+<div class="listingblock console-output">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">pipeline.tekton.dev/helloworld-app-build created</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="tekton-run-build-push-pipeline"><a class="anchor" href="#tekton-run-build-push-pipeline"></a>Run Pipeline</h3>
+<div class="paragraph">
+<p>Ensure that the pipeline run has been set to run with the Service Account <code>build-bot</code></p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  generateName: helloworld-app-build-
+  labels:
+    tekton.dev/pipeline: helloworld-app-build
+spec:
+  serviceAccountName: <mark>build-bot</mark>
+  pipelineRef:
+    name: helloworld-app-build
+  workspaces:
+    - name: maven-settings
+      configmap:
+        name: maven-settings
+    - name: source
+      persistentVolumeClaim:
+        emptyDir: tekton-tutorial-sources</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Run the pipeline:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl create -n workspace-auth-demo -f helloworld-app-build-run.yaml</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>A successful build and push will show the following output ( trimmed brevity):</p>
+</div>
+<div class="listingblock console-output">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">...
+[build-java-app-image : push] + buildah --storage-driver=overlay push --tls-verify=true --digestfile /workspace/source/image-digest quay.io/rhdevelopers/tekton-helloworld docker://quay.io/rhdevelopers/tekton-helloworld
+[build-java-app-image : push] Getting image source signatures
+[build-java-app-image : push] Copying blob sha256:90c2e42f948b524cf98005073e0b0aa2065160abf9e8b314976c064e270d92ac
+[build-java-app-image : push] Copying blob sha256:869b43e5dca37fa63d84e9bc588613678c4fe6fa2072a72a6ab5487424db2891
+[build-java-app-image : push] Copying blob sha256:f9ddbcc4e7954a705b700c35c5e5beceabd86af121a6e561d86437a8512a6be6
+[build-java-app-image : push] Copying blob sha256:7b08010864ba4c7ce9dfe1b90244b459b77c0387051659d37454783d10ab1113
+[build-java-app-image : push] Copying config sha256:5bd61d725dc47d1f8b7c225d8d52f2730321cadad65988a0de60300a711a2e2b
+[build-java-app-image : push] Writing manifest to image destination
+[build-java-app-image : push] Copying config sha256:5bd61d725dc47d1f8b7c225d8d52f2730321cadad65988a0de60300a711a2e2b
+[build-java-app-image : push] Writing manifest to image destination
+[build-java-app-image : push] Storing signatures
+
+[build-java-app-image : digest-to-results] + cat /workspace/source/image-digest
+[build-java-app-image : digest-to-results] + tee /tekton/results/IMAGE_DIGEST
+[build-java-app-image : digest-to-results] <mark>sha256:0e9e267a96f1ea48fe00642cd82ef689e44c7d467d6db3a3a543fa5b42fe53dc</mark></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>View the pipeline run logs using,</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">tkn pr logs -f -a $(tkn pr ls -n workspace-auth-demo | awk 'NR==2{print $1}')</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>A successful pipeline should have pushed the image to the external container registry. The following screen shot shows the image pushed to <strong>rhdevelopers</strong> Quay.io container registry repo:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/pushed_image.png" alt="pushed image">
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>If you noticed the highlighted <strong>sha256</strong> from the log above, is same as that of the <strong>sha256</strong> listed in the contianer registry repository.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="tekton-auth-cleanup"><a class="anchor" href="#tekton-auth-cleanup"></a>Cleanup</h2>
+<div class="sectionbody">
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl delete ns workspace-auth-demo</code></pre>
+</div>
+</div>
+</div>
+</div>
 <nav class="pagination">
-  <span class="prev"><a href="setup.html">Setup</a></span>
-  <span class="next"><a href="tasks.html">Tasks</a></span>
+  <span class="prev"><a href="workspaces.html">Workspaces</a></span>
 </nav>
 </article>
 <aside class="toc sidebar" data-title="Contents" data-levels="2">

@@ -6,7 +6,7 @@
     <title>Workspaces :: Tekton Tutorial</title>
     <link rel="canonical" href="https://redhat-developer-demos.github.io/tekton-tutorial/tekton-tutorial/workspaces.html">
     <link rel="prev" href="pipelines.html">
-    <link rel="next" href="pipelines.html#tekton-ws-cleanup">
+    <link rel="next" href="private_reg_repos.html">
     <meta name="generator" content="Antora 2.3.3">
     <link rel="stylesheet" href="../_/css/site.css">
   </head>
@@ -179,12 +179,12 @@
     <a class="nav-link" href="#ws-overview">Overview</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="#ws-tasks-deploy">Deploy Tasks from Catalog</a>
-  </li>
-  <li class="nav-item" data-depth="2">
     <button class="nav-item-toggle"></button>
     <a class="nav-link" href="#ws-prepare">Prepare for Using Workspaces</a>
 <ul class="nav-list">
+  <li class="nav-item" data-depth="3">
+    <a class="nav-link" href="#ws-tasks-deploy">Deploy Tasks from Catalog</a>
+  </li>
   <li class="nav-item" data-depth="3">
     <a class="nav-link" href="#ws-deploy-nexus">Deploy Nexus</a>
   </li>
@@ -198,6 +198,9 @@
     <a class="nav-link" href="#ws-check-sc">Check Default Storage Class</a>
   </li>
 </ul>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="#ws-pipeline-overview">Java Application Pipeline</a>
   </li>
   <li class="nav-item" data-depth="2">
     <button class="nav-item-toggle"></button>
@@ -239,7 +242,34 @@
 </ul>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="pipelines.html#tekton-ws-cleanup">Cleanup</a>
+    <a class="nav-link" href="#tekton-ws-cleanup">Cleanup</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="private_reg_repos.html">Using Private Registries and Repositories</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="private_reg_repos.html#tkn-prr-overview">Overview</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="private_reg_repos.html#tekton-push-to-external-reg">Pushing To External Registry</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="3">
+    <a class="nav-link" href="private_reg_repos.html#tekton-push-registry-secret">Create Registry Secret</a>
+  </li>
+  <li class="nav-item" data-depth="3">
+    <a class="nav-link" href="private_reg_repos.html#tekton-build-sa">Create Service Account</a>
+  </li>
+  <li class="nav-item" data-depth="3">
+    <a class="nav-link" href="private_reg_repos.html#tekton-create-build-push-pipeline">Create Pipeline</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="private_reg_repos.html#tekton-auth-cleanup">Cleanup</a>
   </li>
 </ul>
   </li>
@@ -316,6 +346,17 @@ This chapter build is in progress, expect to change and not working as expected
 </div>
 </div>
 <div class="sect1">
+<h2 id="_why_workspace"><a class="anchor" href="#_why_workspace"></a>Why Workspace ?</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>In many partical usecases of Pipelines it becomes cricual for you to share the filsystem with between Tasks and between Steps. The filesystem could be typically hold a clone github repostiory, a ConfigMap or a secret.</p>
+</div>
+<div class="paragraph">
+<p>Tekton <code>workspace</code> a technique by which the Task step and Pipeline task can share a common filesystem. This helps Pipelines to pick up changes form one task to another task in the Pipeline workflow.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
 <h2 id="ws-overview"><a class="anchor" href="#ws-overview"></a>Overview</h2>
 <div class="sectionbody">
 <div class="paragraph">
@@ -337,15 +378,17 @@ This chapter build is in progress, expect to change and not working as expected
 </div>
 </div>
 <div class="sect1">
-<h2 id="ws-tasks-deploy"><a class="anchor" href="#ws-tasks-deploy"></a>Deploy Tasks from Catalog</h2>
+<h2 id="ws-prepare"><a class="anchor" href="#ws-prepare"></a>Prepare for using workspaces</h2>
 <div class="sectionbody">
+<div class="sect2">
+<h3 id="ws-tasks-deploy"><a class="anchor" href="#ws-tasks-deploy"></a>Deploy Tasks from Catalog</h3>
 <div class="paragraph">
-<p>All exercises of this chapter will be done a namesapace <code>workspace-demo</code>, lets create and switch to the <code>workspace-demo</code> namespace.</p>
+<p>All exercises of this chapter will be done a namesapace <code>workspace-auth-demo</code>, lets create and switch to the <code>workspace-auth-demo</code> namespace.</p>
 </div>
 <div class="listingblock console-input">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl create ns workspace-demo &amp;&amp; \
-kubectl config set-context --current --namespace workspace-demo</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl create ns workspace-auth-demo
+kubectl config set-context --current --namespace workspace-auth-demo</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -369,12 +412,12 @@ kubectl config set-context --current --namespace workspace-demo</code></pre>
 </div>
 <div class="listingblock console-input">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl apply -n workspace-demo \
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl apply -n workspace-auth-demo \
   -f <a href="https://raw.githubusercontent.com/tektoncd/catalog/master/task/git-clone/0.1/git-clone.yaml" class="bare">https://raw.githubusercontent.com/tektoncd/catalog/master/task/git-clone/0.1/git-clone.yaml</a> \
   -f <a href="https://raw.githubusercontent.com/tektoncd/catalog/master/task/maven/0.1/maven.yaml" class="bare">https://raw.githubusercontent.com/tektoncd/catalog/master/task/maven/0.1/maven.yaml</a> \
   -f <a href="https://raw.githubusercontent.com/tektoncd/catalog/master/task/buildah/0.1/buildah.yaml" class="bare">https://raw.githubusercontent.com/tektoncd/catalog/master/task/buildah/0.1/buildah.yaml</a> \
   -f <a href="https://raw.githubusercontent.com/tektoncd/catalog/master/task/kn/0.1/kn.yaml" class="bare">https://raw.githubusercontent.com/tektoncd/catalog/master/task/kn/0.1/kn.yaml</a> \
-  -f list-directory-task.yaml</code></pre>
+  -f <a href="https://github.com/redhat-developer-demos/tekton-tutorial/blob/master/workspaces/list-directory-task.yaml">$TUTORIAL_HOME/workspaces/list-directory-task.yaml</a></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -399,29 +442,6 @@ maven              This Task can be us...   11 hours ago</code></pre>
 </div>
 </div>
 </div>
-</div>
-<div class="sect1">
-<h2 id="ws-prepare"><a class="anchor" href="#ws-prepare"></a>Prepare for using workspaces</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>The Java Application build pipeline will,</p>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p>Git clone using <code>git-clone</code> task, the <a href="https://github.com/redhat-developer-demos/tekton-helloworld" class="bare">https://github.com/redhat-developer-demos/tekton-helloworld</a> repo and build the apps/greeter/java/springboot application</p>
-</li>
-<li>
-<p>Will use maven task, maven task require two workspaces one for source and other for maven-settings</p>
-</li>
-<li>
-<p>Build the container image using the <code>buildah</code> task and push to the internal container registry</p>
-</li>
-<li>
-<p>Finally deploy the application onto Kubernetes using <code>openshift-client</code> task</p>
-</li>
-</ul>
-</div>
 <div class="sect2">
 <h3 id="ws-deploy-nexus"><a class="anchor" href="#ws-deploy-nexus"></a>Deploy Nexus</h3>
 <div class="paragraph">
@@ -429,7 +449,7 @@ maven              This Task can be us...   11 hours ago</code></pre>
 </div>
 <div class="listingblock console-input">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl apply -n workspace-demo -f $TUTORIAL_HOME/install/utils/nexus.yaml</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl apply -n workspace-auth-demo -f $TUTORIAL_HOME/install/utils/nexus.yaml</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -437,7 +457,7 @@ maven              This Task can be us...   11 hours ago</code></pre>
 </div>
 <div class="listingblock console-input">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">watch kubectl -n workspace-demo get pods,svc</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">watch kubectl -n workspace-auth-demo get pods,svc</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -457,7 +477,7 @@ service/nexus        NodePort    10.100.205.22   &lt;none&gt;        8081:31743/
 </div>
 <div class="listingblock console-input">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$(minikube service nexus -n workspace-demo)</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$(minikube service nexus -n workspace-auth-demo)</code></pre>
 </div>
 </div>
 <div class="admonitionblock note">
@@ -476,7 +496,7 @@ service/nexus        NodePort    10.100.205.22   &lt;none&gt;        8081:31743/
 </div>
 <div class="listingblock">
 <div class="content">
-<pre>oc expose svc -n workspace-demo nexus</pre>
+<pre>oc expose svc -n {chapter-namespace} nexus</pre>
 </div>
 </div>
 </td>
@@ -487,74 +507,12 @@ service/nexus        NodePort    10.100.205.22   &lt;none&gt;        8081:31743/
 <div class="sect2">
 <h3 id="ws-create-maven-settings-cm"><a class="anchor" href="#ws-create-maven-settings-cm"></a>Create maven-settings ConfigMap</h3>
 <div class="paragraph">
-<p>For us to mount the maven <code>settings.xml</code>, we will create ConfigMap holding the settings.xml shown in the below listing:</p>
-</div>
-<div class="listingblock">
-<div class="title"><a href="https://github.com/redhat-developer-demos/tekton-tutorial/blob/master/workspaces/maven-settings.xml">setttings.xml</a></div>
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
-&lt;settings xmlns="http://maven.apache.org/SETTINGS/1.1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.1.0 http://maven.apache.org/xsd/settings-1.1.0.xsd"&gt;
-  &lt;servers&gt;
-    &lt;server&gt;
-      &lt;id&gt;nexus-snapshots&lt;/id&gt;
-      &lt;username&gt;admin&lt;/username&gt;
-      &lt;password&gt;admin123&lt;/password&gt;
-    &lt;/server&gt;
-    &lt;server&gt;
-      &lt;id&gt;nexus-releases&lt;/id&gt;
-      &lt;username&gt;admin&lt;/username&gt;
-      &lt;password&gt;admin123&lt;/password&gt;
-    &lt;/server&gt;
-  &lt;/servers&gt;
-  &lt;mirrors&gt;
-    &lt;mirror&gt;
-      &lt;id&gt;nexus&lt;/id&gt;
-      &lt;mirrorOf&gt;*&lt;/mirrorOf&gt;
-      &lt;url&gt;http://nexus:8081/repository/maven-public/&lt;/url&gt;
-    &lt;/mirror&gt;
-  &lt;/mirrors&gt;
-  &lt;profiles&gt;
-    &lt;profile&gt;
-      &lt;id&gt;nexus&lt;/id&gt;
-      &lt;!--Enable snapshots for the built in central repo to direct --&gt;
-      &lt;!--all requests to nexus via the mirror --&gt;
-      &lt;repositories&gt;
-        &lt;repository&gt;
-          &lt;id&gt;central&lt;/id&gt;
-          &lt;url&gt;http://central&lt;/url&gt;
-          &lt;releases&gt;
-            &lt;enabled&gt;true&lt;/enabled&gt;
-          &lt;/releases&gt;
-          &lt;snapshots&gt;
-            &lt;enabled&gt;true&lt;/enabled&gt;
-          &lt;/snapshots&gt;
-        &lt;/repository&gt;
-      &lt;/repositories&gt;
-      &lt;pluginRepositories&gt;
-        &lt;pluginRepository&gt;
-          &lt;id&gt;central&lt;/id&gt;
-          &lt;url&gt;http://central&lt;/url&gt;
-          &lt;releases&gt;
-            &lt;enabled&gt;true&lt;/enabled&gt;
-          &lt;/releases&gt;
-          &lt;snapshots&gt;
-            &lt;enabled&gt;true&lt;/enabled&gt;
-          &lt;/snapshots&gt;
-        &lt;/pluginRepository&gt;
-      &lt;/pluginRepositories&gt;
-    &lt;/profile&gt;
-  &lt;/profiles&gt;
-  &lt;activeProfiles&gt;
-    &lt;!--make the profile active all the time --&gt;
-    &lt;activeProfile&gt;nexus&lt;/activeProfile&gt;
-  &lt;/activeProfiles&gt;
-&lt;/settings&gt;</code></pre>
-</div>
+<p>For us to mount the maven <code>settings.xml</code>, we will create ConfigMap holding the custom maven settings.xml:</p>
 </div>
 <div class="listingblock console-input">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl create -n workspace-demo cm maven-settings \
-  --from-file=settings.xml=maven-settings.xml</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl create -n workspace-auth-demo cm maven-settings \
+  --from-file=settings.xml=<a href="https://github.com/redhat-developer-demos/tekton-tutorial/blob/master/workspaces/maven-settings.xml">$TUTORIAL_HOME/workspaces/maven-settings.xml</a></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -562,7 +520,7 @@ service/nexus        NodePort    10.100.205.22   &lt;none&gt;        8081:31743/
 </div>
 <div class="listingblock console-input">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl get -n workspace-demo cm maven-settings -oyaml \
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl get -n workspace-auth-demo cm maven-settings -oyaml \
   | yq r - data['settings.xml']</code></pre>
 </div>
 </div>
@@ -577,6 +535,20 @@ service/nexus        NodePort    10.100.205.22   &lt;none&gt;        8081:31743/
 <h3 id="ws-deploy-knative"><a class="anchor" href="#ws-deploy-knative"></a>Deploy Knative Serving</h3>
 <div class="paragraph">
 <p>As we will be dpeloying a <a href="https://knative.dev">Knative</a> serverless application as part of the pipeline we will be running later in this chapter, lets deploy Knative to the cluster:</p>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>OpenShift users can install Knative i.e <a href="https://docs.openshift.com/container-platform/4.1/serverless/installing-openshift-serverless.html">OpenShift Serverless</a> using Operators and skip this section.</p>
+</div>
+</td>
+</tr>
+</table>
 </div>
 <div class="listingblock console-input">
 <div class="content">
@@ -603,9 +575,6 @@ service/nexus        NodePort    10.100.205.22   &lt;none&gt;        8081:31743/
 standard (<mark>default</mark>)   k8s.io/minikube-hostpath   Delete          Immediate           false                  9h</code></pre>
 </div>
 </div>
-<div class="paragraph">
-<p>In OpenShift cluster the default storage class varies based on the underlying cloud platform.</p>
-</div>
 <div class="admonitionblock note">
 <table>
 <tr>
@@ -613,13 +582,55 @@ standard (<mark>default</mark>)   k8s.io/minikube-hostpath   Delete          Imm
 <i class="fa icon-note" title="Note"></i>
 </td>
 <td class="content">
-<div class="paragraph">
+<div class="ulist">
+<ul>
+<li>
 <p>If you dont have one please check <a href="https://kubernetes.io/docs/concepts/storage/storage-classes/">Kubernetes Docs</a> on how to have one configured.</p>
+</li>
+<li>
+<p>In OpenShift cluster the default storage class varies based on the underlying cloud platform. Refer to <a href="https://docs.openshift.com/container-platform/4.5/storage/dynamic-provisioning.html">documentation</a> to know more.</p>
+</li>
+</ul>
 </div>
 </td>
 </tr>
 </table>
 </div>
+</div>
+<div class="sect2">
+<h3 id="_create_pvc"><a class="anchor" href="#_create_pvc"></a>Create PVC</h3>
+<div class="paragraph">
+<p>Create the PVC <code>tekton-tutorial-sources</code>, which we will use as part of the exercises in this chapter and the upcoming ones.</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl apply -n workspace-auth-demo -f <a href="https://github.com/redhat-developer-demos/tekton-tutorial/blob/master/workspaces/sources-pvc.yaml">$TUTORIAL_HOME/workspaces/sources-pvc.yaml</a></code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="ws-pipeline-overview"><a class="anchor" href="#ws-pipeline-overview"></a>Java Application Pipeline</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The Java Application build pipeline will,</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Git clone using <code>git-clone</code> task, the <a href="https://github.com/redhat-developer-demos/tekton-helloworld" class="bare">https://github.com/redhat-developer-demos/tekton-helloworld</a> repo and build the apps/greeter/java/springboot application</p>
+</li>
+<li>
+<p>Will use maven task, maven task require two workspaces one for source and other for maven-settings</p>
+</li>
+<li>
+<p>Build the container image using the <code>buildah</code> task and push to the internal container registry</p>
+</li>
+<li>
+<p>Finally deploy the application onto Kubernetes using <code>openshift-client</code> task</p>
+</li>
+</ul>
 </div>
 </div>
 </div>
@@ -635,12 +646,7 @@ standard (<mark>default</mark>)   k8s.io/minikube-hostpath   Delete          Imm
 <p>Since we will be using the same git repo for all the exercises, lets clone it. As git clone task requires <a href="https://github.com/tektoncd/catalog/blob/master/task/git-clone/0.1/git-clone.yaml#L21-L23"><code>output</code> workspace</a>, we will attach a PersistenceVolumeClaim to it.</p>
 </div>
 <div class="paragraph">
-<p>Since the cluster as <strong>default</strong> Storage Class, just specifying the PersistenceVolumeClaim will  bind the PVC automatically to underlying storage. Create the <code>tekton-tutorial-sources</code> PVC:</p>
-</div>
-<div class="listingblock console-input">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl apply -n workspace-demo -f <a href="https://github.com/redhat-developer-demos/tekton-tutorial/blob/master/workspaces/sources-pvc.yaml">sources-pvc.yaml</a></code></pre>
-</div>
+<p>Since the cluster as <strong>default</strong> Storage Class, just specifying the PersistenceVolumeClaim will  bind the PVC automatically to underlying storage. We will use the PVC <code>tekton-tutorial-sources</code> that we created earlier.</p>
 </div>
 <div class="paragraph">
 <p>Let us run the <code>git-clone</code> Task with the <code>TaskRun</code> definition as shown below:</p>
@@ -690,23 +696,15 @@ spec:
 </div>
 <div class="listingblock console-input">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl create -n workspace-demo -f git-clone-taskrun.yaml</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl create -n workspace-auth-demo -f git-clone-taskrun.yaml</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>Grab the taskrun id to moinitor the logs,</p>
-</div>
-<div class="listingblock console-output">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">taskrun.tekton.dev/#git-clone-dpd7t# created</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Check for the logs using:</p>
+<p>View the task run  logs using,</p>
 </div>
 <div class="listingblock console-input">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">tkn tr logs -f -a git-clone-dpd7t</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">tkn tr logs -f -a $(tkn tr ls -n workspace-auth-demo | awk 'NR==2{print $1}')</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -796,7 +794,7 @@ spec:
 </div>
 <div class="listingblock console-input">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl create -n workspace-demo -f list-dir-taskrun.yaml</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl create -n workspace-auth-demo -f list-dir-taskrun.yaml</code></pre>
 </div>
 </div>
 <div class="listingblock console-output">
@@ -805,11 +803,11 @@ spec:
 </div>
 </div>
 <div class="paragraph">
-<p>Grab the TaskRun id from the output of the earlier command to watch the logs:</p>
+<p>View the task run  logs using,</p>
 </div>
 <div class="listingblock console-input">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">tkn tr logs -f -a list-directory-mbkvl</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">tkn tr logs -f -a $(tkn tr ls -n workspace-auth-demo | awk 'NR==2{print $1}')</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -904,7 +902,7 @@ spec:
 </div>
 <div class="listingblock console-input">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl create -n workspace-demo -f maven-taskrun.yaml</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl create -n workspace-auth-demo -f maven-taskrun.yaml</code></pre>
 </div>
 </div>
 <div class="listingblock console-output">
@@ -913,11 +911,11 @@ spec:
 </div>
 </div>
 <div class="paragraph">
-<p>Grab the id from the output above and use that to watch logs:</p>
+<p>View the task run  logs using,</p>
 </div>
 <div class="listingblock console-input">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">tkn tr logs -f -a maven-build-9cjws</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">tkn tr logs -f -a $(tkn tr ls -n workspace-auth-demo | awk 'NR==2{print $1}')</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -957,7 +955,7 @@ spec:
 <h3 id="ws-use-cm-list-target-dir"><a class="anchor" href="#ws-use-cm-list-target-dir"></a>List build target directory</h3>
 <div class="listingblock console-input">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl create -n workspace-demo -f <a href="https://github.com/redhat-developer-demos/tekton-tutorial/blob/master/workspaces/list-target-dir-taskrun.yaml">list-target-dir-taskrun.yaml</a></code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl create -n workspace-auth-demo -f <a href="https://github.com/redhat-developer-demos/tekton-tutorial/blob/master/workspaces/list-target-dir-taskrun.yaml">list-target-dir-taskrun.yaml</a></code></pre>
 </div>
 </div>
 <div class="listingblock console-output">
@@ -966,11 +964,11 @@ spec:
 </div>
 </div>
 <div class="paragraph">
-<p>Grab the id from the output above and use that to watch logs:</p>
+<p>View the task run  logs using,</p>
 </div>
 <div class="listingblock console-input">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">tkn tr logs -f -a list-directory-xbzpq</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">tkn tr logs -f -a $(tkn tr ls -n workspace-auth-demo | awk 'NR==2{print $1}')</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1136,7 +1134,7 @@ spec:
 <h3 id="ws-create-pipeline"><a class="anchor" href="#ws-create-pipeline"></a>Create the Pipeline</h3>
 <div class="listingblock console-input">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl apply -n workspace-demo -f helloworld-app-deploy.yaml</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl apply -n workspace-auth-demo -f helloworld-app-deploy.yaml</code></pre>
 </div>
 </div>
 <div class="listingblock console-output">
@@ -1152,10 +1150,10 @@ spec:
 </div>
 <div class="listingblock console-input">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">wget -q -O- \
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">curl -sSL \
   <a href="https://raw.githubusercontent.com/tektoncd/catalog/master/task/kn/0.1/kn-deployer.yaml" class="bare">https://raw.githubusercontent.com/tektoncd/catalog/master/task/kn/0.1/kn-deployer.yaml</a> \
-  | yq w - -d0 metadata.namespace workspace-demo \
-  | yq w - -d2 subjects.[0].namespace workspace-demo \
+  | yq w - -d0 metadata.namespace workspace-auth-demo \
+  | yq w - -d2 subjects.[0].namespace workspace-auth-demo \
   | kubectl apply -f -</code></pre>
 </div>
 </div>
@@ -1208,7 +1206,7 @@ spec:
 </div>
 <div class="listingblock console-input">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl create -n workspace-demo -f helloworld-app-deploy-run.yaml</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl create -n workspace-auth-demo -f helloworld-app-deploy-run.yaml</code></pre>
 </div>
 </div>
 <div class="listingblock console-output">
@@ -1217,11 +1215,11 @@ spec:
 </div>
 </div>
 <div class="paragraph">
-<p>Grab the id from the previous output and use the same to watch the logs</p>
+<p>View the pipeline run logs using,</p>
 </div>
 <div class="listingblock console-input">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">tkn pr logs -f -a helloworld-app-7k9cw</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">tkn pr logs -f -a $(tkn pr ls -n workspace-auth-demo | awk 'NR==2{print $1}')</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1229,7 +1227,7 @@ spec:
 </div>
 <div class="listingblock console-input">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl get ksvc -n workspace-demo</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl get ksvc -n workspace-auth-demo</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1238,7 +1236,7 @@ spec:
 <div class="listingblock console-output">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">NAME         URL                                                    LATESTCREATED        LATESTREADY          READY   REASON
-helloworld   http://helloworld.workspace-demo.192.168.64.5.nip.io   helloworld-kffxd-1   helloworld-kffxd-1   True</code></pre>
+helloworld   http://helloworld.{chapter-namespace}.192.168.64.5.nip.io   helloworld-kffxd-1   helloworld-kffxd-1   True</code></pre>
 </div>
 </div>
 </div>
@@ -1276,14 +1274,28 @@ helloworld   http://helloworld.workspace-demo.192.168.64.5.nip.io   helloworld-k
 <div class="sectionbody">
 <div class="listingblock console-input">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl delete ns workspace-demo</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl delete -n workspace-auth-demo pipeline --all
+kubectl delete -n workspace-auth-demo pr --all
+kubectl delete -n workspace-auth-demo tr --all</code></pre>
 </div>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+Leave the namespace, nexus, pvc, confimaps created as part of this chapter, as we will be reusing them in next chapter.
+</td>
+</tr>
+</table>
 </div>
 </div>
 </div>
 <nav class="pagination">
   <span class="prev"><a href="pipelines.html">Pipelines</a></span>
-  <span class="next"><a href="pipelines.html#tekton-ws-cleanup">Cleanup</a></span>
+  <span class="next"><a href="private_reg_repos.html">Using Private Registries and Repositories</a></span>
 </nav>
 </article>
 <aside class="toc sidebar" data-title="Contents" data-levels="2">

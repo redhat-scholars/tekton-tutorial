@@ -179,12 +179,12 @@
     <a class="nav-link" href="workspaces.html#ws-overview">Overview</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="workspaces.html#ws-tasks-deploy">Deploy Tasks from Catalog</a>
-  </li>
-  <li class="nav-item" data-depth="2">
     <button class="nav-item-toggle"></button>
     <a class="nav-link" href="workspaces.html#ws-prepare">Prepare for Using Workspaces</a>
 <ul class="nav-list">
+  <li class="nav-item" data-depth="3">
+    <a class="nav-link" href="workspaces.html#ws-tasks-deploy">Deploy Tasks from Catalog</a>
+  </li>
   <li class="nav-item" data-depth="3">
     <a class="nav-link" href="workspaces.html#ws-deploy-nexus">Deploy Nexus</a>
   </li>
@@ -198,6 +198,9 @@
     <a class="nav-link" href="workspaces.html#ws-check-sc">Check Default Storage Class</a>
   </li>
 </ul>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="workspaces.html#ws-pipeline-overview">Java Application Pipeline</a>
   </li>
   <li class="nav-item" data-depth="2">
     <button class="nav-item-toggle"></button>
@@ -239,7 +242,34 @@
 </ul>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="pipelines.html#tekton-ws-cleanup">Cleanup</a>
+    <a class="nav-link" href="workspaces.html#tekton-ws-cleanup">Cleanup</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="private_reg_repos.html">Using Private Registries and Repositories</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="private_reg_repos.html#tkn-prr-overview">Overview</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="private_reg_repos.html#tekton-push-to-external-reg">Pushing To External Registry</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="3">
+    <a class="nav-link" href="private_reg_repos.html#tekton-push-registry-secret">Create Registry Secret</a>
+  </li>
+  <li class="nav-item" data-depth="3">
+    <a class="nav-link" href="private_reg_repos.html#tekton-build-sa">Create Service Account</a>
+  </li>
+  <li class="nav-item" data-depth="3">
+    <a class="nav-link" href="private_reg_repos.html#tekton-create-build-push-pipeline">Create Pipeline</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="private_reg_repos.html#tekton-auth-cleanup">Cleanup</a>
   </li>
 </ul>
   </li>
@@ -313,10 +343,10 @@
 <td class="tableblock halign-center valign-top"><p class="tableblock"><a href="https://github.com/wercker/stern/releases/download/1.11.0/stern_windows_amd64.exe">Download</a></p></td>
 </tr>
 <tr>
-<td class="tableblock halign-center valign-top"><p class="tableblock"><a href="https://github.com/mikefarah/yq">yq v2.4.1</a></p></td>
-<td class="tableblock halign-center valign-top"><p class="tableblock"><a href="https://github.com/mikefarah/yq/releases/download/2.4.1/yq_darwin_amd64">Download</a></p></td>
-<td class="tableblock halign-center valign-top"><p class="tableblock"><a href="https://github.com/mikefarah/yq/releases/download/2.4.1/yq_linux_amd64">Download</a></p></td>
-<td class="tableblock halign-center valign-top"><p class="tableblock"><a href="https://github.com/mikefarah/yq/releases/download/2.4.1/yq_windows_amd64.exe">Download</a></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock"><a href="https://github.com/mikefarah/yq">yq</a></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">brew install yq</p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">brew install yq</p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">choco install yq</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-center valign-top"><p class="tableblock"><a href="https://httpie.org/">httpie</a></p></td>
