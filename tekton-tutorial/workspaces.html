@@ -467,7 +467,8 @@ maven              This Task can be us...   11 hours ago</code></pre>
 </div>
 <div class="listingblock console-input">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl apply -n workspace-auth-demo -f $TUTORIAL_HOME/install/utils/nexus.yaml</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl apply -n workspace-auth-demo \
+  -f <a href="https://github.com/redhat-developer-demos/tekton-tutorial/blob/master/install/utils/nexus.yaml" target="_blank" rel="noopener">$TUTORIAL_HOME/install/utils/nexus.yaml</a></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -530,7 +531,7 @@ service/nexus        NodePort    10.100.205.22   &lt;none&gt;        8081:31743/
 <div class="listingblock console-input">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl create -n workspace-auth-demo cm maven-settings \
-  --from-file=settings.xml=<a href="https://github.com/redhat-developer-demos/tekton-tutorial/blob/master/workspaces/maven-settings.xml">$TUTORIAL_HOME/workspaces/maven-settings.xml</a></code></pre>
+  --from-file=settings.xml=<a href="https://github.com/redhat-developer-demos/tekton-tutorial/blob/master/workspaces/maven-settings.xml" target="_blank" rel="noopener">$TUTORIAL_HOME/workspaces/maven-settings.xml</a></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -570,7 +571,7 @@ service/nexus        NodePort    10.100.205.22   &lt;none&gt;        8081:31743/
 </div>
 <div class="listingblock console-input">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$TUTORIAL_HOME/bin/<a href="https://github.com/redhat-developer-demos/tekton-tutorial/blob/master/bin/enable_knative.sh">enable_knative.sh</a></code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$TUTORIAL_HOME/bin/<a href="https://github.com/redhat-developer-demos/tekton-tutorial/blob/master/bin/enable_knative.sh" target="_blank" rel="noopener">enable_knative.sh</a></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -622,7 +623,7 @@ standard (<mark>default</mark>)   k8s.io/minikube-hostpath   Delete          Imm
 </div>
 <div class="listingblock console-input">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl apply -n workspace-auth-demo -f <a href="https://github.com/redhat-developer-demos/tekton-tutorial/blob/master/workspaces/sources-pvc.yaml">$TUTORIAL_HOME/workspaces/sources-pvc.yaml</a></code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl apply -n workspace-auth-demo -f <a href="https://github.com/redhat-developer-demos/tekton-tutorial/blob/master/workspaces/sources-pvc.yaml" target="_blank" rel="noopener">$TUTORIAL_HOME/workspaces/sources-pvc.yaml</a></code></pre>
 </div>
 </div>
 </div>
@@ -670,7 +671,7 @@ standard (<mark>default</mark>)   k8s.io/minikube-hostpath   Delete          Imm
 <p>Let us run the <code>git-clone</code> Task with the <code>TaskRun</code> definition as shown below:</p>
 </div>
 <div class="listingblock">
-<div class="title"><a href="https://github.com/redhat-developer-demos/tekton-tutorial/blob/master/workspaces/git-clone-taskrun.yaml">git-clone-taskrun</a></div>
+<div class="title"><a href="https://github.com/redhat-developer-demos/tekton-tutorial/blob/master/workspaces/git-clone-taskrun.yaml" target="_blank" rel="noopener">git-clone-taskrun</a></div>
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">apiVersion: tekton.dev/v1beta1
 kind: TaskRun
@@ -785,7 +786,7 @@ tekton-tutorial-sources   Bound    pvc-48aa86ae-ec20-4f0c-a2d0-65d906d41bed   1G
 <p>As explained in the overview one of the advantages of the <code>workspaces</code> is that it can be shared, lets run a simple list-directory Task to verify the same:</p>
 </div>
 <div class="listingblock">
-<div class="title"><a href="https://github.com/redhat-developer-demos/tekton-tutorial/blob/master/workspaces/list-dir-taskrun.yaml">list-dir-taskrun.yaml</a></div>
+<div class="title"><a href="https://github.com/redhat-developer-demos/tekton-tutorial/blob/master/workspaces/list-dir-taskrun.yaml" target="_blank" rel="noopener">list-dir-taskrun.yaml</a></div>
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">apiVersion: tekton.dev/v1beta1
 kind: TaskRun
@@ -875,7 +876,7 @@ spec:
 <p>Let run the maven task to build the tekton-helloworld project we cloned earlier.</p>
 </div>
 <div class="listingblock">
-<div class="title"><a href="https://github.com/redhat-developer-demos/tekton-tutorial/blob/master/workspaces/maven-taskrun.yaml">maven-taskrun.yaml</a></div>
+<div class="title"><a href="https://github.com/redhat-developer-demos/tekton-tutorial/blob/master/workspaces/maven-taskrun.yaml" target="_blank" rel="noopener">maven-taskrun.yaml</a></div>
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">apiVersion: tekton.dev/v1beta1
 kind: TaskRun
@@ -1032,7 +1033,7 @@ spec:
 <p>Let us now apply what we learned with workspace to build and deploy the application pipeline as shown:</p>
 </div>
 <div class="listingblock">
-<div class="title"><a href="https://github.com/redhat-developer-demos/tekton-tutorial/blob/master/workspaces/helloworld-app-deploy.yaml">helloworld-app-deploy.yaml</a></div>
+<div class="title"><a href="https://github.com/redhat-developer-demos/tekton-tutorial/blob/master/workspaces/helloworld-app-deploy.yaml" target="_blank" rel="noopener">helloworld-app-deploy.yaml</a></div>
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">apiVersion: tekton.dev/v1beta1
 kind: Pipeline
@@ -1189,7 +1190,7 @@ clusterrolebinding.rbac.authorization.k8s.io/kn-deployer-binding created</code><
 <div class="sect2">
 <h3 id="ws-run-pipeline"><a class="anchor" href="#ws-run-pipeline"></a>Run the Pipeline</h3>
 <div class="listingblock">
-<div class="title"><a href="https://github.com/redhat-developer-demos/tekton-tutorial/blob/master/workspaces/helloworld-app-deploy-run.yaml">helloworld-app-deploy-run.yaml</a></div>
+<div class="title"><a href="https://github.com/redhat-developer-demos/tekton-tutorial/blob/master/workspaces/helloworld-app-deploy-run.yaml" target="_blank" rel="noopener">helloworld-app-deploy-run.yaml</a></div>
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">apiVersion: tekton.dev/v1beta1
 kind: PipelineRun

@@ -542,7 +542,7 @@ secrets:
 </div>
 <div class="listingblock console-input">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl apply -n workspace-auth-demo -f <a href="https://github.com/redhat-developer-demos/tekton-tutorial/blob/master/auth/secretworld-app-clone.yaml" target="_blank" rel="noopener">secretworld-app-clone.yaml</a></code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl apply -n workspace-auth-demo -f <a href="https://github.com/redhat-developer-demos/tekton-tutorial/blob/master/private_repos_reg/secretworld-app-clone.yaml" target="_blank" rel="noopener">secretworld-app-clone.yaml</a></code></pre>
 </div>
 </div>
 <div class="listingblock console-output">
@@ -766,7 +766,8 @@ secrets:
 </div>
 <div class="listingblock console-input">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl apply -n workspace-auth-demo -f helloworld-app-build.yaml</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl apply -n workspace-auth-demo \
+  -f <a href="https://github.com/redhat-developer-demos/tekton-tutorial/blob/master/private_repos_reg/helloworld-app-build.yaml" target="_blank" rel="noopener">helloworld-app-build.yaml</a></code></pre>
 </div>
 </div>
 <div class="listingblock console-output">

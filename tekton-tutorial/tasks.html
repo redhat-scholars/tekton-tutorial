@@ -957,7 +957,7 @@ tkn clustertask start echoer --showlog</code></pre>
 <div class="sect2">
 <h3 id="task-parameters"><a class="anchor" href="#task-parameters"></a>Step :: Task Inputs and Outputs</h3>
 <div class="listingblock">
-<div class="title"><a href="https://github.com/redhat-developer-demos/tekton-tutorial/blob/master/tasks/build-app-task.yaml">task inputs and outputs</a></div>
+<div class="title"><a href="https://github.com/redhat-developer-demos/tekton-tutorial/blob/master/tasks/build-app-task.yaml" target="_blank" rel="noopener">task inputs and outputs</a></div>
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">inputs:
     resources: <i class="conum" data-value="1"></i><b>(1)</b>
@@ -1029,7 +1029,7 @@ outputs:
 <div class="sect2">
 <h3 id="build-sources"><a class="anchor" href="#build-sources"></a>Step 1 :: Build Application Sources</h3>
 <div class="listingblock">
-<div class="title"><a href="https://github.com/redhat-developer-demos/tekton-tutorial/blob/master/tasks/build-app-task.yaml#L32-L43">step-build-sources</a></div>
+<div class="title"><a href="https://github.com/redhat-developer-demos/tekton-tutorial/blob/master/tasks/build-app-task.yaml#L32-L43" target="_blank" rel="noopener">step-build-sources</a></div>
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">- name: build-sources
   image: docker.io/maven:3.6.3-jdk-8-slim
@@ -1069,7 +1069,7 @@ outputs:
 <div class="sect2">
 <h3 id="build-linux-image"><a class="anchor" href="#build-linux-image"></a>Step 2 :: Build Application Linux Container Image</h3>
 <div class="listingblock">
-<div class="title"><a href="https://github.com/redhat-developer-demos/tekton-tutorial/blob/master/tasks/build-app-task.yaml#L44-L62">step-build-image</a></div>
+<div class="title"><a href="https://github.com/redhat-developer-demos/tekton-tutorial/blob/master/tasks/build-app-task.yaml#L44-L62" target="_blank" rel="noopener">step-build-image</a></div>
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">- name: build-image
   image: quay.io/buildah/stable
@@ -1107,7 +1107,7 @@ outputs:
 <div class="sect2">
 <h3 id="push-linux-image"><a class="anchor" href="#push-linux-image"></a>Step 3:: Push Application Linux Container Image</h3>
 <div class="listingblock">
-<div class="title"><a href="https://github.com/redhat-developer-demos/tekton-tutorial/blob/master/tasks/build-app-task.yaml#L63-L78">step-build-image</a></div>
+<div class="title"><a href="https://github.com/redhat-developer-demos/tekton-tutorial/blob/master/tasks/build-app-task.yaml#L63-L78" target="_blank" rel="noopener">step-build-image</a></div>
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">- name: push-image
   image: quay.io/buildah/stable
@@ -1130,7 +1130,7 @@ outputs:
 <p>Having see the three individual steps of the <code>build-app</code> task, the following snippet shows all three chained together:</p>
 </div>
 <div class="listingblock">
-<div class="title"><a href="https://github.com/redhat-developer-demos/tekton-tutorial/blob/master/tasks/build-app-task.yaml">build-app-task.yaml</a></div>
+<div class="title"><a href="https://github.com/redhat-developer-demos/tekton-tutorial/blob/master/tasks/build-app-task.yaml" target="_blank" rel="noopener">build-app-task.yaml</a></div>
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">apiVersion: tekton.dev/v1beta1
 kind: Task
