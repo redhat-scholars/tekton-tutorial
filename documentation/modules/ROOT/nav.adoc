@@ -59,10 +59,15 @@
 
 * xref:private_reg_repos.adoc[Using Private Registries and Repositories]
 ** xref:private_reg_repos.adoc#tkn-prr-overview[Overview]
+** xref:private_reg_repos.adoc#tekton-pull-from-remote-repo[Pulling from Private Source Repository]
+*** xref:private_reg_repos.adoc#tekton-github-repo-secret[Create Github PAT Secret]
+*** xref:private_reg_repos.adoc#tekton-github-sa[Create Service Account]
+*** xref:private_reg_repos.adoc#tekton-create-clone-pipeline[reate And Run Pipeline]
 ** xref:private_reg_repos.adoc#tekton-push-to-external-reg[Pushing To External Registry]
 *** xref:private_reg_repos.adoc#tekton-push-registry-secret[Create Registry Secret]
 *** xref:private_reg_repos.adoc#tekton-build-sa[Create Service Account]
-*** xref:private_reg_repos.adoc#tekton-create-build-push-pipeline[Create Pipeline]
+*** xref:private_reg_repos.adoc#tekton-create-build-push-pipeline[Create And Run Pipeline]
+** xref:private_reg_repos.adoc#tekton-remote-ref-points[Points to Ponder]
 ** xref:private_reg_repos.adoc#tekton-auth-cleanup[Cleanup]
 
 // * xref:pipelines.adoc[Triggers]
