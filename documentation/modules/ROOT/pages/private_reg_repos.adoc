@@ -1,0 +1,200 @@
+= Using Private Repositories and Registries
+
+include::_attributes.adoc[]
+:chapter-namespace: workspace-auth-demo
+
+WARNING: This chapter build is in progress, expect to change and not working as expected
+
+At the end of this chapter you will be able to :
+
+* Tekton Authentication Secrets
+* How to push linux contianer image to external registry
+* How to clone from a private Github respository
+
+[#tkn-prr-overview]
+== Overview
+
+In many parctical usecase you might need to pull from private Git repsoitories or might need to push to external container registry such as https://quay.io[Quay.io]. In both the cases the access requires you to authenticate. With Tekton this is achieved using the Kubernetes Service Account(SA) and Kubernetes Secret.
+
+include::partial$tekton-nav-to-folder.adoc[tags="folder-all,auth"]
+
+Let us create a new namespace called `{chapter-namespace}` and switch to that namespace context. 
+
+[NOTE.assumptions,caption=ASSUMPTIONS]
+====
+* It is assumed that you have completed xref:workspaces.adoc[Workspaces] and the reusing the same namespace that was xref:workspaces.adoc#ws-prepare[prepared] in that chapter.
+* You have container registry account with https://quay.io[Quay.io] or https://hub.docker.com[Docker Hub]
+* You have GitHub account and a private repository
+====
+
+[#tekton-push-to-external-reg]
+== Pusing to external registry
+
+To able push to external container registry, its requried that the Pipline is run with a ServiceAccount that has container registry credentials configured via ServiceAccount secrets.  Kubernetes provider a Secret type called `docker-registry`, that can be used to configure the container registry credentials.
+
+Set the requried environment variables to be used when creating the container-registry-secret:
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+export CONTAINER_REGISTRY_SERVER='https://quay.io' #<.>
+export CONTAINER_REGISTRY_USER='<your registry user>'
+export CONTAINER_REGISTRY_PASSWORD='<your registry user password>'
+----
+<.> The container registry server URL, for Quay.io its https://quay.io and for DockerHub it is https://index.docker.io/v2/
+
+[#tekton-push-registry-secret]
+=== Create Container Registry Secret
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+kubectl create secret -n {chapter-namespace} docker-registry container-registry-secret \
+  --docker-server=pass:[$CONTAINER_REGISTRY_SERVER] \
+  --docker-username=pass:[$CONTAINER_REGISTRY_USER] \
+  --docker-password=pass:[$CONTAINER_REGISTRY_PASSWORD]
+----
+
+[.console-output]
+[source,bash]
+----
+secret/container-registry-secret created
+----
+
+[#tekton-build-sa]
+=== Create Service Account
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+kubectl create sa -n {chapter-namespace} build-bot
+----
+
+[.console-output]
+[source,bash]
+----
+serviceaccount/build-bot created
+----
+
+[#tekton-patch-build-sa]
+=== Patch Service Account 
+
+Now patch the `build-bot` service account to use the `container-registry-secret` credentials:
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+kubectl patch serviceaccount build-bot \
+  -p '{"secrets": [{"name": "container-registry-secret"}]}'
+----
+
+[.console-output]
+[source,bash]
+----
+serviceaccount/build-bot patched
+----
+
+Lets verify if the service account has the secret added:
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+kubectl get sa -n {chapter-namespace} build-bot -o yaml
+----
+
+The command should show an output like:
+
+[.console-output]
+[source,yaml,subs="+quotes"]
+----
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  creationTimestamp: "2020-07-28T03:34:32Z"
+  name: build-bot
+  namespace: auth-demo
+  resourceVersion: "53879"
+  selfLink: /api/v1/namespaces/auth-demo/serviceaccounts/build-bot
+  uid: 628067fd-91d1-4cdd-b6a6-88b4f7280ff0
+secrets:
+#- name: container-registry-secret#
+- name: build-bot-token-8nl2v
+----
+
+[#tekton-create-build-push-pipeline]
+=== Create Pipeline
+
+Create the build and push app pipeline: 
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+kubectl apply -n {chapter-namespace} -f helloworld-app-build.yaml
+----
+
+[.console-output]
+[source,bash]
+----
+pipeline.tekton.dev/helloworld-app-build created
+----
+
+[#tekton-run-build-push-pipeline]
+=== Run Pipeline
+
+Ensure that the pipeline run has been set to run with the Service Account `build-bot`
+
+[source,yaml,subs="+quotes"]
+----
+include::ROOT:example$helloworld-app-build-run.yaml[]
+----
+
+Run the pipeline:
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+kubectl create -n {chapter-namespace} -f helloworld-app-build-run.yaml
+----
+
+A successful build and push will show the following output ( trimmed brevity):
+
+[.console-output]
+[source,bash,subs="+quotes"]
+----
+...
+[build-java-app-image : push] + buildah --storage-driver=overlay push --tls-verify=true --digestfile /workspace/source/image-digest quay.io/rhdevelopers/tekton-helloworld docker://quay.io/rhdevelopers/tekton-helloworld
+[build-java-app-image : push] Getting image source signatures
+[build-java-app-image : push] Copying blob sha256:90c2e42f948b524cf98005073e0b0aa2065160abf9e8b314976c064e270d92ac
+[build-java-app-image : push] Copying blob sha256:869b43e5dca37fa63d84e9bc588613678c4fe6fa2072a72a6ab5487424db2891
+[build-java-app-image : push] Copying blob sha256:f9ddbcc4e7954a705b700c35c5e5beceabd86af121a6e561d86437a8512a6be6
+[build-java-app-image : push] Copying blob sha256:7b08010864ba4c7ce9dfe1b90244b459b77c0387051659d37454783d10ab1113
+[build-java-app-image : push] Copying config sha256:5bd61d725dc47d1f8b7c225d8d52f2730321cadad65988a0de60300a711a2e2b
+[build-java-app-image : push] Writing manifest to image destination
+[build-java-app-image : push] Copying config sha256:5bd61d725dc47d1f8b7c225d8d52f2730321cadad65988a0de60300a711a2e2b
+[build-java-app-image : push] Writing manifest to image destination
+[build-java-app-image : push] Storing signatures
+
+[build-java-app-image : digest-to-results] + cat /workspace/source/image-digest
+[build-java-app-image : digest-to-results] + tee /tekton/results/IMAGE_DIGEST
+[build-java-app-image : digest-to-results] #sha256:0e9e267a96f1ea48fe00642cd82ef689e44c7d467d6db3a3a543fa5b42fe53dc#
+----
+
+include::ROOT:partial$logs-view.adoc[tags='pr']
+
+A successful pipeline should have pushed the image to the external container registry. The following screen shot shows the image pushed to *rhdevelopers* Quay.io container registry repo:
+
+image::pushed_image.png[]
+
+[NOTE]
+====
+If you noticed the highlighted *sha256* from the log above, is same as that of the *sha256* listed in the contianer registry repository.
+====
+
+[#tekton-auth-cleanup]
+== Cleanup
+
+[.console-input]
+[source,bash,subs="+macros,attributes+"]
+----
+kubectl delete ns {chapter-namespace}
+----

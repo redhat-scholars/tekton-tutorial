@@ -1,5 +1,6 @@
 = Workspaces
 include::_attributes.adoc[]
+:chapter-namespace: workspace-auth-demo
 
 WARNING: This chapter build is in progress, expect to change and not working as expected
 
@@ -14,6 +15,12 @@ At the end of this chapter you will be able to :
 
 include::partial$tekton-nav-to-folder.adoc[tags="folder-all,workspaces"]
 
+== Why Workspace ?
+
+In many partical usecases of Pipelines it becomes cricual for you to share the filsystem with between Tasks and between Steps. The filesystem could be typically hold a clone github repostiory, a ConfigMap or a secret. 
+
+Tekton `workspace` a technique by which the Task step and Pipeline task can share a common filesystem. This helps Pipelines to pick up changes form one task to another task in the Pipeline workflow.
+
 [#ws-overview]
 == Overview
 
@@ -23,16 +30,19 @@ As part of `workspaces` exercies, we will be building the Java application https
 * Mount a PersistenceVolume as Workspace
 * Share and Cache build artifacts
 
-[#ws-tasks-deploy]
-== Deploy Tasks from Catalog
+[#ws-prepare]
+== Prepare for using workspaces
 
-All exercises of this chapter will be done a namesapace `workspace-demo`, lets create and switch to the `workspace-demo` namespace.
+[#ws-tasks-deploy]
+=== Deploy Tasks from Catalog
+
+All exercises of this chapter will be done a namesapace `{chapter-namespace}`, lets create and switch to the `{chapter-namespace}` namespace.
 
 [.console-input]
 [source,bash,subs="+macros,+attributes"]
 ----
-kubectl create ns workspace-demo && \
-kubectl config set-context --current --namespace workspace-demo
+kubectl create ns {chapter-namespace} 
+kubectl config set-context --current --namespace {chapter-namespace}
 ----
 
 As part of this exercise we will need to install the following external tasks to be installed in the namespace:
@@ -45,12 +55,12 @@ As part of this exercise we will need to install the following external tasks to
 [.console-input]
 [source,bash,subs="+macros,+attributes"]
 ----
-kubectl apply -n workspace-demo \
+kubectl apply -n {chapter-namespace} \
   -f https://raw.githubusercontent.com/tektoncd/catalog/master/task/git-clone/0.1/git-clone.yaml \
   -f https://raw.githubusercontent.com/tektoncd/catalog/master/task/maven/0.1/maven.yaml \
   -f https://raw.githubusercontent.com/tektoncd/catalog/master/task/buildah/0.1/buildah.yaml \
   -f https://raw.githubusercontent.com/tektoncd/catalog/master/task/kn/0.1/kn.yaml \
-  -f list-directory-task.yaml
+  -f link:{github-repo}/{workspaces-repo}/list-directory-task.yaml[pass:[$TUTORIAL_HOME]/{workspaces-repo}/list-directory-task.yaml]
 ----
 
 Check if all the tasks are available:
@@ -74,16 +84,6 @@ list-directory     Simple directory li...   11 hours ago
 maven              This Task can be us...   11 hours ago
 ----
 
-[#ws-prepare]
-== Prepare for using workspaces
-
-The Java Application build pipeline will,
-
-- Git clone using `git-clone` task, the https://github.com/redhat-developer-demos/tekton-helloworld repo and build the apps/greeter/java/springboot application
-- Will use maven task, maven task require two workspaces one for source and other for maven-settings
-- Build the container image using the `buildah` task and push to the internal container registry
-- Finally deploy the application onto Kubernetes using `openshift-client` task
-
 [#ws-deploy-nexus]
 === Deploy Nexus
 
@@ -92,7 +92,7 @@ To show maven artifact caching and using customized maven `settings.xml` we will
 [.console-input]
 [source,bash,subs="+macros,+attributes"]
 ----
-kubectl apply -n workspace-demo -f $TUTORIAL_HOME/install/utils/nexus.yaml
+kubectl apply -n {chapter-namespace} -f $TUTORIAL_HOME/install/utils/nexus.yaml
 ----
 
 Wait for the nexus3 pod to come up before proceeding further with exercises:
@@ -100,7 +100,7 @@ Wait for the nexus3 pod to come up before proceeding further with exercises:
 [.console-input]
 [source,bash,subs="+macros,+attributes"]
 ----
-watch kubectl -n workspace-demo get pods,svc
+watch kubectl -n {chapter-namespace} get pods,svc
 ----
 
 A sucessfully running nexus3 pod should show the following services and pods:
@@ -120,7 +120,7 @@ The nexus maven repository could be opened using the url:
 [.console-input]
 [source,bash,subs="+macros,+attributes"]
 ----
-$(minikube service nexus -n workspace-demo)
+$(minikube service nexus -n {chapter-namespace})
 ----
 
 [NOTE]
@@ -129,26 +129,20 @@ $(minikube service nexus -n workspace-demo)
 [.console-input]
 [source,bash,subs="+macros,+attributes"]
 ----
-oc expose svc -n workspace-demo nexus
+oc expose svc -n {chapter-namespace} nexus
 ----
 =====
 
 [#ws-create-maven-settings-cm]
 === Create maven-settings ConfigMap
 
-For us to mount the maven `settings.xml`, we will create ConfigMap holding the settings.xml shown in the below listing:
-
-.link:{github-repo}/{workspaces-repo}/maven-settings.xml[setttings.xml]
-[source,xml]
-----
-include::ROOT:example$maven-settings.xml[]
-----
+For us to mount the maven `settings.xml`, we will create ConfigMap holding the custom maven settings.xml:
 
 [.console-input]
 [source,bash,subs="+macros,+attributes"]
 ----
-kubectl create -n workspace-demo cm maven-settings \
-  --from-file=settings.xml=maven-settings.xml
+kubectl create -n {chapter-namespace} cm maven-settings \
+  --from-file=settings.xml=link:{github-repo}/{workspaces-repo}/maven-settings.xml[+$TUTORIAL_HOME+/{workspaces-repo}/maven-settings.xml]
 ----
 
 You can check the ConfigMap contents using the command:
@@ -156,7 +150,7 @@ You can check the ConfigMap contents using the command:
 [.console-input]
 [source,bash,subs="+macros,+attributes"]
 ----
-kubectl get -n workspace-demo cm maven-settings -oyaml \
+kubectl get -n {chapter-namespace} cm maven-settings -oyaml \
   | yq r - data['settings.xml']
 ----
 
@@ -168,6 +162,11 @@ Before we create our pipeline ensure that the kubernetes cluster has a default s
 === Deploy Knative Serving
 
 As we will be dpeloying a https://knative.dev[Knative] serverless application as part of the pipeline we will be running later in this chapter, lets deploy Knative to the cluster:
+
+[IMPORTANT]
+====
+OpenShift users can install Knative i.e https://docs.openshift.com/container-platform/4.1/serverless/installing-openshift-serverless.html[OpenShift Serverless] using Operators and skip this section.
+====
 
 [.console-input]
 [source,bash,subs="+macros,+attributes"]
@@ -195,12 +194,32 @@ NAME                 PROVISIONER                RECLAIMPOLICY   VOLUMEBINDINGMOD
 standard (#default#)   k8s.io/minikube-hostpath   Delete          Immediate           false                  9h
 ----
 
-In OpenShift cluster the default storage class varies based on the underlying cloud platform.
-
 [NOTE]
 ====
-If you dont have one please check https://kubernetes.io/docs/concepts/storage/storage-classes/[Kubernetes Docs] on how to have one configured.
+- If you dont have one please check https://kubernetes.io/docs/concepts/storage/storage-classes/[Kubernetes Docs] on how to have one configured.
+
+- In OpenShift cluster the default storage class varies based on the underlying cloud platform. Refer to https://docs.openshift.com/container-platform/4.5/storage/dynamic-provisioning.html[documentation] to know more.
 ====
+
+=== Create PVC
+
+Create the PVC `tekton-tutorial-sources`, which we will use as part of the exercises in this chapter and the upcoming ones.
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+kubectl apply -n {chapter-namespace} -f link:{github-repo}/{workspaces-repo}/sources-pvc.yaml[+$TUTORIAL_HOME+/{workspaces-repo}/sources-pvc.yaml]
+----
+
+[#ws-pipeline-overview]
+== Java Application Pipeline
+
+The Java Application build pipeline will,
+
+- Git clone using `git-clone` task, the https://github.com/redhat-developer-demos/tekton-helloworld repo and build the apps/greeter/java/springboot application
+- Will use maven task, maven task require two workspaces one for source and other for maven-settings
+- Build the container image using the `buildah` task and push to the internal container registry
+- Finally deploy the application onto Kubernetes using `openshift-client` task
 
 [#ws-use-pvc]
 == Using PVC As Workspace
@@ -212,13 +231,7 @@ As part of this exercise we will use PersitenceVolume(PV) and PersistenceVolumeC
 
 Since we will be using the same git repo for all the exercises, lets clone it. As git clone task requires https://github.com/tektoncd/catalog/blob/master/task/git-clone/0.1/git-clone.yaml#L21-L23[`output` workspace], we will attach a PersistenceVolumeClaim to it. 
 
-Since the cluster as *default* Storage Class, just specifying the PersistenceVolumeClaim will  bind the PVC automatically to underlying storage. Create the `tekton-tutorial-sources` PVC:
-
-[.console-input]
-[source,bash,subs="+macros,+attributes"]
-----
-kubectl apply -n workspace-demo -f link:{github-repo}/{workspaces-repo}/sources-pvc.yaml[sources-pvc.yaml]
-----
+Since the cluster as *default* Storage Class, just specifying the PersistenceVolumeClaim will  bind the PVC automatically to underlying storage. We will use the PVC `tekton-tutorial-sources` that we created earlier.
 
 Let us run the `git-clone` Task with the `TaskRun` definition as shown below:
 
@@ -253,24 +266,10 @@ spec:
 [.console-input]
 [source,bash,subs="+macros,+attributes"]
 ----
-kubectl create -n workspace-demo -f git-clone-taskrun.yaml
+kubectl create -n {chapter-namespace} -f git-clone-taskrun.yaml
 ----
 
-Grab the taskrun id to moinitor the logs,
-
-[.console-output]
-[source,bash]
-----
-taskrun.tekton.dev/#git-clone-dpd7t# created
-----
-
-Check for the logs using:
-
-[.console-input]
-[source,bash]
-----
-tkn tr logs -f -a git-clone-dpd7t
-----
+include::ROOT:partial$logs-view.adoc[tags='tr']
 
 It will take few minutes for the TaskRun to start.
 
@@ -343,7 +342,7 @@ spec:
 [.console-input]
 [source,bash,subs="+macros,+attributes"]
 ----
-kubectl create -n workspace-demo -f list-dir-taskrun.yaml
+kubectl create -n {chapter-namespace} -f list-dir-taskrun.yaml
 ----
 
 [.console-output]
@@ -352,13 +351,7 @@ kubectl create -n workspace-demo -f list-dir-taskrun.yaml
 taskrun.tekton.dev/list-directory-mbkvl created
 ----
 
-Grab the TaskRun id from the output of the earlier command to watch the logs:
-
-[.console-input]
-[source,bash,subs="+macros,+attributes"]
-----
-tkn tr logs -f -a list-directory-mbkvl
-----
+include::ROOT:partial$logs-view.adoc[tags='tr']
 
 If all went well the list directory should show the directory listing of https://github.com/redhat-developer-demos/tekton-helloworld.
 
@@ -427,7 +420,7 @@ spec:
 [.console-input]
 [source,bash,subs="+macros,+attributes"]
 ----
-kubectl create -n workspace-demo -f maven-taskrun.yaml 
+kubectl create -n {chapter-namespace} -f maven-taskrun.yaml 
 ----
 
 [.console-output]
@@ -436,13 +429,7 @@ kubectl create -n workspace-demo -f maven-taskrun.yaml
 taskrun.tekton.dev/maven-build-9cjws created
 ----
 
-Grab the id from the output above and use that to watch logs:
-
-[.console-input]
-[source,bash,subs="+macros,+attributes"]
-----
-tkn tr logs -f -a maven-build-9cjws
-----
+include::ROOT:partial$logs-view.adoc[tags='tr']
 
 A successfull run should have output like(output trimmed for brevity):
 
@@ -473,7 +460,7 @@ When the TaskRun runs for the first , it will run loner as  it will maven artifa
 [.console-input]
 [source,bash,subs="+macros,+attributes"]
 ----
-kubectl create -n workspace-demo -f link:{github-repo}/{workspaces-repo}/list-target-dir-taskrun.yaml[list-target-dir-taskrun.yaml]
+kubectl create -n {chapter-namespace} -f link:{github-repo}/{workspaces-repo}/list-target-dir-taskrun.yaml[list-target-dir-taskrun.yaml]
 ----
 
 [.console-output]
@@ -482,13 +469,7 @@ kubectl create -n workspace-demo -f link:{github-repo}/{workspaces-repo}/list-ta
 taskrun.tekton.dev/list-directory-xbzpq created
 ----
 
-Grab the id from the output above and use that to watch logs:
-
-[.console-input]
-[source,bash,subs="+macros,+attributes"]
-----
-tkn tr logs -f -a list-directory-xbzpq
-----
+include::ROOT:partial$logs-view.adoc[tags='tr']
 
 A successful command should show the following output:
 
@@ -536,7 +517,7 @@ include::ROOT:example$helloworld-app-deploy.yaml[]
 [.console-input]
 [source,bash,subs="+macros,+attributes"]
 ----
-kubectl apply -n workspace-demo -f helloworld-app-deploy.yaml
+kubectl apply -n {chapter-namespace} -f helloworld-app-deploy.yaml
 ----
 
 [.console-output]
@@ -552,10 +533,10 @@ We need to create the Service Account(SA) that is authorized to Knative Service 
 [.console-input]
 [source,bash,subs="+macros,+attributes"]
 ----
-wget -q -O- \
+curl -sSL \
   https://raw.githubusercontent.com/tektoncd/catalog/master/task/kn/0.1/kn-deployer.yaml \
-  | yq w - -d0 metadata.namespace workspace-demo \
-  | yq w - -d2 subjects.[0].namespace workspace-demo \
+  | yq w - -d0 metadata.namespace {chapter-namespace} \
+  | yq w - -d2 subjects.[0].namespace {chapter-namespace} \
   | kubectl apply -f -
 ----
 
@@ -583,7 +564,7 @@ include::ROOT:example$helloworld-app-deploy-run.yaml[]
 [.console-input]
 [source,bash,subs="+macros,+attributes"]
 ----
-kubectl create -n workspace-demo -f helloworld-app-deploy-run.yaml
+kubectl create -n {chapter-namespace} -f helloworld-app-deploy-run.yaml
 ----
 
 [.console-output]
@@ -592,20 +573,14 @@ kubectl create -n workspace-demo -f helloworld-app-deploy-run.yaml
 pipelinerun.tekton.dev/helloworld-app-7k9cw created
 ----
 
-Grab the id from the previous output and use the same to watch the logs
-
-[.console-input]
-[source,bash,subs="+macros,+attributes"]
-----
-tkn pr logs -f -a helloworld-app-7k9cw
-----
+include::ROOT:partial$logs-view.adoc[tags='pr']
 
 A successfull Pipelinerun should have the `helloworld` application up and running as shown:
 
 [.console-input]
 [source,bash,subs="+macros,+attributes"]
 ----
-kubectl get ksvc -n workspace-demo
+kubectl get ksvc -n {chapter-namespace}
 ----
 
 The command should show an output like :
@@ -614,7 +589,7 @@ The command should show an output like :
 [source,bash]
 ----
 NAME         URL                                                    LATESTCREATED        LATESTREADY          READY   REASON
-helloworld   http://helloworld.workspace-demo.192.168.64.5.nip.io   helloworld-kffxd-1   helloworld-kffxd-1   True
+helloworld   http://helloworld.{chapter-namespace}.192.168.64.5.nip.io   helloworld-kffxd-1   helloworld-kffxd-1   True
 ----
 
 [#ws-verify-service]
@@ -650,5 +625,9 @@ Hello World!
 [.console-input]
 [source,bash,subs="+macros,attributes+"]
 ----
-kubectl delete ns workspace-demo
+kubectl delete -n {chapter-namespace} pipeline --all
+kubectl delete -n {chapter-namespace} pr --all
+kubectl delete -n {chapter-namespace} tr --all
 ----
+
+IMPORTANT: Leave the namespace, nexus, pvc, confimaps created as part of this chapter, as we will be reusing them in next chapter.

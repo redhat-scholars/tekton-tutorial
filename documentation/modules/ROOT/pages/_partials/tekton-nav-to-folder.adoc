@@ -2,6 +2,14 @@
 If you are not in tutorial chapter folder, then navigate to the folder:
 #end::folder-all[]
 
+#tag::auth[]
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+cd pass:[$TUTORIAL_HOME]/private_repos_reg
+----
+#end::auth[]
+
 #tag::tasks[]
 [.console-input]
 [source,bash,subs="+macros,+attributes"]

@@ -1,0 +1,17 @@
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  generateName: helloworld-app-build-
+  labels:
+    tekton.dev/pipeline: helloworld-app-build
+spec:
+  serviceAccountName: #build-bot#
+  pipelineRef:
+    name: helloworld-app-build
+  workspaces:
+    - name: maven-settings
+      configmap:
+        name: maven-settings
+    - name: source
+      persistentVolumeClaim:
+        emptyDir: tekton-tutorial-sources

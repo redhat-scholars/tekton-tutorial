@@ -32,17 +32,20 @@ spec:
           livenessProbe:
             httpGet:
               path: /
-              port: 8081
-            # nexus has lots of init to do first time so lets give
-            # more time for that to happen
-            initialDelaySeconds: 180
+              port: 8081-tcp
           readinessProbe:
+            exec:
+              command:
+                - cat
+                - /nexus-data/karaf.pid
+          # nexus has lots of init to do first time so lets give
+          # more time for that to happen
+          startupProbe:
             httpGet:
               path: /
-              port: 8081
-            # nexus has lots of init to do first time so lets give
-            # more time for that to happen
-            initialDelaySeconds: 180
+              port: 8081-tcp
+            failureThreshold: 18
+            periodSeconds: 10
           volumeMounts:
             - name: nexus-data
               mountPath: /nexus-data

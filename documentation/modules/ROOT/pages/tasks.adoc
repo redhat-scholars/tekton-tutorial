@@ -1,5 +1,6 @@
 = Tasks
 include::_attributes.adoc[]
+:chapter-namespace: tektontutorial
 
 At the end of this chapter you will be able to :
 

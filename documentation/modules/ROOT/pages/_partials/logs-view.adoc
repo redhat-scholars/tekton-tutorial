@@ -1,0 +1,21 @@
+#tag::pr[]
+
+View the pipeline run logs using,
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+tkn pr logs -f -a $(tkn pr ls -n {chapter-namespace} | awk 'NR==2{print $1}')
+----
+#end::pr[]
+
+#tag::tr[]
+
+View the task run  logs using,
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+tkn tr logs -f -a $(tkn tr ls -n {chapter-namespace} | awk 'NR==2{print $1}')
+----
+#end::tr[]

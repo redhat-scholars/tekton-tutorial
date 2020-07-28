@@ -1,16 +1,12 @@
 = Pipeline Resources
 include::_attributes.adoc[]
 :k8s-resource: build-resources.yaml
+:chapter-namespace: tektontutorial
 
 At the end of this chapter you will be able to :
 
 * Understand what is a https://github.com/tektoncd/pipeline/blob/master/docs/resources.md[pipeline resource] ?
 * Create a pipeline resource
-
-[WARNING]
-====
-PipelineResources will deprecated in future Tekton releases in favour of xref:workspaces.adoc[Workspaces]. Expect this chapter to be removed in future release of the tutorial.
-====
 
 [#tekton-res-prerequisite]
 == Prerequisite
