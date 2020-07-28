@@ -254,6 +254,21 @@
   </li>
   <li class="nav-item" data-depth="2">
     <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="#tekton-pull-from-remote-repo">Pulling from Private Source Repository</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="3">
+    <a class="nav-link" href="#tekton-github-repo-secret">Create Github PAT Secret</a>
+  </li>
+  <li class="nav-item" data-depth="3">
+    <a class="nav-link" href="#tekton-github-sa">Create Service Account</a>
+  </li>
+  <li class="nav-item" data-depth="3">
+    <a class="nav-link" href="#tekton-create-clone-pipeline">reate And Run Pipeline</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <button class="nav-item-toggle"></button>
     <a class="nav-link" href="#tekton-push-to-external-reg">Pushing To External Registry</a>
 <ul class="nav-list">
   <li class="nav-item" data-depth="3">
@@ -263,9 +278,12 @@
     <a class="nav-link" href="#tekton-build-sa">Create Service Account</a>
   </li>
   <li class="nav-item" data-depth="3">
-    <a class="nav-link" href="#tekton-create-build-push-pipeline">Create Pipeline</a>
+    <a class="nav-link" href="#tekton-create-build-push-pipeline">Create And Run Pipeline</a>
   </li>
 </ul>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="#tekton-remote-ref-points">Points to Ponder</a>
   </li>
   <li class="nav-item" data-depth="2">
     <a class="nav-link" href="#tekton-auth-cleanup">Cleanup</a>
@@ -371,7 +389,281 @@ This chapter build is in progress, expect to change and not working as expected
 </div>
 </div>
 <div class="sect1">
-<h2 id="tekton-push-to-external-reg"><a class="anchor" href="#tekton-push-to-external-reg"></a>Pusing to external registry</h2>
+<h2 id="tekton-pull-from-remote-repo"><a class="anchor" href="#tekton-pull-from-remote-repo"></a>Pulling from Private Source Repository</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>In this exercise we will see how to pull i.e. clone the source code from the private source reporsitory. For this example we will use the GitHub as the remote source repository.</p>
+</div>
+<div class="paragraph">
+<p>To be able to run this exercise you need:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>A remote GitHub Repository, you can pull fork the <a href="https://github.com/redhat-developer-demos/tekton-helloworld" class="bare">https://github.com/redhat-developer-demos/tekton-helloworld</a> and push that as your private repository</p>
+</li>
+<li>
+<p>A <a href="https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-token">GitHub Personal Access Token(PAT)</a> to access the remote repository.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Set the requried environment variables to be used when creating the github-pat-secret:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">export GITHUB_USERNAME='&lt;your github.com username&gt;'
+export TEKTON_TUTORIAL_GITHUB_PAT='&lt;your github.com username personal accesstoken&gt;'</code></pre>
+</div>
+</div>
+<div class="sect2">
+<h3 id="tekton-github-repo-secret"><a class="anchor" href="#tekton-github-repo-secret"></a>Create Github PAT Secret</h3>
+<div class="paragraph">
+<p>Create the Kubernetes secret that can hold your GitHub.com credentials:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl create secret -n workspace-auth-demo generic github-pat-secret --dry-run=client -o yaml \
+  | yq w - type kubernetes.io/basic-auth \
+  | yq w - stringData.username $GITHUB_USERNAME \
+  | yq w - stringData.password $TEKTON_TUTORIAL_GITHUB_PAT \
+  | kubectl apply -f -</code></pre>
+</div>
+</div>
+<div class="listingblock console-output">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">secret/github-pat-secret created</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="tekton-github-pat-annoate"><a class="anchor" href="#tekton-github-pat-annoate"></a>Annotate Secret to be used with GitHub.com</h3>
+<div class="paragraph">
+<p>To make Tekton use the Secret <code>github-pat-secret</code> with github.com, we need to annotate the Secret with <code>tekton.dev/git-0=https://github.com</code>.</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl annotate -n workspace-auth-demo secret github-pat-secret \
+  "tekton.dev/git-0=https://github.com"</code></pre>
+</div>
+</div>
+<div class="listingblock console-output">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">secret/github-pat-secret annotated</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Verify the github-pat-secret as right type, annoations and credential values:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl get -n workspace-auth-demo secret github-pat-secret -o yaml</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The command should show an output(trimmed for brevity) as shown in the following listing, with your GitHub.com username and PAT.</p>
+</div>
+<div class="listingblock console-output">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">apiVersion: v1
+data:
+  password: REDACTED
+  username: REDACTED
+kind: Secret
+metadata:
+  annotations:
+    <mark>tekton.dev/git-0: https://github.com</mark>
+  name: github-pat-secret
+  namespace: workspace-auth-demo
+<mark>type: kubernetes.io/basic-auth</mark></code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="tekton-github-sa"><a class="anchor" href="#tekton-github-sa"></a>Create Service Account</h3>
+<div class="paragraph">
+<p>Let us create a Kubernetes ServiceAccount that could be used pull from the private GitHub repository:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl create sa -n workspace-auth-demo github-bot</code></pre>
+</div>
+</div>
+<div class="listingblock console-output">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">serviceaccount/github-bot created</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="tekton-patch-github-sa"><a class="anchor" href="#tekton-patch-github-sa"></a>Patch Service Account</h3>
+<div class="paragraph">
+<p>Now patch the <code>github-bot</code> service account to use the <code>github-pat-secret</code> credentials:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl patch serviceaccount github-bot \
+  -p '{"secrets": [{"name": "github-pat-secret"}]}'</code></pre>
+</div>
+</div>
+<div class="listingblock console-output">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">serviceaccount/github-bot patched</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Lets verify if the service account has the secret added:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl get sa -n workspace-auth-demo github-bot -o yaml</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The command should show an output(trimmed for brevity) like:</p>
+</div>
+<div class="listingblock console-output">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: github-bot
+  namespace: workspace-auth-demo
+secrets:
+<mark>- name: github-pat-secret</mark>
+- name: build-bot-token-8nl2v</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="tekton-create-clone-pipeline"><a class="anchor" href="#tekton-create-clone-pipeline"></a>Create Pipeline</h3>
+<div class="paragraph">
+<p>Create the git clone pipeline which will clone from the private GitHub repo and simply list the contents:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl apply -n workspace-auth-demo -f <a href="https://github.com/redhat-developer-demos/tekton-tutorial/blob/master/auth/secretworld-app-clone.yaml" target="_blank" rel="noopener">secretworld-app-clone.yaml</a></code></pre>
+</div>
+</div>
+<div class="listingblock console-output">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">pipeline.tekton.dev/secretworld-app-clone created</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="tekton-run-clone-pipeline"><a class="anchor" href="#tekton-run-clone-pipeline"></a>Run Pipeline</h3>
+<div class="paragraph">
+<p>Ensure that the pipeline run has been set to run with the Service Account <code>github-bot</code></p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  generateName: secretworld-app-clone-
+  labels:
+    tekton.dev/pipeline: secretworld-app-clone
+spec:
+  serviceAccountName: <mark>github-bot</mark>
+  pipelineRef:
+    name: secretworld-app-clone
+  params:
+    - name: private-github-repo-url
+      value: https://github.com/redhat-developer-demos/tekton-secretworld <i class="conum" data-value="1"></i><b>(1)</b>
+  workspaces:
+    - name: source
+      persistentVolumeClaim:
+        claimName: tekton-tutorial-sources</code></pre>
+</div>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Please make sure you have updated the private GitHub repository to match your private repository</td>
+</tr>
+</table>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Run the pipeline:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl create -n workspace-auth-demo -f secretworld-app-clone-run.yaml</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>View the pipeline run logs using,</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">tkn pr logs -f -a $(tkn pr ls -n workspace-auth-demo | awk 'NR==2{print $1}')</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>A successful clone from private repo will show the following output ( trimmed brevity):</p>
+</div>
+<div class="listingblock console-output">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">[clone-sources : credential-initializer] {"level":"info","ts":1595922122.9077983,"caller":"creds-init/main.go:44","msg":"Credentials initialized."}
+
+[clone-sources : clone] + CHECKOUT_DIR=/workspace/output/
+[clone-sources : clone] + '[[' true '==' true ]]
+[clone-sources : clone] + cleandir
+[clone-sources : clone] + '[[' -d /workspace/output/ ]]
+[clone-sources : clone] + rm -rf /workspace/output//Dockerfile /workspace/output//README.md /workspace/output//k8s /workspace/output//mvnw /workspace/output//mvnw.cmd /workspace/output//pom.xml /workspace/output//src
+[clone-sources : clone] + rm -rf /workspace/output//.dockerignore /workspace/output//.git /workspace/output//.gitignore /workspace/output//.mvn
+[clone-sources : clone] + rm -rf '/workspace/output//..?*'
+[clone-sources : clone] + test -z
+[clone-sources : clone] + test -z
+[clone-sources : clone] + test -z
+[clone-sources : clone] + /ko-app/git-init -url https://github.com/redhat-developer-demos/tekton-secretworld -revision master -refspec  -path /workspace/output/ '-sslVerify=true' '-submodules=true' -depth 1
+[clone-sources : clone] {"level":"info","ts":1595922137.4565356,"caller":"git/git.go:139","msg":"Successfully cloned https://github.com/redhat-developer-demos/tekton-secretworld @ 5250e1fa185805373e620d1c04a0c48129efd2ee (grafted, HEAD, origin/master) in path /workspace/output/"}
+[clone-sources : clone] {"level":"info","ts":1595922137.4990256,"caller":"git/git.go:180","msg":"Successfully initialized and updated submodules in path /workspace/output/"}
+[clone-sources : clone] + cd /workspace/output/
+[clone-sources : clone] + git+ tr -d '\n'
+[clone-sources : clone]  rev-parse HEAD
+[clone-sources : clone] + RESULT_SHA=5250e1fa185805373e620d1c04a0c48129efd2ee
+[clone-sources : clone] + EXIT_CODE=0
+[clone-sources : clone] + '[' 0 '!=' 0 ]
+[clone-sources : clone] + echo -n 5250e1fa185805373e620d1c04a0c48129efd2ee
+
+[list-cloned-repo : credential-initializer] {"level":"info","ts":1595922139.7837844,"caller":"creds-init/main.go:44","msg":"Credentials initialized."}
+
+
+[list-cloned-repo : list-directory] total 44
+[list-cloned-repo : list-directory] drwxr-xr-x    4 root     root          4096 Jul 28 07:42 src
+[list-cloned-repo : list-directory] -rw-r--r--    1 root     root          4147 Jul 28 07:42 pom.xml
+[list-cloned-repo : list-directory] -rwxr-xr-x    1 root     root          6607 Jul 28 07:42 mvnw.cmd
+[list-cloned-repo : list-directory] -rwxr-xr-x    1 root     root         10069 Jul 28 07:42 mvnw
+[list-cloned-repo : list-directory] drwxr-xr-x    2 root     root          4096 Jul 28 07:42 k8s
+[list-cloned-repo : list-directory] -rw-r--r--    1 root     root           111 Jul 28 07:42 README.md
+[list-cloned-repo : list-directory] -rw-r--r--    1 root     root            87 Jul 28 07:42 Dockerfile
+
+[list-cloned-repo : digest-to-results] 🥳 Yay! 🎉
+[list-cloned-repo : digest-to-results]
+[list-cloned-repo : digest-to-results] You have successfully cloned from private GitHub repository.  👏👏
+[list-cloned-repo : digest-to-results]
+[list-cloned-repo : digest-to-results] 😺 Tekton Rocks!! 🚀</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="tekton-push-to-external-reg"><a class="anchor" href="#tekton-push-to-external-reg"></a>Pushing to external registry</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>To able push to external container registry, its requried that the Pipline is run with a ServiceAccount that has container registry credentials configured via ServiceAccount secrets.  Kubernetes provider a Secret type called <code>docker-registry</code>, that can be used to configure the container registry credentials.</p>
@@ -518,6 +810,14 @@ spec:
 </div>
 </div>
 <div class="paragraph">
+<p>View the pipeline run logs using,</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">tkn pr logs -f -a $(tkn pr ls -n workspace-auth-demo | awk 'NR==2{print $1}')</code></pre>
+</div>
+</div>
+<div class="paragraph">
 <p>A successful build and push will show the following output ( trimmed brevity):</p>
 </div>
 <div class="listingblock console-output">
@@ -538,14 +838,6 @@ spec:
 [build-java-app-image : digest-to-results] + cat /workspace/source/image-digest
 [build-java-app-image : digest-to-results] + tee /tekton/results/IMAGE_DIGEST
 [build-java-app-image : digest-to-results] <mark>sha256:0e9e267a96f1ea48fe00642cd82ef689e44c7d467d6db3a3a543fa5b42fe53dc</mark></code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>View the pipeline run logs using,</p>
-</div>
-<div class="listingblock console-input">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">tkn pr logs -f -a $(tkn pr ls -n workspace-auth-demo | awk 'NR==2{print $1}')</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -574,8 +866,38 @@ spec:
 </div>
 </div>
 <div class="sect1">
+<h2 id="tekton-remote-ref-points"><a class="anchor" href="#tekton-remote-ref-points"></a>Points to Ponder</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>When need to pull from remote source repository or push to external container registry:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>A Kubernetes Secret to hold the container registry credentials</p>
+</li>
+<li>
+<p>A Kubenretes Service Account, with the container registry Secret added to it</p>
+</li>
+<li>
+<p>Use the Service Account as <code>serviceAccountName</code> in PipelineRuns/TaskRuns</p>
+</li>
+<li>
+<p>Annotate Secerts to map which Secret to be used with source repository</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>You can find more details about using Authentication with Tekton <a href="https://tekton.dev/docs/pipelines/auth/">here</a>.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
 <h2 id="tekton-auth-cleanup"><a class="anchor" href="#tekton-auth-cleanup"></a>Cleanup</h2>
 <div class="sectionbody">
+<div class="paragraph">
+<p>If you no longer going to use the workspace-auth-demo, you can do:</p>
+</div>
 <div class="listingblock console-input">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl delete ns workspace-auth-demo</code></pre>
