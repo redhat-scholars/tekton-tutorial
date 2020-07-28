@@ -250,11 +250,11 @@ A successful clone from private repo will show the following output ( trimmed br
 [list-cloned-repo : list-directory] -rw-r--r--    1 root     root           111 Jul 28 07:42 README.md
 [list-cloned-repo : list-directory] -rw-r--r--    1 root     root            87 Jul 28 07:42 Dockerfile
 
-[list-cloned-repo : digest-to-results] 🥳 Yay! 🎉
-[list-cloned-repo : digest-to-results]
-[list-cloned-repo : digest-to-results] You have successfully cloned from private GitHub repository.  👏👏
-[list-cloned-repo : digest-to-results]
-[list-cloned-repo : digest-to-results] 😺 Tekton Rocks!! 🚀
+[list-cloned-repo : show-readme] 🥳 Yay! 🎉
+[list-cloned-repo : show-readme]
+[list-cloned-repo : show-readme] You have successfully cloned from private GitHub repository. 👏👏
+[list-cloned-repo : show-readme]
+[list-cloned-repo : show-readme] 😺 Tekton Rocks!! 🚀
 ----
 
 [#tekton-push-to-external-reg]
