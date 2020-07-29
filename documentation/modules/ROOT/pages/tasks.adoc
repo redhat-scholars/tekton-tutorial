@@ -711,6 +711,11 @@ tkn taskrun describe <taskrun-name>
 
 Lets try running the image build using the `build-app` task:
 
+[tabs]
+====
+Minikube::
++
+--
 [.console-input]
 [source,bash,subs="+macros,attributes+"]
 ----
@@ -719,18 +724,6 @@ kubectl run demo-greeter -n {tutorial-namespace} \
  --image='example.com/rhdevelopers/tekton-tutorial-greeter' && \
 kubectl expose pod demo-greeter -n {tutorial-namespace} --port 8080 --type=NodePort
 ----
-
-[NOTE]
-=====
-If you are on OpenShift you can expose the service to get the route url, like:
-
-[.console-input]
-[source,bash,subs="+macros,attributes+"]
-----
-oc expose svc -n {tutorial-namespace} demo-greeter
-----
-
-=====
 
 Wait for the `demo-greeter` to be up and running:
 
@@ -748,17 +741,23 @@ Lets try checking the application:
 SVC_URL=$(minikube -p {tutorial-namespace} -n {tutorial-namespace} service demo-greeter --url)
 ----
 
-[NOTE]
-=====
-If you are on OpenShift use routes like:
+--
+OpenShift::
++
+--
+[.console-input]
+[source,bash,subs="+macros,attributes+"]
+----
+oc expose svc -n {tutorial-namespace} demo-greeter
+----
 
 [.console-input]
 [source,bash,subs="+macros,attributes+"]
 ----
 SVC_URL=$(oc get routes -o yaml | yq r - 'spec.url.host' )
 ----
-
-=====
+--
+====
 
 [.console-input]
 [source,bash,subs="+macros,attributes+"]

@@ -404,16 +404,28 @@ A successfull Pipelinerun should have the `helloworld` application up and runnin
 [.console-input]
 [source,bash,subs="+macros,+attributes"]
 ----
-kubectl get ksvc -n {chapter-namespace}
+kn service describe -n {chapter-namespace} helloworld
 ----
 
 The command should show an output like :
 
 [.console-output]
-[source,bash]
+[source,bash,subs="+quotes"]
 ----
-NAME         URL                                                    LATESTCREATED        LATESTREADY          READY   REASON
-helloworld   http://helloworld.{chapter-namespace}.192.168.64.5.nip.io   helloworld-kffxd-1   helloworld-kffxd-1   True
+Name:       helloworld
+Namespace:  triggers-demo
+Age:        1h
+#URL:        http://helloworld.triggers-demo.192.168.64.5.nip.io#
+
+Revisions:
+  100%  @latest (helloworld-vxndl-1) [2] (12m)
+        Image:  example.com/tekton-tutorial/helloworld@sha256:0c91396144438372cb1396288cdd700a2ff14f7c1e333613df6c0d5af9a68514 (at 0c9139)
+
+Conditions:
+  OK TYPE                   AGE REASON
+  ++ Ready                  12m
+  ++ ConfigurationsReady    12m
+  ++ RoutesReady            12m
 ----
 
 [#ws-verify-service]
@@ -424,7 +436,7 @@ Let us now verify the deployed Knative Service:
 [.console-input]
 [source,bash,subs="+macros,+attributes"]
 ----
-KSVC_URL=$(kubectl get routes helloworld -o yaml | yq r - status.url)
+KSVC_URL=$(kn service describe -n {chapter-namespace} helloworld -o url)
 ----
 
 Now do a invoke the service like:
