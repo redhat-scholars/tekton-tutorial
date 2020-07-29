@@ -1310,8 +1310,32 @@ el-gogs-webhook-88bc89db-ld6jz event-listener {"level":"info","logger":"eventlis
 ...</code></pre>
 </div>
 </div>
+</div>
+<div class="sect2">
+<h3 id="_clone_and_edit_the_source"><a class="anchor" href="#_clone_and_edit_the_source"></a>Clone and Edit the source</h3>
 <div class="paragraph">
-<p>Using your favorite IDE clone the repo <code>tekton-helloworld</code>. Edit the Java file <code>src/java/com/redhat/developers/GreetingResource.java</code> to update the "Hello World!" to "😺 Tekton Rocks!" and update the Test case <code>test/java/com/redhat/developers/GreetingResourceTest.java</code> to match "😺 Tekton Rocks!", commit and push to see the 😺 Pipeline running 🚀.</p>
+<p>Using your favorite IDE clone the repo <code>tekton-helloworld</code> from Gogs using the <a href="#tkn-triggers-init-repo">clone url</a>.</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">git clone &lt;your gogs tekton-helloworld clone url&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Open the <code>tekton-hellworld</code> in your IDE and  edit the Java files:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>src/main/java/com/redhat/developers/GreetingResource.java</code> to update the "Hello World!" to "😺 Tekton Rocks!"</p>
+</li>
+<li>
+<p><code>src/test/java/com/redhat/developers/GreetingResourceTest.java</code> to match "😺 Tekton Rocks!".</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Commit and push to see the 😺 Pipeline <code>helloworld-app-deploy</code> running 🚀.</p>
 </div>
 <div class="admonitionblock note">
 <table>
@@ -1348,6 +1372,9 @@ Use the username <code>gogs</code> and password <code>gogs</code> when prompted 
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">😺 Tekton Rocks!</code></pre>
 </div>
+</div>
+<div class="paragraph">
+<p>Expriment with updating the sources to your taste and see the pipeline triggers.</p>
 </div>
 </div>
 </div>
