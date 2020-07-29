@@ -3,9 +3,8 @@ runtime:
 
 site:
   title: Tekton Tutorial(Staging)
-  url: http://redhat-developer-docs.github.io/tekton-tutorial-staging
+  url: https://redhat-developer-docs.github.io/tekton-tutorial
   start_page: tekton-tutorial::index.adoc
-
 content:
   sources:
     - url: git@github.com:redhat-developer-demos/tekton-tutorial.git
@@ -26,5 +25,6 @@ ui:
     url: https://github.com/redhat-developer-demos/rhd-tutorial-ui/releases/download/v0.1.9/ui-bundle.zip
     snapshot: true
   supplemental_files: ./supplemental-ui
+
 output:
   dir: ./gh-pages
