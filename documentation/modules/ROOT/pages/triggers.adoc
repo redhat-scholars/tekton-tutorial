@@ -520,7 +520,23 @@ el-gogs-webhook-88bc89db-ld6jz event-listener {"level":"info","logger":"eventlis
 ...
 ----
 
-Using your favorite IDE clone the repo `tekton-helloworld`. Edit the Java file `src/java/com/redhat/developers/GreetingResource.java` to update the "Hello World!" to "😺 Tekton Rocks!" and update the Test case `test/java/com/redhat/developers/GreetingResourceTest.java` to match "😺 Tekton Rocks!", commit and push to see the 😺 Pipeline running 🚀.
+=== Clone and Edit the source
+
+Using your favorite IDE clone the repo `tekton-helloworld` from Gogs using the <<tkn-triggers-init-repo,clone url>>. 
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+git clone <your gogs tekton-helloworld clone url>
+----
+
+Open the `tekton-hellworld` in your IDE and  edit the Java files:
+
+- `src/main/java/com/redhat/developers/GreetingResource.java` to update the "Hello World!" to "😺 Tekton Rocks!" 
+
+- `src/test/java/com/redhat/developers/GreetingResourceTest.java` to match "😺 Tekton Rocks!".
+
+Commit and push to see the 😺 Pipeline `helloworld-app-deploy` running 🚀.
 
 NOTE: Use the username `gogs` and password `gogs` when prompted during Git push to repository.
 
@@ -541,6 +557,8 @@ The command should shown output like:
 ----
 😺 Tekton Rocks!
 ----
+
+Expriment with updating the sources to your taste and see the pipeline triggers.
 
 [#tekton-triggers-ptp]
 == Points to Ponder
