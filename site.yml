@@ -9,6 +9,7 @@ content:
   sources:
     - url: git@github.com:redhat-developer-demos/tekton-tutorial.git
       tags: []
+      branches: release/0.11.x
       start_path: documentation
 asciidoc:
   attributes:
