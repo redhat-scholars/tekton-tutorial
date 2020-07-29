@@ -700,13 +700,13 @@ standard (<mark>default</mark>)   k8s.io/minikube-hostpath   Delete          Imm
 </div>
 <div class="listingblock console-input">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">tkn pr ls</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">tkn pipeline -n triggers-demo ls</code></pre>
 </div>
 </div>
 <div class="listingblock console-output">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">NAME                    AGE            LAST RUN               STARTED       DURATION    STATUS
-helloworld-app-deploy   15 hours ago   helloworld-app-dm4wl   2 hours ago   6 minutes   ---</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">NAME                    AGE            LAST RUN   STARTED   DURATION   STATUS
+helloworld-app-deploy   1 minute ago   ---        ---       ---        ---</code></pre>
 </div>
 </div>
 </div>
@@ -726,8 +726,12 @@ helloworld-app-deploy   15 hours ago   helloworld-app-dm4wl   2 hours ago   6 mi
 </div>
 <div class="listingblock console-input">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">export GOGS_HOSTNAME="gogs.$(minikube ip).nip.io"
-yq w <a href="https://github.com/redhat-developer-demos/tekton-tutorial/blob/master/install/git/gogs-ingress.yaml">$TUTORIAL_HOME/install/git/gogs-ingress.yaml</a> \
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">export GOGS_HOSTNAME="gogs.$(minikube ip).nip.io"</code></pre>
+</div>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">yq w <a href="https://github.com/redhat-developer-demos/tekton-tutorial/blob/master/install/git/gogs-ingress.yaml">$TUTORIAL_HOME/install/git/gogs-ingress.yaml</a> \
   spec.virtualhost.fqdn $GOGS_HOSTNAME |\
   kubectl apply -n triggers-demo -f -</code></pre>
 </div>
@@ -785,7 +789,7 @@ persistentvolumeclaim/pgwal-pvc created</code></pre>
 <div class="listingblock console-output">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">NAME                                  READY   STATUS    RESTARTS   AGE
-pod/gogs-854766b6d7-nsmsp             1/1     Running   1          64s
+pod/gogs-854766b6d7-nsmsp             1/1     Running   0          64s
 pod/gogs-postgresql-745dfd5cb-spc46   1/1     Running   0          64s
 
 NAME                      TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)          AGE
@@ -801,13 +805,11 @@ service/gogs-postgresql   ClusterIP   10.105.150.118   &lt;none&gt;        5432/
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">open <a href="http://$GOGS_HOSTNAME" class="bare">http://$GOGS_HOSTNAME</a></code></pre>
 </div>
 </div>
-<div class="paragraph">
-<p>A gogs home page should something like:</p>
-</div>
 <div class="imageblock">
 <div class="content">
 <img src="_images/gogs_home.png" alt="gogs home">
 </div>
+<div class="title">Figure 1. Gogs Home</div>
 </div>
 </div>
 </div>
@@ -918,6 +920,23 @@ In OpenShift you might no need the <strong>pipeline</strong> SA, as the OpenShif
 <div class="listingblock console-output">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">triggertemplate.triggers.tekton.dev/tekton-helloworld-trigger-template created</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>List the available TriggerTemplates:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">tkn tt -n triggers-demo ls</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>It should be only one now:</p>
+</div>
+<div class="listingblock console-output">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">NAME                                 AGE
+tekton-helloworld-trigger-template   1 minute ago</code></pre>
 </div>
 </div>
 </div>
@@ -1052,7 +1071,7 @@ spec:
 </div>
 <div class="listingblock console-input">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl create -n triggers-demo gogs-triggerbindings.yaml</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl create -n triggers-demo -f gogs-triggerbindings.yaml</code></pre>
 </div>
 </div>
 <div class="listingblock console-output">
@@ -1061,7 +1080,21 @@ spec:
 </div>
 </div>
 <div class="paragraph">
-<p>You can check the what payload Gogs might send in the Gogs Webhook settings page. We will be creating the Gogs Webhook as part upcoming section.</p>
+<p>List the available TriggerBindings:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">tkn tb -n triggers-demo ls</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>It should show an output like:</p>
+</div>
+<div class="listingblock console-output">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">NAME                  AGE
+gogs-triggerbinding   7 seconds ago</code></pre>
+</div>
 </div>
 </div>
 </div>
@@ -1070,7 +1103,7 @@ spec:
 <h2 id="tkn-triggers-eventlistener"><a class="anchor" href="#tkn-triggers-eventlistener"></a>Event Listener</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Event Listener is primary interace for external sources send send events to trigger creation of Tekton resources that is defined as part of the TriggerTemplate</p>
+<p>Event Listener is primary interace for external sources to send events, that will trigger the creation of Tekton resources defined as part of the TriggerTemplate.</p>
 </div>
 <div class="sect2">
 <h3 id="tkn-triggers-create-eventlistener"><a class="anchor" href="#tkn-triggers-create-eventlistener"></a>Create Event Listener</h3>
@@ -1085,7 +1118,24 @@ spec:
 </div>
 </div>
 <div class="paragraph">
-<p>The eventlistener creates the following services:</p>
+<p>List the available EventListeners:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">tkn el -n triggers-demo ls</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>It should show an output like:</p>
+</div>
+<div class="listingblock console-output">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">NAME           AGE
+gogs-webhook   4 seconds ago</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Each EventListener will have a service named <code>el-&lt;EventListener Name&gt;</code> exposed automatically for sources to send events to Triggers.</p>
 </div>
 <div class="listingblock console-input">
 <div class="content">
@@ -1097,9 +1147,6 @@ spec:
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">NAME              TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)          AGE
 <mark>el-gogs-webhook   ClusterIP   10.97.199.207    &lt;none&gt;        8080/TCP         51s</mark></code></pre>
 </div>
-</div>
-<div class="paragraph">
-<p>Each EventListener will have a service named <code>el-&lt;EventListener Name&gt;</code> exposed automatically for sources to send events to Triggers.</p>
 </div>
 </div>
 <div class="sect2">
