@@ -70,14 +70,14 @@ Verify the available pipelines:
 [.console-input]
 [source,bash,subs="+macros,+attributes"]
 ----
-tkn pr ls
+tkn pipeline -n {chapter-namespace} ls
 ----
 
 [.console-output]
 [source,bash]
 ----
-NAME                    AGE            LAST RUN               STARTED       DURATION    STATUS
-helloworld-app-deploy   15 hours ago   helloworld-app-dm4wl   2 hours ago   6 minutes   ---
+NAME                    AGE            LAST RUN   STARTED   DURATION   STATUS
+helloworld-app-deploy   1 minute ago   ---        ---       ---        ---
 ----
 
 === Deploy Gogs
@@ -94,6 +94,11 @@ Create the gogs ingress so that we can access the application from host machine 
 [source,bash,subs="+macros,+attributes"]
 ----
 export GOGS_HOSTNAME="gogs.$(minikube ip).nip.io"
+----
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
 yq w link:{github-repo}/install/git/gogs-ingress.yaml[+$TUTORIAL_HOME+/install/git/gogs-ingress.yaml] \
   spec.virtualhost.fqdn $GOGS_HOSTNAME |\
   kubectl apply -n {chapter-namespace} -f -
@@ -144,7 +149,7 @@ A suceesfull deployment should show:
 [source,bash]
 ----
 NAME                                  READY   STATUS    RESTARTS   AGE
-pod/gogs-854766b6d7-nsmsp             1/1     Running   1          64s
+pod/gogs-854766b6d7-nsmsp             1/1     Running   0          64s
 pod/gogs-postgresql-745dfd5cb-spc46   1/1     Running   0          64s
 
 NAME                      TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)          AGE
@@ -160,8 +165,7 @@ You can access the gogs service using ingress url:
 open http://$GOGS_HOSTNAME
 ----
 
-A gogs home page should something like:
-
+.Gogs Home
 image::gogs_home.png[]
 
 [#tkn-create-sa]
@@ -247,6 +251,23 @@ kubectl create -n {chapter-namespace} \
 triggertemplate.triggers.tekton.dev/tekton-helloworld-trigger-template created
 ----
 
+List the available TriggerTemplates:
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+tkn tt -n {chapter-namespace} ls
+----
+
+It should be only one now:
+
+[.console-output]
+[source,bash]
+----
+NAME                                 AGE
+tekton-helloworld-trigger-template   1 minute ago
+----
+
 [#tkn-triggers-bindings]
 == Trigger Bindings
 
@@ -281,7 +302,7 @@ include::ROOT:example$gogs-triggerbindings.yaml[]
 [.console-input]
 [source,bash,subs="+macros,+attributes"]
 ----
-kubectl create -n {chapter-namespace} gogs-triggerbindings.yaml
+kubectl create -n {chapter-namespace} -f gogs-triggerbindings.yaml
 ----
 
 [.console-output]
@@ -290,12 +311,27 @@ kubectl create -n {chapter-namespace} gogs-triggerbindings.yaml
 triggerbinding.triggers.tekton.dev/gogs-triggerbinding created
 ----
 
-You can check the what payload Gogs might send in the Gogs Webhook settings page. We will be creating the Gogs Webhook as part upcoming section.
+List the available TriggerBindings:
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+tkn tb -n {chapter-namespace} ls
+----
+
+It should show an output like:
+
+[.console-output]
+[source,bash]
+----
+NAME                  AGE
+gogs-triggerbinding   7 seconds ago
+----
 
 [#tkn-triggers-eventlistener]
 == Event Listener
 
-Event Listener is primary interace for external sources send send events to trigger creation of Tekton resources that is defined as part of the TriggerTemplate
+Event Listener is primary interace for external sources to send events, that will trigger the creation of Tekton resources defined as part of the TriggerTemplate.
 
 [#tkn-triggers-create-eventlistener]
 === Create Event Listener
@@ -312,7 +348,24 @@ kubectl apply -n {chapter-namespace} -f link:{github-repo}/{triggers-repo}/gogs-
 eventlistener.triggers.tekton.dev/gogs-webhook created
 ----
 
-The eventlistener creates the following services:
+List the available EventListeners:
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+tkn el -n {chapter-namespace} ls
+----
+
+It should show an output like:
+
+[.console-output]
+[source,bash]
+----
+NAME           AGE
+gogs-webhook   4 seconds ago
+----
+
+Each EventListener will have a service named `el-<EventListener Name>` exposed automatically for sources to send events to Triggers.
 
 [.console-input]
 [source,bash,subs="+macros,+attributes"]
@@ -326,8 +379,6 @@ kubectl get svc -n {chapter-namespace} -leventlistener=gogs-webhook
 NAME              TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)          AGE
 #el-gogs-webhook   ClusterIP   10.97.199.207    <none>        8080/TCP         51s#
 ----
-
-Each EventListener will have a service named `el-<EventListener Name>` exposed automatically for sources to send events to Triggers.
 
 === Create Event Listener Ingress
 
