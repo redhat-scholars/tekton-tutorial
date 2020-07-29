@@ -1,0 +1,31 @@
+---
+apiVersion: triggers.tekton.dev/v1alpha1
+kind: EventListener
+metadata:
+  name: github-webhook
+  labels:
+    app: github
+spec:
+  serviceAccountName: pipeline
+  triggers:
+    - name: tekton-helloworld-webhook
+      bindings:
+        - name: github-triggerbinding
+      template:
+        name: tekton-helloworld-trigger-template
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: webhook
+  labels:
+    app.kubernetes.io/managed-by: EventListener
+    app.kubernetes.io/part-of: Triggers
+    eventlistener: github-webhook
+spec:
+  port:
+    targetPort: 8080
+  to:
+    kind: 'Service'
+    name: el-github-webhook
+    weight: 100
