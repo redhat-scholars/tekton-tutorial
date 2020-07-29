@@ -1298,7 +1298,7 @@ spec:
 </div>
 <div class="listingblock console-input">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl get ksvc -n workspace-auth-demo</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kn service describe -n workspace-auth-demo helloworld</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1306,8 +1306,20 @@ spec:
 </div>
 <div class="listingblock console-output">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">NAME         URL                                                    LATESTCREATED        LATESTREADY          READY   REASON
-helloworld   http://helloworld.{chapter-namespace}.192.168.64.5.nip.io   helloworld-kffxd-1   helloworld-kffxd-1   True</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">Name:       helloworld
+Namespace:  triggers-demo
+Age:        1h
+<mark>URL:        http://helloworld.triggers-demo.192.168.64.5.nip.io</mark>
+
+Revisions:
+  100%  @latest (helloworld-vxndl-1) [2] (12m)
+        Image:  example.com/tekton-tutorial/helloworld@sha256:0c91396144438372cb1396288cdd700a2ff14f7c1e333613df6c0d5af9a68514 (at 0c9139)
+
+Conditions:
+  OK TYPE                   AGE REASON
+  ++ Ready                  12m
+  ++ ConfigurationsReady    12m
+  ++ RoutesReady            12m</code></pre>
 </div>
 </div>
 </div>
@@ -1318,7 +1330,7 @@ helloworld   http://helloworld.{chapter-namespace}.192.168.64.5.nip.io   hellowo
 </div>
 <div class="listingblock console-input">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">KSVC_URL=$(kubectl get routes helloworld -o yaml | yq r - status.url)</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">KSVC_URL=$(kn service describe -n workspace-auth-demo helloworld -o url)</code></pre>
 </div>
 </div>
 <div class="paragraph">

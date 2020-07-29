@@ -1459,6 +1459,19 @@ step-image-digest-exporter-52lh6</code></pre>
 <div class="paragraph">
 <p>Lets try running the image build using the <code>build-app</code> task:</p>
 </div>
+<div class="tabset is-loading">
+<div class="ulist tabs">
+<ul>
+<li>
+<p><a id="tabset1_minikube"></a>Minikube</p>
+</li>
+<li>
+<p><a id="tabset1_openshift"></a>OpenShift</p>
+</li>
+</ul>
+</div>
+<div class="content">
+<div class="tab-pane" aria-labelledby="tabset1_minikube">
 <div class="listingblock console-input">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl run demo-greeter -n tektontutorial \
@@ -1466,25 +1479,6 @@ step-image-digest-exporter-52lh6</code></pre>
  --image='example.com/rhdevelopers/tekton-tutorial-greeter' &amp;&amp; \
 kubectl expose pod demo-greeter -n tektontutorial --port 8080 --type=NodePort</code></pre>
 </div>
-</div>
-<div class="admonitionblock note">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-note" title="Note"></i>
-</td>
-<td class="content">
-<div class="paragraph">
-<p>If you are on OpenShift you can expose the service to get the route url, like:</p>
-</div>
-<div class="listingblock console-input">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc expose svc -n tektontutorial demo-greeter</code></pre>
-</div>
-</div>
-</td>
-</tr>
-</table>
 </div>
 <div class="paragraph">
 <p>Wait for the <code>demo-greeter</code> to be up and running:</p>
@@ -1502,24 +1496,20 @@ kubectl expose pod demo-greeter -n tektontutorial --port 8080 --type=NodePort</c
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">SVC_URL=$(minikube -p tektontutorial -n tektontutorial service demo-greeter --url)</code></pre>
 </div>
 </div>
-<div class="admonitionblock note">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-note" title="Note"></i>
-</td>
-<td class="content">
-<div class="paragraph">
-<p>If you are on OpenShift use routes like:</p>
+</div>
+<div class="tab-pane" aria-labelledby="tabset1_openshift">
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc expose svc -n tektontutorial demo-greeter</code></pre>
+</div>
 </div>
 <div class="listingblock console-input">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">SVC_URL=$(oc get routes -o yaml | yq r - 'spec.url.host' )</code></pre>
 </div>
 </div>
-</td>
-</tr>
-</table>
+</div>
+</div>
 </div>
 <div class="listingblock console-input">
 <div class="content">
