@@ -6,6 +6,7 @@
     <title>Using Private Repositories and Registries :: Tekton Tutorial</title>
     <link rel="canonical" href="https://redhat-developer-demos.github.io/tekton-tutorial/tekton-tutorial/private_reg_repos.html">
     <link rel="prev" href="workspaces.html">
+    <link rel="next" href="triggers.html">
     <meta name="generator" content="Antora 2.3.3">
     <link rel="stylesheet" href="../_/css/site.css">
   </head>
@@ -247,7 +248,7 @@
   </li>
   <li class="nav-item is-current-page" data-depth="1">
     <button class="nav-item-toggle"></button>
-    <a class="nav-link" href="private_reg_repos.html">Using Private Registries and Repositories</a>
+    <a class="nav-link" href="private_reg_repos.html">Private Registries and Repositories</a>
 <ul class="nav-list">
   <li class="nav-item" data-depth="2">
     <a class="nav-link" href="#tkn-prr-overview">Overview</a>
@@ -290,6 +291,39 @@
   </li>
 </ul>
   </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="triggers.html">Triggers</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="triggers.html#install-tekton-triggers">Instal Tekton Triggers</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="triggers.html#tkn-triggers-prepare">Prepare Namespace</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="triggers.html#tkn-triggers-init-repo">Initialize Source Repository</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="triggers.html#tkn-triggers-create-sa"> Pipeline Service Account</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="triggers.html#tkn-triggers-template">Trigger Template</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="triggers.html#tkn-triggers-bindings">Trigger Bindings</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="triggers.html#tkn-triggers-eventlistener">Trigger Event Listener</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="triggers.html#tekton-triggers-in-action">Triggers in Action</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="triggers.html#tekton-triggers-ptp">Points to Ponder</a>
+  </li>
+</ul>
+  </li>
 </ul>
   </li>
 </ul>
@@ -305,7 +339,7 @@
 <nav class="breadcrumbs" aria-label="breadcrumbs">
   <ul>
     <li><a href="index.html">Tekton Tutorial</a></li>
-    <li><a href="private_reg_repos.html">Using Private Registries and Repositories</a></li>
+    <li><a href="private_reg_repos.html">Private Registries and Repositories</a></li>
   </ul>
 </nav>
   <div class="edit-this-page"><a href="https://github.com/redhat-developer-demos/tekton-tutorial/edit/master/documentation/modules/ROOT/pages/private_reg_repos.adoc">Edit this Page</a></div>
@@ -897,7 +931,7 @@ spec:
 <h2 id="tekton-auth-cleanup"><a class="anchor" href="#tekton-auth-cleanup"></a>Cleanup</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>If you no longer going to use the workspace-auth-demo, you can do:</p>
+<p>Delete the workspace and its resources:</p>
 </div>
 <div class="listingblock console-input">
 <div class="content">
@@ -908,6 +942,7 @@ spec:
 </div>
 <nav class="pagination">
   <span class="prev"><a href="workspaces.html">Workspaces</a></span>
+  <span class="next"><a href="triggers.html">Triggers</a></span>
 </nav>
 </article>
 <aside class="toc sidebar" data-title="Contents" data-levels="2">
