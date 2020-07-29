@@ -1,0 +1,71 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gogs-postgresql
+  labels:
+    app: gogs
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gogs
+      name: gogs-postgresql
+  template:
+    metadata:
+      labels:
+        app: gogs
+        name: gogs-postgresql
+    spec:
+      containers:
+        - name: postgresql
+          image: quay.io/redhatdemo/openshift-pgsql12-primary:centos7
+          env:
+            - name: PG_USER_PASSWORD
+              value: gogs
+            - name: PG_USER_NAME
+              value: gogs
+            - name: PG_DATABASE
+              value: gogs
+            - name: PG_NETWORK_MASK
+              value: all
+          ports:
+            - containerPort: 5432
+          livenessProbe:
+            initialDelaySeconds: 30
+            tcpSocket:
+              port: 5432
+            timeoutSeconds: 1
+            failureThreshold: 10
+            periodSeconds: 20
+          resources:
+            limits:
+              memory: '512Mi'
+              cpu: '512m'
+          volumeMounts:
+            - mountPath: /pgdata
+              name: pgdata
+            - mountPath: /pgwal
+              name: pgwal
+      volumes:
+        - name: pgdata
+          persistentVolumeClaim:
+            claimName: pgdata-pvc
+        - name: pgwal
+          persistentVolumeClaim:
+            claimName: pgwal-pvc
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: gogs-postgresql
+  labels:
+    app: gogs
+spec:
+  ports:
+    - name: postgresql
+      port: 5432
+      targetPort: 5432
+  selector:
+    name: gogs-postgresql
+    app: gogs

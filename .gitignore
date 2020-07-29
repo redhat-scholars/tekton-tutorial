@@ -43,3 +43,6 @@ install/knative-eventing/knative-kafka.yaml
 bin/kubectl
 gh-pages
 staging-gh-pages
+
+triggers/tekton-helloworld
+app.ini

@@ -1,0 +1,188 @@
+[#ws-tasks-deploy]
+=== Deploy Tasks from Catalog
+
+All exercises of this chapter will be done a namesapace `{chapter-namespace}`, lets create and switch to the `{chapter-namespace}` namespace.
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+kubectl create ns {chapter-namespace} 
+kubectl config set-context --current --namespace {chapter-namespace}
+----
+
+As part of this exercise we will need to install the following external tasks to be installed in the namespace:
+
+- https://github.com/tektoncd/catalog/tree/master/task/git-clone/0.1[git-clone]
+- https://github.com/tektoncd/catalog/tree/master/task/maven/0.1[maven]
+- https://github.com/tektoncd/catalog/tree/master/task/buildah/0.1[buildah]
+- https://github.com/tektoncd/catalog/tree/master/task/kn/0.1[knative client(kn)]
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+kubectl apply -n {chapter-namespace} \
+  -f https://raw.githubusercontent.com/tektoncd/catalog/master/task/git-clone/0.1/git-clone.yaml \
+  -f https://raw.githubusercontent.com/tektoncd/catalog/master/task/maven/0.1/maven.yaml \
+  -f https://raw.githubusercontent.com/tektoncd/catalog/master/task/buildah/0.1/buildah.yaml \
+  -f https://raw.githubusercontent.com/tektoncd/catalog/master/task/kn/0.1/kn.yaml \
+  -f link:{github-repo}/{workspaces-repo}/list-directory-task.yaml[pass:[$TUTORIAL_HOME]/{workspaces-repo}/list-directory-task.yaml]
+----
+
+Check if all the tasks are available:
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+tkn task ls
+----
+
+The command should show an output like:
+
+[.console-output]
+[source,bash,subs="+macros,+attributes"]
+----
+NAME               DESCRIPTION              AGE
+buildah            Buildah task builds...   11 hours ago
+git-clone          These Tasks are Git...   11 hours ago
+kn                 This Task performs ...   9 minutes ago
+list-directory     Simple directory li...   11 hours ago
+maven              This Task can be us...   11 hours ago
+----
+
+[#ws-deploy-nexus]
+=== Deploy Nexus
+
+To show maven artifact caching and using customized maven `settings.xml` we will deploy Sonatype Nexus to the cluster:
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+kubectl apply -n {chapter-namespace} \
+  -f link:{github-repo}/install/utils/nexus.yaml[$TUTORIAL_HOME/install/utils/nexus.yaml^]
+----
+
+Wait for the nexus3 pod to come up before proceeding further with exercises:
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+watch kubectl -n {chapter-namespace} get pods,svc
+----
+
+A sucessfully running nexus3 pod should show the following services and pods:
+
+[.console-output]
+[source,bash]
+----
+NAME                         READY   STATUS    RESTARTS   AGE
+pod/nexus-75fff8bbbd-cmlxs   1/1     Running   0          3m25s
+
+NAME                 TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)          AGE
+service/nexus        NodePort    10.100.205.22   <none>        8081:31743/TCP   3m25s
+----
+
+The nexus maven repository could be opened using the url:
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+$(minikube service nexus -n {chapter-namespace})
+----
+
+[NOTE]
+=====
+* OpenShift users can use routes to expose the service
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+oc expose svc -n {chapter-namespace} nexus
+----
+=====
+
+[#ws-create-maven-settings-cm]
+=== Create maven-settings ConfigMap
+
+For us to mount the maven `settings.xml`, we will create ConfigMap holding the custom maven settings.xml:
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+kubectl create -n {chapter-namespace} cm maven-settings \
+  --from-file=settings.xml=link:{github-repo}/{workspaces-repo}/maven-settings.xml[+$TUTORIAL_HOME+/{workspaces-repo}/maven-settings.xml^]
+----
+
+You can check the ConfigMap contents using the command:
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+kubectl get -n {chapter-namespace} cm maven-settings -oyaml \
+  | yq r - data['settings.xml']
+----
+
+The output of the above command should be as same as settings.xml listing above.
+
+Before we create our pipeline ensure that the kubernetes cluster has a default storage class defined:
+
+[#ws-deploy-knative]
+=== Deploy Knative Serving
+
+As we will be dpeloying a https://knative.dev[Knative] serverless application as part of the pipeline we will be running later in this chapter, lets deploy Knative to the cluster:
+
+[tabs]
+====
+Minikube::
++
+--
+IMPORTANT: Do it only once per cluster
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+$TUTORIAL_HOME/bin/link:{github-repo}/bin/enable_knative.sh[enable_knative.sh^]
+----
+
+Wait for the serving deployment to complete without errors. 
+
+--
+OpenShift::
++
+--
+OpenShift users can install Knative i.e https://docs.openshift.com/container-platform/4.1/serverless/installing-openshift-serverless.html[OpenShift Serverless] using Operators.
+--
+====
+
+[#ws-check-sc]
+=== Check Default Storage Class
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+kubectl get sc
+----
+
+In minkube cluster it should show an output like:
+
+[.console-output]
+[source,subs="+quotes"]
+----
+NAME                 PROVISIONER                RECLAIMPOLICY   VOLUMEBINDINGMODE   ALLOWVOLUMEEXPANSION   AGE
+standard (#default#)   k8s.io/minikube-hostpath   Delete          Immediate           false                  9h
+----
+
+[NOTE]
+====
+- If you dont have one please check https://kubernetes.io/docs/concepts/storage/storage-classes/[Kubernetes Docs] on how to have one configured.
+
+- In OpenShift cluster the default storage class varies based on the underlying cloud platform. Refer to https://docs.openshift.com/container-platform/4.5/storage/dynamic-provisioning.html[documentation] to know more.
+====
+
+=== Create PVC
+
+Create the PVC `tekton-tutorial-sources`, which we will use as part of the exercises in this chapter and the upcoming ones.
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+kubectl apply -n {chapter-namespace} -f link:{github-repo}/{workspaces-repo}/sources-pvc.yaml[+$TUTORIAL_HOME+/{workspaces-repo}/sources-pvc.yaml^]
+----

@@ -1,0 +1,53 @@
+apiVersion: tekton.dev/v1beta1
+kind: TaskRun
+metadata:
+  generateName: webhook-gogs-
+spec:
+  serviceAccountName: pipeline
+  taskSpec:
+    params:
+      - name: GOGS_USER
+        type: string
+        description: Gogs admin username
+        default: gogs
+      - name: GOGS_PASSWORD
+        type: string
+        description: Gogs admin password
+        default: gogs
+      - name: GOGS_REPO_NAME
+        type: string
+        description: The GOGS Repo where to add to the webhooks
+        default: tekton-helloworld
+    stepTemplate:
+      env:
+        - name: NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+    steps:
+      - name: webhook-gogs
+        image: quay.io/siamaksade/python-oc
+        script: |
+          #!/usr/bin/env python3
+
+          import os
+          import requests 
+
+          gogs_user = "$(params.GOGS_USER)"
+          gogs_pwd = "$(params.GOGS_PASSWORD)"
+          webhookURL = "http://" + os.popen('oc get httpproxy el-gogs-webhook-ingress -o template --template="{{.spec.virtualhost.fqdn}}"').read()
+          gogsURL = "http://" + os.popen('oc get svc gogs -o template --template="{{.spec.clusterIP}}"').read() + ":3000"
+
+          # configure webhook on tekton-helloworld
+          data_webhook = '{"type": "gogs", "config": { "url": "' + webhookURL + '", "content_type": "json"}, "events": ["push"], "active": true}'
+          headers = {'Content-Type': 'application/json'}
+          resp = requests.post(url = gogsURL + "/api/v1/repos/" + gogs_user + "/$(params.GOGS_REPO_NAME)/hooks", 
+                              headers = headers, 
+                              auth = (gogs_user, gogs_pwd), 
+                              data = data_webhook) 
+
+          if resp.status_code != 200 and resp.status_code != 201:
+            print("Error configuring the webhook (status code: {})".format(resp.status_code))
+            print(resp.content)
+          else:
+            print("Configured webhook: " + webhookURL)

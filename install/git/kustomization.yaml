@@ -1,0 +1,24 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# Adds namespace to all resources.
+namespace: triggers-demo
+
+# Adds gogs label to all resources.
+commonLabels:
+  app: gogs
+
+generatorOptions:
+  disableNameSuffixHash: true
+
+configMapGenerator:
+  - name: gogs-config
+    behavior: create
+    files:
+      - app.ini
+
+resources:
+  - pvcs.yaml
+  - postgresql.yaml
+  - gogs.yaml

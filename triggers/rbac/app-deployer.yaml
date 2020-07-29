@@ -1,0 +1,49 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: app-deployer-role
+rules:
+  - apiGroups: ['serving.knative.dev']
+    resources: ['*']
+    verbs: ['*']
+  - apiGroups: ['eventing.knative.dev']
+    resources: ['*']
+    verbs: ['*']
+  - apiGroups: ['sources.knative.dev']
+    resources: ['*']
+    verbs: ['*']
+  - apiGroups: ['projectcontour.io']
+    resources: ['*']
+    verbs: ['*']
+  - apiGroups:
+      - ''
+    resources:
+      - pods
+      - services
+      - endpoints
+      - configmaps
+      - secrets
+    verbs:
+      - '*'
+  - apiGroups:
+      - apps
+    resources:
+      - deployments
+      - daemonsets
+      - replicasets
+      - statefulsets
+    verbs:
+      - '*'
+  - apiGroups:
+      - ''
+    resources:
+      - pods
+    verbs:
+      - get
+  - apiGroups:
+      - apps
+    resources:
+      - replicasets
+    verbs:
+      - get

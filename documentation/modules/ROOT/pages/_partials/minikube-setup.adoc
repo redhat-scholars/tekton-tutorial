@@ -116,15 +116,3 @@ kubectl create namespace {tutorial-namespace} &&\
 kubectl config set-context --current --namespace={tutorial-namespace}
 ----
 
-[TIP]
-=====
-The https://github.com/ahmetb/kubens[kubens] utility installed as part of https://github.com/ahmetb/kubectx[kubectx] allows for easy switching between Kubernetes namespaces.
-
-[.console-output]
-[source,bash,subs="+macros,+attributes"]
-----
-kubens {tutorial-namespace}
-----
-
-=====
-

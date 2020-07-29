@@ -436,7 +436,7 @@ You can find more details about using Authentication with Tekton https://tekton.
 [#tekton-auth-cleanup]
 == Cleanup
 
-If you no longer going to use the {chapter-namespace}, you can do:
+Delete the workspace and its resources:
 
 [.console-input]
 [source,bash,subs="+macros,attributes+"]

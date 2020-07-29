@@ -1,0 +1,12 @@
+---
+apiVersion: projectcontour.io/v1
+kind: HTTPProxy
+metadata:
+  name: gogs-http
+spec:
+  virtualhost:
+    fqdn: gogs.bar.com
+  routes:
+    - services:
+        - name: gogs
+          port: 3000

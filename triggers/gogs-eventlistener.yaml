@@ -1,0 +1,15 @@
+---
+apiVersion: triggers.tekton.dev/v1alpha1
+kind: EventListener
+metadata:
+  name: gogs-webhook
+  labels:
+    app: gogs
+spec:
+  serviceAccountName: pipeline
+  triggers:
+    - name: tekton-helloworld-webhook
+      bindings:
+        - name: gogs-triggerbinding
+      template:
+        name: tekton-helloworld-trigger-template

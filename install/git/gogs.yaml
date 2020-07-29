@@ -1,0 +1,78 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gogs
+  labels:
+    app: gogs
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gogs
+      name: gogs
+  template:
+    metadata:
+      labels:
+        app: gogs
+        name: gogs
+    spec:
+      containers:
+        - name: gogs
+          imagePullPolicy: Always
+          image: quay.io/siamaksade/gogs:stable
+          ports:
+            - containerPort: 3000
+              protocol: TCP
+          volumeMounts:
+            - name: gogs-data
+              mountPath: /opt/gogs/data
+            - name: gogs-config
+              mountPath: /etc/gogs/conf
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 3000
+              scheme: HTTP
+            initialDelaySeconds: 40
+            timeoutSeconds: 1
+            periodSeconds: 20
+            successThreshold: 1
+            failureThreshold: 10
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 3000
+              scheme: HTTP
+            initialDelaySeconds: 40
+            timeoutSeconds: 1
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 10
+      volumes:
+        - name: gogs-data
+          persistentVolumeClaim:
+            claimName: gogs-data
+        - name: gogs-config
+          configMap:
+            name: gogs-config
+            items:
+              - key: app.ini
+                path: app.ini
+---
+kind: Service
+apiVersion: v1
+metadata:
+  labels:
+    app: gogs
+  name: gogs
+spec:
+  ports:
+    - name: 3000-tcp
+      port: 3000
+      protocol: TCP
+      targetPort: 3000
+  selector:
+    app: gogs
+    name: gogs
+  type: NodePort

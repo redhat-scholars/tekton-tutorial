@@ -1,4 +1,5 @@
 = Setup
+include::_attributes.adoc[]
 
 [[tutorial-all-local]]
 == CLI tools
@@ -24,6 +25,11 @@ The following CLI tools are required for running the exercises in this tutorial.
 | https://kubernetes.io/docs/tasks/tools/install-kubectl/[Install]
 | https://kubernetes.io/docs/tasks/tools/install-kubectl/[Install]
 
+| Knative Client `kn` (>={kn-version})
+| `brew install knative/client/kn`
+| https://github.com/knative/client/releases/download/{kn-version}/kn-linux-amd64[Install]
+| https://github.com/knative/client/releases/download/{kn-version}/kn-windows-amd64.exe[Install]
+
 | https://github.com/wercker/stern[stern]
 | `brew install stern`
 | https://github.com/wercker/stern/releases/download/1.6.0/stern_linux_amd64[Download]
@@ -42,11 +48,6 @@ The following CLI tools are required for running the exercises in this tutorial.
 | watch
 | `brew install watch`
 | `dnf install procps-ng`
-|
-
-| kubectx and kubens
-| `brew install kubectx`
-| https://github.com/ahmetb/kubectx
 |
 
 |===
@@ -68,9 +69,11 @@ ifndef::workshop[]
 This tutorial was developed and tested with:
 
 - Tekton `{tekton-version}`
+- Tekton Triggers `{triggers-version}`
 - Minikube `{minikube-version}`
 - OpenShift `{openshift-version}`
 - Tekton CLI `{tekton-cli-version}`
+- Knative Client(kn) `{kn-version}`
 ====
 endif::[]
 
@@ -82,7 +85,7 @@ Knative can be installed only on Kubernetes cluster. The following section shows
 
 [tabs]
 ====
-Kubernetes::
+Minikube::
 +
 --
 include::partial$minikube-setup.adoc[]

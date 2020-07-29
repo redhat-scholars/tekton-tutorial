@@ -1,0 +1,76 @@
+{
+  "ref": "refs/heads/master",
+  "before": "d84fc84f8d7a1da0b49140f644613168e4af3110",
+  #"after": "becd943814ef904215c0c6f301434ce8faf31c26",#
+  "compare_url": "http://gogs.192.168.64.5.nip.io/gogs/tekton-helloworld/compare/d84fc84f8d7a1da0b49140f644613168e4af3110...becd943814ef904215c0c6f301434ce8faf31c26",
+  "commits": [
+    {
+      "id": "becd943814ef904215c0c6f301434ce8faf31c26",
+      "message": "First Test Trigger\n",
+      "url": "http://gogs.192.168.64.5.nip.io/gogs/tekton-helloworld/commit/becd943814ef904215c0c6f301434ce8faf31c26",
+      "author": {
+        "name": "Kamesh Sampath",
+        "email": "kamesh.sampath@hotmail.com",
+        "username": ""
+      },
+      "committer": {
+        "name": "Kamesh Sampath",
+        "email": "kamesh.sampath@hotmail.com",
+        "username": ""
+      },
+      "added": [],
+      "removed": [],
+      "modified": [
+        "src/main/java/com/redhat/developers/GreetingResource.java"
+      ],
+      "timestamp": "2020-07-29T05:24:44Z"
+    }
+  ],
+  "repository": {
+    "id": 5,
+    "owner": {
+      "id": 1,
+      "login": "gogs",
+      "full_name": "",
+      "email": "admin@gogs.com",
+      "avatar_url": "https://secure.gravatar.com/avatar/4d667b96bad9b51aafc728a20ebce918",
+      "username": "gogs"
+    },
+    "name": "tekton-helloworld",
+    "full_name": "gogs/tekton-helloworld",
+    "description": "",
+    "private": false,
+    "fork": false,
+    "parent": null,
+    "empty": false,
+    "mirror": false,
+    "size": 323584,
+    "html_url": "http://gogs.192.168.64.5.nip.io/gogs/tekton-helloworld",
+    "ssh_url": "gogs@gogs.192.168.64.5.nip.io:gogs/tekton-helloworld.git",
+    #"clone_url": "http://gogs.192.168.64.5.nip.io/gogs/tekton-helloworld.git",#
+    "website": "",
+    "stars_count": 0,
+    "forks_count": 0,
+    "watchers_count": 1,
+    "open_issues_count": 0,
+    "default_branch": "master",
+    "created_at": "2020-07-28T15:22:20Z",
+    "updated_at": "2020-07-28T15:22:24Z"
+  },
+  "pusher": {
+    "id": 1,
+    "login": "gogs",
+    "full_name": "",
+    "email": "admin@gogs.com",
+    "avatar_url": "https://secure.gravatar.com/avatar/4d667b96bad9b51aafc728a20ebce918",
+    "username": "gogs"
+  },
+  "sender": {
+    "id": 1,
+    "login": "gogs",
+    "full_name": "",
+    "email": "admin@gogs.com",
+    "avatar_url": "https://secure.gravatar.com/avatar/4d667b96bad9b51aafc728a20ebce918",
+    "username": "gogs"
+  }
+}
