@@ -38,7 +38,7 @@ jobs:
       - name: Install SSH Client
         uses: webfactory/ssh-agent@v0.2.0
         with:
-          ssh-private-key: ${{ secrets.TKN_SITE_DEPLOY }}
+          ssh-private-key: ${{ secrets.TKN_STAGING_SITE_DEPLOY }}
       - name: Download generated site
         uses: actions/download-artifact@v1
         with:
