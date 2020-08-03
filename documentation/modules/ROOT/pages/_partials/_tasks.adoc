@@ -1,0 +1,898 @@
+
+At the end of this chapter you will be able to :
+
+* Understand what is a https://github.com/tektoncd/pipeline/blob/master/docs/tasks.md[Task] ?
+* Understand how to clone your build resources using Task
+* Understand where cloned sources reside i.e. Workspace
+* Create a Task that can build the sources
+* How to run a Task
+* Use the pipeline resource with TaskRun
+
+include::partial$tekton-nav-to-folder.adoc[tags="folder-all,tasks"]
+
+[#tekton-tasks]
+== Tekton Task
+
+Each Task has the following:
+
+* **name** - the unique name using which the task can be referred
+* **inputs** - the inputs to the task
+** **resources** - the pipeline resources that will be used in the task e.g. git-source
+*** **name** - the name of the input resource using which it can be referenced and bound via <<tekton-task-run>>
+*** **type** - the type of the input resource, typically the pipeline resource type
+** **params** - the parameters that will be used in the task steps. Each parameter has
+*** **name** - the name of the parameter
+*** **description** - the description of the parameter
+*** **default** - the default value of parameter
+
+NOTE: The <<tekton-task-run>> could override the parameter values, if no parameter value is passed then the **default** value will be used.
+
+* **outputs** the pipeline resource that will end artifact of the task. In the above example the build will produce a container image artifact.
+** **resources** - the pipeline resources that will be used in the task e.g. builtImage
+*** **name** - the name of the input resource using which it can be referenced and bound via <<tekton-task-run>>
+*** **type** - the type of the input resource, typically the pipeline resource type
+* **steps** - One or more sub-tasks that will be executed in the defined order. The step has all the attributes like a https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.14/#pod-v1-core[Pod spec]
+* **volumes** - the task can also mount external volumes using the **volumes** attribute.
+
+The parameters that were part of the menu:spec[inputs > params] can be used in the steps using the notation `$(<variable-name>)`.
+
+[[tekton-task-clone]]
+=== Clone Source Code
+
+The following listing shows a simple Task that clones the sources using git command and lists the sources:
+
+.List application source code
+[source,yaml]
+----
+include::ROOT:example$source-lister.yaml[]
+----
+
+The sources are usually cloned to a standard path called `/workspace/<input.resource.name>`, in this example the input source name is `source` and hence the git clone will be done to a path called `/workspace/source`.
+
+You can create the Task using the command as shown in the following listing:
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+kubectl apply -n {tutorial-namespace} -f source-lister.yaml
+----
+
+Verify that your task was created:
+
+.Verify task
+[.console-input]
+[source,bash,subs="+quotes,macros+,attributes+"]
+----
+tkn task ls
+----
+
+[.console-output]
+[source,bash,subs="+quotes,macros+,attributes+"]
+----
+NAME            AGE
+source-lister   37 seconds ago
+----
+
+Lets describe the `task` resource:
+
+[.console-input]
+[source,bash,subs="+quotes,macros+,attributes+"]
+----
+tkn task describe source-lister
+----
+
+The command above will shown an output like:
+
+[#localtask-source-lister]
+.source-lister Task
+[.console-output]
+[source,bash,subs="+quotes,macros+,attributes+"]
+----
+Name:        source-lister
+Namespace:   tektontutorial
+
+📨 Input Resources
+
+ NAME       TYPE
+ ∙ source   git
+
+📡 Output Resources
+
+ No output resources
+
+⚓ Params
+
+ NAME           TYPE     DESCRIPTION              DEFAULT VALUE
+ ∙ contextDir   string   The context directo...   apps/greeter/java/quarkus
+
+🦶 Steps
+
+ ∙ ls-build-sources
+
+🗂  Taskruns
+
+ No taskruns
+----
+
+Since we have not run the Task yet, the command shows *No taskruns*. You can use the `tkn` CLI tool to run the Task, pass parameters and input sources.
+
+[TIP]
+====
+
+Use the `help` command option to know what are the possible options for the start command:
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+tkn task start --help
+----
+====
+
+Since we just have to pass the GitHub repo for the source-lister, run the following command to start the `TaskRun`:
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+tkn task start source-lister \
+  --showlog \#<.>
+  --inputresource='source=git-source'#<.>
+----
+<.> Show the logs while running the Task
+<.> You are mapping the git-source from the Pipeline resource to be the input source for the Task.
+
+[NOTE]
+====
+The command might ask your to confirm any default values, in this task we have a parameter called `contextDir` which has a default value ``, so when starting the command the Tekton CLI will ask you confirm the same, like:
+
+[.console-output]
+[source,bash]
+----
+? Value for param `contextDir` of type `string`? (Default is `apps/greeter/java/quarkus`) (apps/greeter/java/quarkus)
+----
+
+Be sure press kbd:[Enter] to start the TaskRun after providing inputs to the prompts.
+
+====
+
+The command should show an output like:
+
+[.console-output]
+[source,bash]
+----
+? Value for param `contextDir` of type `string`? (Default is `apps/greeter/java/quarkus`) apps/greeter/java/quarkus
+TaskRun started: source-lister-run-nbpvz
+Waiting for logs to be available...
+[git-source-git-source-qtp5j] {"level":"info","ts":1595743350.5350783,"caller":"git/git.go:105","msg":"Successfully cloned https://github.com/redhat-developer-demos/tekton-tutorial @ master in path /workspace/source"}
+[git-source-git-source-qtp5j] {"level":"warn","ts":1595743350.5351503,"caller":"git/git.go:152","msg":"Unexpected error: creating symlink: symlink /tekton/home/.ssh /root/.ssh: file exists"}
+[git-source-git-source-qtp5j] {"level":"info","ts":1595743350.5708065,"caller":"git/git.go:133","msg":"Successfully initialized and updated submodules in path /workspace/source"}
+
+[ls-build-sources] total 36
+[ls-build-sources] drwxr-xr-x    4 root     root          4096 Jul 26 06:02 src
+[ls-build-sources] -rw-r--r--    1 root     root          4005 Jul 26 06:02 pom.xml
+[ls-build-sources] -rwxr-xr-x    1 root     root          6607 Jul 26 06:02 mvnw.cmd
+[ls-build-sources] -rwxr-xr-x    1 root     root         10069 Jul 26 06:02 mvnw
+[ls-build-sources] drwxr-xr-x    2 root     root          4096 Jul 26 06:02 k8s
+[ls-build-sources] -rw-r--r--    1 root     root           154 Jul 26 06:02 Dockerfile
+----
+
+[NOTE]
+=====
+The container images used by the steps need to be downloaded therefore the first execution of the task will take some time before it starts logging the output to the terminal.
+=====
+
+Remember a Task is running as a pod therefore you can watch your pod to see task lifecycle: Init, PodInitializing, Running, and finally Completed as seen in the following listing:
+
+While the task is running open a new terminal and run:
+
+.Watch the pods
+[.console-input]
+[source,bash,subs="+quotes,macros+,attributes+"]
+----
+watch kubectl get pods
+----
+
+The command should show an output like:
+
+[.console-output]
+[source,bash,subs="+quotes,macros+,attributes+"]
+----
+NAME                                 READY   STATUS       AGE
+source-lister-run-6xpgx-pod-c7dc67   0/2     Init:0/2     9s
+...
+NAME                                 READY   STATUS       AGE
+source-lister-run-6kt8d-pod-67b326   0/2     Completed    41s
+----
+
+[#tekton-watch-logs]
+== Watching logs
+
+If the Task ran successfully you will notice the following logs in your terminal (lines truncated for brevity):
+
+[.console-output]
+[source,bash]
+----
+Taskrun started: source-lister-run-96qc4
+Waiting for logs to be available...
+...
+[git-source-git-source-rdr2k] {"level":"info","ts":1585065123.3817806,"logger":"fallback-logger","caller":"logging/config.go:69","msg":"Fetch GitHub commit ID from kodata failed: open /var/run/ko/refs/heads/master: no such file or directory"}
+[git-source-git-source-rdr2k] {"level":"info","ts":1585065133.3997571,"logger":"fallback-logger","caller":"logging/config.go:69","msg":"Fetch GitHub commit ID from kodata failed: open /var/run/ko/refs/heads/master: no such file or directory"}
+[git-source-git-source-rdr2k] {"level":"info","ts":1585065138.9021251,"logger":"fallback-logger","caller":"git/git.go:102","msg":"Successfully cloned https://github.com/redhat-developer-demos/tekton-tutorial @ master in path /workspace/source"}
+[git-source-git-source-rdr2k] {"level":"warn","ts":1585065138.902316,"logger":"fallback-logger","caller":"git/git.go:149","msg":"Unexpected error: creating symlink: symlink /tekton/home/.ssh /root/.ssh: file exists"}
+[git-source-git-source-rdr2k] {"level":"info","ts":1585065138.9946759,"logger":"fallback-logger","caller":"git/git.go:130","msg":"Successfully initialized and updated submodules in path /workspace/source"}
+
+[ls-build-sources] {"level":"info","ts":1585065132.8109465,"logger":"fallback-logger","caller":"logging/config.go:69","msg":"Fetch GitHub commit ID from kodata failed: \"KO_DATA_PATH\" does not exist or is empty"}
+[ls-build-sources] total 36
+[ls-build-sources] drwxr-xr-x    3 root     root          4096 Mar 24 15:52 src
+[ls-build-sources] -rw-r--r--    1 root     root          3472 Mar 24 15:52 pom.xml
+[ls-build-sources] -rw-r--r--    1 root     root          6609 Mar 24 15:52 mvnw.cmd
+[ls-build-sources] -rwxr-xr-x    1 root     root         10078 Mar 24 15:52 mvnw
+[ls-build-sources] -rw-r--r--    1 root     root           671 Mar 24 15:52 Dockerfile.jvm
+[ls-build-sources] -rw-r--r--    1 root     root           188 Mar 24 15:52 Dockerfile
+----
+
+The logs are the consolidated logs from all the Task step containers. You can identify the source of the log i.e the step that has generated the logs using the text within the square brackets `[]` of each log line.
+
+e.g.
+
+Logs starting with **[ls-build-sources]** are from the container that is responsible for running the Task step i.e. `ls-build-sources`.
+
+[[tekton-task-list-ws]]
+== Know the workspace directory
+
+In the example above, there is a log which shows the `git clone` command that cloned the application sources to the `/workspace/source` directory. The *workspace* directory is where your Task/Pipeline sources/build atrifacts will be cloned and generated. The `source` sub-path under is the directory where Tekton cloned the applicaiton sources. It is usually the name of the resources --> inputs --> Resource of type Git.
+
+[[tekton-task-clustertask]]
+== Cluster Task
+
+The tasks are by default tied to namespace i.e their visibility is restricted to the namespace where they were created. E.g. the `source-lister` that we created and ran earlier is tied to {tutorial-namespace}.
+
+To check lets create a new namespace called `clustertask-demo`:
+
+[.console-input]
+[source,bash]
+----
+kubectl create namespace clustertask-demo
+kubectl config set-context --current --namespace clustertask-demo
+----
+
+Listing the tasks in the `clustertask-demo` will not show any Tasks as shown in the command output below. 
+
+[.console-input]
+[source,bash]
+----
+tkn task ls
+----
+
+[.console-output]
+[source,bash]
+----
+No Tasks found
+----
+
+The reason that there are no Tasks found us that, we have not created any ClusterTask yet. If the Task is not a ClusterTask type then we will not be able to run the Task in namespaces where its not installed. Try running our `source-lister` task  from within `clustertask-demo`:
+
+[.console-input]
+[source,bash]
+----
+tkn task start source-lister --showlog --inputresource='source=git-source'
+----
+
+The command should fail with following output:
+
+[.console-output]
+[source,bash]
+----
+# shifting to clustertask-demo 
+Context "tektontutorial" modified.
+Error: Task name source-lister does not exist in namespace clustertask-demo
+----
+
+Let us now create a very simple ClusterTask called echoer as shown in the below listing:
+
+.List echoer ClusterTask
+[source,yaml]
+----
+apiVersion: tekton.dev/v1beta1
+kind: ClusterTask #<.>
+metadata:
+  name: echoer
+spec:
+  steps:
+    - image: alpine
+      script: | #<.>
+        #!/bin/sh
+        echo 'Tekton Rocks!!'
+
+----
+<.> The kind ClusterTask makes the task available in all namespaces.
+<.> The step can also be shell script 😄
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+kubectl apply -n clustertask-demo -f echoer.yaml
+----
+
+=== List and Describe ClusterTasks
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+tkn clustertask ls
+----
+
+NOTE: You have to use `clustertask` command to list all cluster tasks
+
+The comand should return an output like, with one ClusterTask `echoer`:
+
+[.console-output]
+[source,bash]
+----
+NAME     DESCRIPTION   AGE
+echoer                 18 minutes ago
+----
+
+Let us decribe ClusterTask `echoer`:
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+tkn clustertask describe echoer
+----
+
+The comand should return an output like:
+
+[.console-output]
+[source,bash]
+----
+Name:   echoer
+
+📨 Input Resources
+
+ No input resources
+
+📡 Output Resources
+
+ No output resources
+
+⚓ Params
+
+ No params
+
+🦶 Steps
+
+ ∙ unnamed-0
+
+🗂  Taskruns
+
+ No taskruns
+----
+
+[IMPORTANT]
+====
+If you compare the output above with <<localtask-source-lister>>, the one big difference with respect to definition is the missing `Namespace` for the `echoer` Task.
+====
+
+=== Run ClusterTask `echoer`
+
+Lets run the task in the current namesapce `clustertask-demo`:
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+tkn clustertask start echoer --showlog
+----
+
+[#tekton-rocks-output]
+[.console-output]
+[source,bash]
+----
+TaskRun started: echoer-run-75n6g
+Waiting for logs to be available...
+[unnamed-0] + echo 'Tekton Rocks!!'
+[unnamed-0] Tekton Rocks!!
+----
+
+=== Run ClusterTask `echoer` in other namespace(s)
+
+Let us now shift back to `{tutorial-namespace}` and run the `echoer` task again:
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+kubectl config set-context --current --namespace={tutorial-namespace} && \
+tkn clustertask start echoer --showlog
+----
+
+The command should produce an identical output as show <<tekton-rocks-output,above>>.
+
+[#tekton-tasks-points-to-ponder]
+== Points to Ponder
+
+- Tasks are namespace bound i.e. available only in namespace(s) where they were created
+- Tasks resources are interacted using `tkn task` command and its options
+- ClusterTasks are available across the cluster i.e. in any namesapce(s) of the cluster
+- ClusterTasks resources are interacted using `tkn clustertask` command and its options
+
+[[tekton-task-build-sources]]
+== Build Cloud Native Application
+
+The Tekton Task can be of one or more steps. A Cloud Native Java Application at minimum comprises of the following steps:
+
+1. Building the Application from sources using build tool like https://maven.apache.org[Apache Maven] or https://gradle.org[Gradle]
+2. Building the linux container image from the build artifacts
+3. Pushing the built container image to remote registry like https://quay.io[Quay.io] or https://hub.docker.com[Docker Hub]
+
+The task `build-app` is used to build the https://github.com/redhat-developer-demos/tekton-tutorial/tree/master/apps/greeter/java/quarkus[Java application] that is part of the tutorial. As a step one(`build-sources`) the application will be built using https://apache.maven.org[Apache Maven], then the step two (`build-image`) the application artifacts a **jar** in this case will be used to built the linux container image using https://buildah.io[buildah], the https://github.com/redhat-developer-demos/tekton-tutorial/tree/master/apps/greeter/java/quarkus/Dockerfile.jvm[Dockerfile] in the sources will be used as base to build the linux container image and as part of the last step(`build-push`) the built linux container image will be pushed to the container registry.
+
+The following section explains the three Task steps. The <<tekton-task-deploy>> will finally deploy all these three steps together as one single `build-app` task.
+
+[[task-parameters]]
+=== Step :: Task Inputs and Outputs
+.link:{github-repo}/{tasks-repo}/build-app-task.yaml[task inputs and outputs^]
+[source,yaml,subs="+macros,attributes+"]
+----
+inputs:
+    resources: #<.>
+      - name: source
+        type: git
+    params:
+      - name: contextDir #<.>
+        description: the context dir within source
+        default: .
+      - name: destinationImage #<.>
+        description: the fully qualified image name
+        default: "$(outputs.resources.builtImage.url)"
+      - name: dockerFile #<.>
+        description: the docker file to used for building the application
+        default: Dockerfile
+      - name: tlsVerify #<.>
+        description: tls verify
+        type: string
+        default: "false"
+outputs:
+  resources: #<.>
+    - name: builtImage
+      type: image
+----
+
+<.> The input referred via `source`, which will be of type `git`. Having a input resource of type `git` will cause the TektonPipelines to add implict git clone step to download the sources to `workspace/source` directory
+<.> `contextDir` - specifies the directory under the sources, which will be the context for the Task
+<.> `destinationImage` - the linux container image name that will be built as part of this Task. Defaults to the `outputs.resources.builtImage.url`
+<.> `dockerFile` - the Dockerfile that will be used to build the image
+<.> `tlsVerify` - enable or disable TLS when pushing the image to remote registry
+<.> The output specifices the final output of the Task, in this case the built linux container image referred via `builtImage`
+
+[NOTE]
+====
+For Task inputs and outputs - we will use the xref:pipeline-resources.adoc#tkn-see-what-you-have-deployed[PipelineResources] that was created in previous chapter.
+====
+
+[[build-sources]]
+=== Step 1 :: Build Application Sources
+.link:{github-repo}/{tasks-repo}/build-app-task.yaml#L32-L43[step-build-sources^]
+[source,yaml,subs="+macros,attributes+"]
+----
+- name: build-sources
+  image: docker.io/maven:3.6.3-jdk-8-slim
+  workingDir: "/workspace/source/$(inputs.params.contextDir)" #<.>
+  command: #<.>
+    - mvn
+  args: #<.>
+    - -DskipTests
+    - clean
+    - package
+  env: #<.>
+    - name: user.home
+      value: /home/tekton
+----
+
+<.> the working dir or the context directory within the sources from there the build command will be run
+<.> the build command to run
+<.> the build command arguments
+<.> The environment variables that will be set within the step container
+
+[[build-linux-image]]
+=== Step 2 :: Build Application Linux Container Image
+
+.link:{github-repo}/{tasks-repo}/build-app-task.yaml#L44-L62[step-build-image^]
+[source,yaml,subs="+macros,attributes+"]
+----
+- name: build-image
+  image: quay.io/buildah/stable
+  workingDir: "/workspace/source/$(inputs.params.contextDir)"
+  command:
+    - "buildah"
+  args:
+    - "bud"
+    - "--layers"
+    - "-f"
+    - "$(inputs.params.dockerFile)"
+    - "-t"
+    - "$(inputs.params.destinationImage)"
+    - "."
+  securityContext: <.>
+    runAsUser: 0
+  volumeMounts: <.>
+    - name: varlibc
+      mountPath: /var/lib/containers
+----
+<.> Running buildah inside container needs to be run as root user and needs privilege esclation. These are set as part of security context.
+<.> The buildah tool saves the built linux container layers in the local file system at `/var/lib/containers`, which can then be used in other <<push-linux-image,steps>> or to push the image to remote registry.
+
+[[push-linux-image]]
+=== Step 3:: Push Application Linux Container Image
+
+.link:{github-repo}/{tasks-repo}/build-app-task.yaml#L63-L78[step-build-image^]
+[source,yaml,subs="+macros,attributes+"]
+----
+- name: push-image
+  image: quay.io/buildah/stable
+  workingDir: "/workspace/source/$(inputs.params.contextDir)"
+  command:
+    - "buildah"
+  args:
+    - "push"
+    - "--tls-verify=$(inputs.params.tlsVerify)"
+    - $(inputs.params.destinationImage)
+    - "docker://$(inputs.params.destinationImage)"
+  securityContext:
+    runAsUser: 0
+  volumeMounts:
+    - name: varlibc
+      mountPath: /var/lib/containers
+----
+
+Having see the three individual steps of the `build-app` task, the following snippet shows all three chained together:
+
+.link:{github-repo}/{tasks-repo}/build-app-task.yaml[build-app-task.yaml^]
+[source,yaml,subs="+macros,attributes+"]
+----
+include::ROOT:example$build-app-task.yaml[]
+----
+
+[#tekton-task-deploy]
+== Deploy a task
+
+Make sure we are in the `{tutorial-namespace}`:
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+kubectl config view --minify | grep namespace
+----
+
+Output should be like:
+
+[.console-output]
+[source,bash]
+----
+namespace: tektontutorial
+----
+
+The application build task could be created using the command:
+
+[.console-input]
+[source,bash,subs="+macros,attributes+"]
+----
+kubectl apply -n {tutorial-namespace} -f link:{github-repo}/{tasks-repo}/build-app-task.yaml[build-app-task.yaml]
+----
+
+We will use the Tekton cli to inspect the created resources
+
+[.console-input]
+[source,bash,subs="+macros,attributes+"]
+----
+tkn task ls
+----
+
+The above command should list one Task as shown below:
+
+[.console-output]
+[source,bash]
+----
+NAME        AGE
+build-app   12 seconds ago
+source-lister   7 minutes ago
+----
+
+[TIP]
+====
+* Use the command **help** `tkn task --help`
+====
+
+[#tekton-task-run]
+== TaskRun
+
+The https://github.com/tektoncd/pipeline/blob/master/docs/taskruns.md[TaskRun] is used to run a specific task independently. In the following section we will run the `build-app` task created in the previous step.
+
+The application build task(`build-app`) could be run using the command:
+
+[.console-input]
+[source,bash,subs="+macros,attributes+"]
+----
+tkn task start -n {tutorial-namespace} build-app \#<.>
+  --inputresource='source=git-source' \#<.>
+  --outputresource='builtImage=tekton-tutorial-greeter-image' \#<.>
+  --param contextDir='apps/greeter/java/springboot' \#<.>
+  --showlog#<.>
+----
+
+<.> The task that need to be run, in this case `build-app`
+<.> The input resource mapping, i.e. mapping  input `source` to PipelineResource `git-source` of type `git`
+<.> The output resource mapping, i.e. mapping output `builtImage` to PipelineResource `built-image` of type `image`
+
+It will take few seconds for the TaskRun to show status as `Running` as it needs to download the container images.
+
+[TIP]
+====
+* Use the command **help** via `tkn taskrun --help`
+* Use `tr` as shorcut for taskrun commands e.g to list taskruns run the command `tkn tr ls`
+====
+
+[#tekton-tr-logs]
+=== Watch TaskRun logs
+
+To check the status of the TaskRun use the `logs` command of taskrun like:
+
+[.console-input]
+[source,bash,subs="+macros,attributes+"]
+----
+tkn tr ls
+----
+
+[.console-output]
+[source,bash]
+----
+NAME                      STARTED          DURATION     STATUS
+build-app-run-tsqrf       2 minutes ago    ---          Running
+echoer-run-gx6wp          40 minutes ago   15 seconds   Succeeded
+source-lister-run-6t2mj   1 hour ago       14 seconds   Succeeded
+source-lister-run-nbpvz   1 hour ago       28 seconds   Succeeded
+----
+
+[.console-input ]
+[source,bash,subs="+macros,attributes+"]
+----
+# use one task run for which you need the log from list above
+tkn tr logs -f -a build-app-run-tsqrf #<1>
+----
+<1> The `-f` or `-a` allows to tail the logs from all the containers of the task. For more options run `tkn tr --help`
+
+=== TaskRun Containers
+
+Each task step will be run within a container of its own. You can list the containers of the build pod like:
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+kubectl get pods --selector=tekton.dev/task=build-app
+----
+
+e.g. For a build-app TaskRun pod `build-app-run-lj7sm-pod-s74bp`
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+kubectl get pod build-app-run-lj7sm-pod-s74bp \
+  -o jsonpath=+"{range .spec.containers[*] }{.name}{'\n'}{end}"+
+----
+
+The command should show an output like:
+
+[.console-output]
+[source,bash]
+----
+step-create-dir-builtimage-hn654
+step-git-source-git-source-2lqtx
+step-build-sources
+step-build-image
+step-push-image
+step-image-digest-exporter-52lh6
+----
+
+As noted from the output each container will be prefixed by `step-` followed by the step-name from that of the Task definition. 
+
+Apart from your step pods there will also be other Tekton pods that will be added to each TaskRun based on the input and output resources. e.g step-git-source-git-source-2lqtx, step-image-digest-exporter-52lh6
+
+If you see the TaskRun status as `Failed` or `Error` use the following command to check the reason for error:
+
+[.console-input]
+[source,bash,subs="+macros,attributes+"]
+----
+tkn taskrun describe <taskrun-name>
+----
+
+[#tekton-test-task-output]
+=== Test Task output
+
+Lets try running the image build using the `build-app` task:
+
+[tabs]
+====
+Minikube::
++
+--
+[.console-input]
+[source,bash,subs="+macros,attributes+"]
+----
+kubectl run demo-greeter -n {tutorial-namespace} \
+ --generator='run-pod/v1' \
+ --image='example.com/rhdevelopers/tekton-tutorial-greeter' && \
+kubectl expose pod demo-greeter -n {tutorial-namespace} --port 8080 --type=NodePort
+----
+
+Wait for the `demo-greeter` to be up and running:
+
+[.console-input]
+[source,bash,subs="+macros,attributes+"]
+----
+watch kubectl get pods -n {tutorial-namespace}
+----
+
+Lets try checking the application:
+
+[.console-input]
+[source,bash,subs="+macros,attributes+"]
+----
+SVC_URL=$(minikube -p {tutorial-namespace} -n {tutorial-namespace} service demo-greeter --url)
+----
+
+--
+OpenShift::
++
+--
+[.console-input]
+[source,bash,subs="+macros,attributes+"]
+----
+oc expose svc -n {tutorial-namespace} demo-greeter
+----
+
+[.console-input]
+[source,bash,subs="+macros,attributes+"]
+----
+SVC_URL=$(oc get routes -o yaml | yq r - 'spec.url.host' )
+----
+--
+====
+
+[.console-input]
+[source,bash,subs="+macros,attributes+"]
+----
+http --body $SVC_URL
+----
+
+The above command should show an output like **hello**
+
+[[tekton-task-step-template]]
+== Step Template
+
+When there is a need to have similar container configuration across all steps of a Task, we can have them defined in the stepTemplate. The Task steps will then inherit them implicitly in all steps. In the example above we define the resources and securityContext for all the steps using the stepTemplate.  Also if you notice in the example above we can also override the stepTemplate at the step level. That gives a unique flexibility to tweak the settings at step level.
+
+With the current `build-app` task, we see the following configurations are repeated in `build-image` and `push-image`:
+
+[source,yaml]
+----
+securityContext:
+  privileged: true
+  runAsUser: 0
+volumeMounts:
+  - name: varlibc
+    mountPath: /var/lib/containers
+----
+
+We can move the the above step configuration into a stepTemplate as shown in the following updated `build-app` task:
+
+[source,yaml]
+----
+include::ROOT:example$build-app-task-step-template.yaml[]
+----
+
+=== Apply new Task updates
+
+Now you can apply the task as shown:
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+kubectl apply -n {tutorial-namespace} -f build-app-task-step-template.yaml
+----
+
+Now try running `build-app` Task again:
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+tkn task start -n {tutorial-namespace} build-app \
+  --inputresource='source=git-source' \
+  --outputresource='builtImage=tekton-tutorial-greeter-image' \
+  --param contextDir='apps/greeter/java/springboot' \
+  --showlog
+----
+
+When you examine the TaskRun pods should notice `stepTemplate` added to all the step containers including `build-sources`.
+
+List the pods that were part of the TaskRun for Task `build-app`:
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+kubectl get pods --selector=tekton.dev/task=build-app
+----
+
+=== Check `securityContext`
+
+Assuming the build-app-run pod to be `build-app-run-dnbwp-pod-4hcvr`:
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+kubectl get pod -n {tutorial-namespace} build-app-run-dnbwp-pod-4hcvr \
+-o=jsonpath=+"{range .spec.containers[*]}{.name}{'\n'}\
+  {'\t'}{'Privileged: '}{.securityContext.privileged}{'\t'}{'User: '}{.securityContext.runAsUser}{'\n'}{end}"+
+----
+
+The command should an output like :
+
+[.console-output]
+[source,bash]
+----
+step-create-dir-builtimage-mqg45
+        Privileged: true        User: 0
+step-git-source-git-source-t5xcb
+        Privileged: true        User: 0
+step-build-sources
+        Privileged: true        User: 0
+step-build-image
+        Privileged: true        User: 0
+step-push-image
+        Privileged: true        User: 0
+step-image-digest-exporter-tr4mf
+        Privileged: true        User: 0
+----
+
+As you noticed that all steps have inherited the `securityContext` from the `StepTemplate`, making the step container to run in `privileged` mode with user `0`
+
+=== Check `volumeMounts`
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+kubectl get pod -n {tutorial-namespace} build-app-run-dnbwp-pod-4hcvr \
+-o=jsonpath=+"{range .spec.containers[*]}{.name}{'\n'}{'\t'}{'Mount Path: '}{.volumeMounts[?(@.name=='varlibc')].mountPath} {'\n'}{end}"+
+----
+
+The command should an output like :
+
+[.console-output]
+[source,bash]
+----
+step-create-dir-builtimage-mqg45
+        Mount Path: /var/lib/containers
+step-git-source-git-source-t5xcb
+        Mount Path: /var/lib/containers
+step-build-sources
+        Mount Path: /var/lib/containers
+step-build-image
+        Mount Path: /var/lib/containers
+step-push-image
+        Mount Path: /var/lib/containers
+step-image-digest-exporter-tr4mf
+        Mount Path: /var/lib/containers
+----
+
+As you noticed that all steps have inherited the `mountPath` from the `StepTemplate`.
+
+NOTE: The Task steps can override the stepTemplate values.
+
+[#tekton-task-cleanup]
+== Cleanup
+
+[.console-input]
+[source,bash,subs="+macros,attributes+"]
+----
+kubectl delete pod -n {tutorial-namespace} demo-greeter
+kubectl delete svc -n {tutorial-namespace} demo-greeter
+# cleans all completed and failed pods
+$TUTORIAL_HOME/bin/clean_completed.sh
+----

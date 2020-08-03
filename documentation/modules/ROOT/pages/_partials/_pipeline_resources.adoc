@@ -1,0 +1,105 @@
+At the end of this chapter you will be able to :
+
+* Understand what is a https://github.com/tektoncd/pipeline/blob/master/docs/resources.md[pipeline resource] ?
+* Create a pipeline resource
+
+[#tekton-res-prerequisite]
+== Prerequisite
+
+include::ROOT:partial$prereq-cli.adoc[]
+
+include::partial$tekton-api.adoc[]
+
+[#tekton-res-create]
+== Create a pipeline resource
+
+include::partial$tekton-nav-to-folder.adoc[tags="folder-all,resources"]
+
+The following snippet shows what a Tekton `PipelineResource` YAML looks like:
+
+.link:{github-repo}/{resources-repo}/build-resources.yaml[build-resources.yaml^]
+[source,yaml,subs="+macros,attributes+"]
+----
+include::ROOT:example$build-resources.yaml[]
+----
+
+Each pipeline resource has:
+
+* **name**: the name using which it will be referred in other places
+* **type**: the type of the pipeline resource, in this example we have two types
+    **  __git__ - this type of resource refers to a GitHub repository
+    **  __image__ - this type of resource is linux container image 
+* **params**: each type can have one or more parameters that will be used to configure the underlying type. In the above example for the `git-source` pipeline resource, the parameters `url` and `revision` are used  to identify the GitHub repository url and revision of the sources respectively.
+
+More details on other types of pipeline resource types is available https://github.com/tektoncd/pipeline/blob/master/docs/resources.md#resource-types[here].
+ 
+[#tekton-res-deploy]
+== Deploy a pipeline resource
+
+The pipeline resource could be created using the command:
+
+[.console-input]
+[source,bash,subs="+macros,attributes+"]
+----
+kubectl apply -n {tutorial-namespace} -f link:{github-repo}/{resources-repo}/build-resources.yaml[build-resources.yaml^]
+----
+
+[.console-output]
+[source,bash,subs="+macros,attributes+"]
+----
+pipelineresource.tekton.dev/git-source created
+pipelineresource.tekton.dev/tekton-tutorial-greeter-image created
+----
+
+[#tkn-see-what-you-have-deployed]
+== See what you have deployed
+
+We will use the Tekton cli to inspect the created resources
+
+[.console-input]
+[source,bash,subs="+macros,attributes+"]
+----
+tkn res ls
+----
+
+The above command should list two resources as shown below:
+
+[.console-output]
+[source,bash]
+----
+NAME                            TYPE    DETAILS
+git-source                      git     url: https://github.com/redhat-developer-demos/tekton-tutorial
+tekton-tutorial-greeter-image   image   url: example.com/rhdevelopers/tekton-tutorial-greeter
+----
+
+All Tekton API resources/objects has the *describe* option that gives more details of respective Tekton API object.
+
+e.g. To describe the PipelineResource that we just created, run:
+
+[.console-input]
+[source,bash,subs="+macros,attributes+"]
+----
+tkn res describe git-source
+----
+
+[.console-output]
+[source,bash]
+----
+Name:                    git-source
+Namespace:               tektontutorial
+PipelineResource Type:   git
+
+Params
+NAME       VALUE
+url        https://github.com/redhat-developer-demos/tekton-tutorial
+revision   master
+
+Secret Params
+No secret params
+----
+
+[TIP]
+====
+Use the command **help** via `tkn res --help`
+====
+

@@ -1,0 +1,445 @@
+= Using Private Repositories and Registries
+
+include::_attributes.adoc[]
+:chapter-namespace: workspace-auth-demo
+
+WARNING: This chapter build is in progress, expect to change and not working as expected
+
+At the end of this chapter you will be able to :
+
+* Tekton Authentication Secrets
+* How to push linux contianer image to external registry
+* How to clone from a private Github respository
+
+[#tkn-prr-overview]
+== Overview
+
+In many parctical usecase you might need to pull from private Git repsoitories or might need to push to external container registry such as https://quay.io[Quay.io]. In both the cases the access requires you to authenticate. With Tekton this is achieved using the Kubernetes Service Account(SA) and Kubernetes Secret.
+
+include::partial$tekton-nav-to-folder.adoc[tags="folder-all,auth"]
+
+Let us create a new namespace called `{chapter-namespace}` and switch to that namespace context. 
+
+[NOTE.assumptions,caption=ASSUMPTIONS]
+====
+* It is assumed that you have completed xref:workspaces.adoc[Workspaces] and the reusing the same namespace that was xref:workspaces.adoc#ws-prepare[prepared] in that chapter.
+* You have container registry account with https://quay.io[Quay.io] or https://hub.docker.com[Docker Hub]
+* You have GitHub account and a private repository
+====
+
+[#tekton-pull-from-remote-repo]
+== Pulling from Private Source Repository
+
+In this exercise we will see how to pull i.e. clone the source code from the private source reporsitory. For this example we will use the GitHub as the remote source repository. 
+
+To be able to run this exercise you need:
+
+- A remote GitHub Repository, you can pull fork the https://github.com/redhat-developer-demos/tekton-helloworld and push that as your private repository
+- A https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-token[GitHub Personal Access Token(PAT)] to access the remote repository.
+
+Set the requried environment variables to be used when creating the github-pat-secret:
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+export GITHUB_USERNAME='<your github.com username>'
+export TEKTON_TUTORIAL_GITHUB_PAT='<your github.com username personal accesstoken>'
+----
+
+[#tekton-github-repo-secret]
+=== Create Github PAT Secret
+
+Create the Kubernetes secret that can hold your GitHub.com credentials:
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+kubectl create secret -n {chapter-namespace} generic github-pat-secret --dry-run=client -o yaml \
+  | yq w - type kubernetes.io/basic-auth \
+  | yq w - stringData.username $GITHUB_USERNAME \
+  | yq w - stringData.password $TEKTON_TUTORIAL_GITHUB_PAT \
+  | kubectl apply -f - 
+----
+
+[.console-output]
+[source,bash]
+----
+secret/github-pat-secret created
+----
+
+[#tekton-github-pat-annoate]
+=== Annotate Secret to be used with GitHub.com
+
+To make Tekton use the Secret `github-pat-secret` with github.com, we need to annotate the Secret with `tekton.dev/git-0=https://github.com`.
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+kubectl annotate -n {chapter-namespace} secret github-pat-secret \
+  "tekton.dev/git-0=https://github.com"
+----
+
+[.console-output]
+[source,bash]
+----
+secret/github-pat-secret annotated
+----
+
+Verify the github-pat-secret as right type, annoations and credential values:
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+kubectl get -n {chapter-namespace} secret github-pat-secret -o yaml 
+----
+
+The command should show an output(trimmed for brevity) as shown in the following listing, with your GitHub.com username and PAT. 
+
+[.console-output]
+[source,bash,subs="+quotes"]
+----
+apiVersion: v1
+data:
+  password: REDACTED
+  username: REDACTED
+kind: Secret
+metadata:
+  annotations:
+    #tekton.dev/git-0: https://github.com#
+  name: github-pat-secret
+  namespace: workspace-auth-demo
+#type: kubernetes.io/basic-auth#
+----
+
+[#tekton-github-sa]
+=== Create Service Account
+
+Let us create a Kubernetes ServiceAccount that could be used pull from the private GitHub repository:
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+kubectl create sa -n {chapter-namespace} github-bot
+----
+
+[.console-output]
+[source,bash]
+----
+serviceaccount/github-bot created
+----
+
+[#tekton-patch-github-sa]
+=== Patch Service Account 
+
+Now patch the `github-bot` service account to use the `github-pat-secret` credentials:
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+kubectl patch serviceaccount github-bot \
+  -p '{"secrets": [{"name": "github-pat-secret"}]}'
+----
+
+[.console-output]
+[source,bash]
+----
+serviceaccount/github-bot patched
+----
+
+Lets verify if the service account has the secret added:
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+kubectl get sa -n {chapter-namespace} github-bot -o yaml
+----
+
+The command should show an output(trimmed for brevity) like:
+
+[.console-output]
+[source,yaml,subs="+quotes,+attributes"]
+----
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: github-bot
+  namespace: {chapter-namespace}
+secrets:
+#- name: github-pat-secret#
+- name: build-bot-token-8nl2v
+----
+
+[#tekton-create-clone-pipeline]
+=== Create Pipeline
+
+Create the git clone pipeline which will clone from the private GitHub repo and simply list the contents: 
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+kubectl apply -n {chapter-namespace} -f link:{github-repo}/{auth-repo}/secretworld-app-clone.yaml[secretworld-app-clone.yaml^]
+----
+
+[.console-output]
+[source,bash]
+----
+pipeline.tekton.dev/secretworld-app-clone created
+----
+
+[#tekton-run-clone-pipeline]
+=== Run Pipeline
+
+Ensure that the pipeline run has been set to run with the Service Account `github-bot`
+
+[source,yaml,subs="+quotes"]
+----
+include::ROOT:example$secretworld-app-clone-run.yaml[]
+----
+[IMPORTANT]
+====
+<.>  Please make sure you have updated the private GitHub repository to match your private repository
+====
+
+Run the pipeline:
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+kubectl create -n {chapter-namespace} -f secretworld-app-clone-run.yaml
+----
+
+include::ROOT:partial$logs-view.adoc[tags='pr']
+
+A successful clone from private repo will show the following output ( trimmed brevity):
+
+[.console-output]
+[source,bash,subs="+quotes"]
+----
+[clone-sources : credential-initializer] {"level":"info","ts":1595922122.9077983,"caller":"creds-init/main.go:44","msg":"Credentials initialized."}
+
+[clone-sources : clone] + CHECKOUT_DIR=/workspace/output/
+[clone-sources : clone] + '[[' true '==' true ]]
+[clone-sources : clone] + cleandir
+[clone-sources : clone] + '[[' -d /workspace/output/ ]]
+[clone-sources : clone] + rm -rf /workspace/output//Dockerfile /workspace/output//README.md /workspace/output//k8s /workspace/output//mvnw /workspace/output//mvnw.cmd /workspace/output//pom.xml /workspace/output//src
+[clone-sources : clone] + rm -rf /workspace/output//.dockerignore /workspace/output//.git /workspace/output//.gitignore /workspace/output//.mvn
+[clone-sources : clone] + rm -rf '/workspace/output//..?*'
+[clone-sources : clone] + test -z
+[clone-sources : clone] + test -z
+[clone-sources : clone] + test -z
+[clone-sources : clone] + /ko-app/git-init -url https://github.com/redhat-developer-demos/tekton-secretworld -revision master -refspec  -path /workspace/output/ '-sslVerify=true' '-submodules=true' -depth 1
+[clone-sources : clone] {"level":"info","ts":1595922137.4565356,"caller":"git/git.go:139","msg":"Successfully cloned https://github.com/redhat-developer-demos/tekton-secretworld @ 5250e1fa185805373e620d1c04a0c48129efd2ee (grafted, HEAD, origin/master) in path /workspace/output/"}
+[clone-sources : clone] {"level":"info","ts":1595922137.4990256,"caller":"git/git.go:180","msg":"Successfully initialized and updated submodules in path /workspace/output/"}
+[clone-sources : clone] + cd /workspace/output/
+[clone-sources : clone] + git+ tr -d '\n'
+[clone-sources : clone]  rev-parse HEAD
+[clone-sources : clone] + RESULT_SHA=5250e1fa185805373e620d1c04a0c48129efd2ee
+[clone-sources : clone] + EXIT_CODE=0
+[clone-sources : clone] + '[' 0 '!=' 0 ]
+[clone-sources : clone] + echo -n 5250e1fa185805373e620d1c04a0c48129efd2ee
+
+[list-cloned-repo : credential-initializer] {"level":"info","ts":1595922139.7837844,"caller":"creds-init/main.go:44","msg":"Credentials initialized."}
+
+
+[list-cloned-repo : list-directory] total 44
+[list-cloned-repo : list-directory] drwxr-xr-x    4 root     root          4096 Jul 28 07:42 src
+[list-cloned-repo : list-directory] -rw-r--r--    1 root     root          4147 Jul 28 07:42 pom.xml
+[list-cloned-repo : list-directory] -rwxr-xr-x    1 root     root          6607 Jul 28 07:42 mvnw.cmd
+[list-cloned-repo : list-directory] -rwxr-xr-x    1 root     root         10069 Jul 28 07:42 mvnw
+[list-cloned-repo : list-directory] drwxr-xr-x    2 root     root          4096 Jul 28 07:42 k8s
+[list-cloned-repo : list-directory] -rw-r--r--    1 root     root           111 Jul 28 07:42 README.md
+[list-cloned-repo : list-directory] -rw-r--r--    1 root     root            87 Jul 28 07:42 Dockerfile
+
+[list-cloned-repo : show-readme] 🥳 Yay! 🎉
+[list-cloned-repo : show-readme]
+[list-cloned-repo : show-readme] You have successfully cloned from private GitHub repository. 👏👏
+[list-cloned-repo : show-readme]
+[list-cloned-repo : show-readme] 😺 Tekton Rocks!! 🚀
+----
+
+[#tekton-push-to-external-reg]
+== Pushing to external registry
+
+To able push to external container registry, its requried that the Pipline is run with a ServiceAccount that has container registry credentials configured via ServiceAccount secrets.  Kubernetes provider a Secret type called `docker-registry`, that can be used to configure the container registry credentials.
+
+Set the requried environment variables to be used when creating the container-registry-secret:
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+export CONTAINER_REGISTRY_SERVER='https://quay.io' #<.>
+export CONTAINER_REGISTRY_USER='<your registry user>'
+export CONTAINER_REGISTRY_PASSWORD='<your registry user password>'
+----
+<.> The container registry server URL, for Quay.io its https://quay.io and for DockerHub it is https://index.docker.io/v2/
+
+[#tekton-push-registry-secret]
+=== Create Container Registry Secret
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+kubectl create secret -n {chapter-namespace} docker-registry container-registry-secret \
+  --docker-server=pass:[$CONTAINER_REGISTRY_SERVER] \
+  --docker-username=pass:[$CONTAINER_REGISTRY_USER] \
+  --docker-password=pass:[$CONTAINER_REGISTRY_PASSWORD]
+----
+
+[.console-output]
+[source,bash]
+----
+secret/container-registry-secret created
+----
+
+[#tekton-build-sa]
+=== Create Service Account
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+kubectl create sa -n {chapter-namespace} build-bot
+----
+
+[.console-output]
+[source,bash]
+----
+serviceaccount/build-bot created
+----
+
+[#tekton-patch-build-sa]
+=== Patch Service Account 
+
+Now patch the `build-bot` service account to use the `container-registry-secret` credentials:
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+kubectl patch serviceaccount build-bot \
+  -p '{"secrets": [{"name": "container-registry-secret"}]}'
+----
+
+[.console-output]
+[source,bash]
+----
+serviceaccount/build-bot patched
+----
+
+Lets verify if the service account has the secret added:
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+kubectl get sa -n {chapter-namespace} build-bot -o yaml
+----
+
+The command should show an output like:
+
+[.console-output]
+[source,yaml,subs="+quotes"]
+----
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  creationTimestamp: "2020-07-28T03:34:32Z"
+  name: build-bot
+  namespace: auth-demo
+  resourceVersion: "53879"
+  selfLink: /api/v1/namespaces/auth-demo/serviceaccounts/build-bot
+  uid: 628067fd-91d1-4cdd-b6a6-88b4f7280ff0
+secrets:
+#- name: container-registry-secret#
+- name: build-bot-token-8nl2v
+----
+
+[#tekton-create-build-push-pipeline]
+=== Create Pipeline
+
+Create the build and push app pipeline: 
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+kubectl apply -n {chapter-namespace} \
+  -f link:{github-repo}/{auth-repo}/helloworld-app-build.yaml[helloworld-app-build.yaml^]
+----
+
+[.console-output]
+[source,bash]
+----
+pipeline.tekton.dev/helloworld-app-build created
+----
+
+[#tekton-run-build-push-pipeline]
+=== Run Pipeline
+
+Ensure that the pipeline run has been set to run with the Service Account `build-bot`
+
+[source,yaml,subs="+quotes"]
+----
+include::ROOT:example$helloworld-app-build-run.yaml[]
+----
+
+Run the pipeline:
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+kubectl create -n {chapter-namespace} -f helloworld-app-build-run.yaml
+----
+
+include::ROOT:partial$logs-view.adoc[tags='pr']
+
+A successful build and push will show the following output ( trimmed brevity):
+
+[.console-output]
+[source,bash,subs="+quotes"]
+----
+...
+[build-java-app-image : push] + buildah --storage-driver=overlay push --tls-verify=true --digestfile /workspace/source/image-digest quay.io/rhdevelopers/tekton-helloworld docker://quay.io/rhdevelopers/tekton-helloworld
+[build-java-app-image : push] Getting image source signatures
+[build-java-app-image : push] Copying blob sha256:90c2e42f948b524cf98005073e0b0aa2065160abf9e8b314976c064e270d92ac
+[build-java-app-image : push] Copying blob sha256:869b43e5dca37fa63d84e9bc588613678c4fe6fa2072a72a6ab5487424db2891
+[build-java-app-image : push] Copying blob sha256:f9ddbcc4e7954a705b700c35c5e5beceabd86af121a6e561d86437a8512a6be6
+[build-java-app-image : push] Copying blob sha256:7b08010864ba4c7ce9dfe1b90244b459b77c0387051659d37454783d10ab1113
+[build-java-app-image : push] Copying config sha256:5bd61d725dc47d1f8b7c225d8d52f2730321cadad65988a0de60300a711a2e2b
+[build-java-app-image : push] Writing manifest to image destination
+[build-java-app-image : push] Copying config sha256:5bd61d725dc47d1f8b7c225d8d52f2730321cadad65988a0de60300a711a2e2b
+[build-java-app-image : push] Writing manifest to image destination
+[build-java-app-image : push] Storing signatures
+
+[build-java-app-image : digest-to-results] + cat /workspace/source/image-digest
+[build-java-app-image : digest-to-results] + tee /tekton/results/IMAGE_DIGEST
+[build-java-app-image : digest-to-results] #sha256:0e9e267a96f1ea48fe00642cd82ef689e44c7d467d6db3a3a543fa5b42fe53dc#
+----
+
+A successful pipeline should have pushed the image to the external container registry. The following screen shot shows the image pushed to *rhdevelopers* Quay.io container registry repo:
+
+image::pushed_image.png[]
+
+[NOTE]
+====
+If you noticed the highlighted *sha256* from the log above, is same as that of the *sha256* listed in the contianer registry repository.
+====
+
+[#tekton-remote-ref-points]
+== Points to Ponder
+
+When need to pull from remote source repository or push to external container registry:
+
+* A Kubernetes Secret to hold the container registry credentials
+* A Kubenretes Service Account, with the container registry Secret added to it
+* Use the Service Account as `serviceAccountName` in PipelineRuns/TaskRuns
+* Annotate Secerts to map which Secret to be used with source repository
+
+You can find more details about using Authentication with Tekton https://tekton.dev/docs/pipelines/auth/[here].
+
+[#tekton-auth-cleanup]
+== Cleanup
+
+Delete the workspace and its resources:
+
+[.console-input]
+[source,bash,subs="+macros,attributes+"]
+----
+kubectl delete ns {chapter-namespace}
+----
