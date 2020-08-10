@@ -7,7 +7,7 @@
 
 ## Documentation
 
-HTML -- http://redhat-developer-demos.github.io/tekton-tutorial/
+HTML -- https://redhat-scholars.github.io/tekton-tutorial
 
 
 [Tekton](https://github.com/tektoncd/pipeline), originally known as Knative Build but spun-off as its own open source project with its own [governance organization](https://cd.foundation/). Tekton attempts to fill the void of an in-cluster container image build and deployment workflow -- that is continuous integration (CI) and continuous delivery (CD) --. The Tekton philosophy revolves around three main pillars:
@@ -19,7 +19,7 @@ This content is brought to you by [Red Hat Developer Program](http://developers.
 
 ## Dev Builds
 
-If you want to grab the latest updats (dev) HTML -- http://redhat-developer-docs.github.io/tekton-tutorial-staging/
+If you want to grab the latest updats (dev) HTML -- http://redhat-scholars.github.io/tekton-tutorial-staging/
 
 ## Contributing
 
