@@ -1,0 +1,18 @@
+
+While Kubernetes has grown to become the defacto container orchestration platform; it still misses one crucial capability, the ability to build container images, in-cluster and at scale. This gap in capability means that the critical job of building secure, production-ready container images is still left to the random developer and their favorite desktop tooling (e.g. Docker Desktop).  Although the ecosystem had provided various solutions, 99% of those solutions were still missing a key attribute, that of “being Kubernetes native”.
+
+:sectnums!:
+== What is _Tekton_?
+
+https://github.com/tektoncd/pipeline[Tekton], originally known as Knative Build but spun-off as its own open source project with its own https://cd.foundation/[governance organization]. Tekton attempts to fill the void of an in-cluster container image build and deployment workflow -- that is continuous integration (CI) and continuous delivery (CD) --. The Tekton philosophy revolves around three main pillars:
+
+Containers::
+  The motto of Tekton is to be Kubernetes native. Containers are the nucleus of any Kubernetes cluster and Tekton is optimized for containerized application build, test and deployment.  Furthermore, Tekton's primitives such as Tasks and Pipelines are implemented as Custom Resource Definitions, with your pipeline being a simple YAML resource file.
+
+Serverless::
+  As previously mentioned, Tekton was originally part of Knative and formerly known as Knative Build. Knative Build has since been deprecated and resources consolidated to work on the Tekton project. However, being a Knative offspring has lent some interesting DNA to Tekton as it runs as a serverless CI/CD solution without any need of a central service/engine that requires ongoing management and maintenance.  The Tekton "master" is Kubernetes itself as it is implemented as a series of CRDs and their supporting controllers.
+
+DevOps::
+  CI/CD needs DevOps, Tekton is built for distributed, yet collaborative teams and for either microservices or even more traditional monolithic application architecture.
+
+As part of this tutorial and its chapters you will learn about Tekton components such as Task & Pipeline and how to apply them in common day-to-day CI/CD use cases.
