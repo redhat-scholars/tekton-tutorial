@@ -1,0 +1,100 @@
+[[tutorial-all-local]]
+== CLI tools
+
+The following CLI tools are required for running the exercises in this tutorial. Please have them installed and configured before you get started with any of the tutorial chapters.
+
+[cols="4*^,4*.",options="header,+attributes"]
+|===
+|**Tool**|**macOS**|**Fedora**|**windows**
+
+| Git
+| https://git-scm.com/download/mac[Download]
+| https://git-scm.com/download/win[Download]
+| https://git-scm.com/download/linux[Download]
+
+| `Docker`
+| https://docs.docker.com/docker-for-mac/install[Docker for Mac]
+| `dnf install docker`
+| https://docs.docker.com/docker-for-windows/install[Docker for Windows]
+
+| `kubectl`
+| https://kubernetes.io/docs/tasks/tools/install-kubectl/[Install]
+| https://kubernetes.io/docs/tasks/tools/install-kubectl/[Install]
+| https://kubernetes.io/docs/tasks/tools/install-kubectl/[Install]
+
+| Knative Client `kn` (>={kn-version})
+| `brew install knative/client/kn`
+| https://github.com/knative/client/releases/download/{kn-version}/kn-linux-amd64[Install]
+| https://github.com/knative/client/releases/download/{kn-version}/kn-windows-amd64.exe[Install]
+
+| https://github.com/wercker/stern[stern]
+| `brew install stern`
+| https://github.com/wercker/stern/releases/download/1.6.0/stern_linux_amd64[Download]
+| https://github.com/wercker/stern/releases/download/1.11.0/stern_windows_amd64.exe[Download]
+
+| https://github.com/mikefarah/yq[yq]
+| brew install yq
+| brew install yq
+| choco install yq
+
+| https://httpie.org/[httpie]
+| `brew install httpie`
+| `dnf install httpie`
+| https://httpie.org/doc#windows-etc
+
+| watch
+| `brew install watch`
+| `dnf install procps-ng`
+|
+
+|===
+
+[#download-tutorial-sources]
+== Download Tutorial Sources
+
+Before we start setting up the environment, let's clone the tutorial sources and set the `TUTORIAL_HOME` environment variable to point to the root directory of the tutorial:
+
+:tutorial-url: https://github.com/redhat-developer-demos/tekton-tutorial
+:folder: tekton-tutorial
+
+ifndef::workshop[]
+[IMPORTANT,subs="attributes+,+macros"]
+====
+
+This tutorial was developed and tested with:
+
+- Tekton `{tekton-version}`
+- Tekton Triggers `{triggers-version}`
+- Minikube `{minikube-version}`
+- OpenShift `{openshift-version}`
+- Tekton CLI `{tekton-cli-version}`
+- Knative Client(kn) `{kn-version}`
+====
+endif::[]
+
+ifndef::workshop[]
+[#kubernetes-cluster]
+== Choose your Kubernetes Cluster
+
+Knative can be installed only on Kubernetes cluster. The following section shows how to install Knative on vanilla https://kubernetes.io[Kubernetes] or on Red Hat https://www.openshift.com[Openshift] -- an enterprise grade Kubernetes platform --
+
+[tabs]
+====
+Minikube::
++
+--
+include::partial$minikube-setup.adoc[]
+--
+OpenShift::
++
+--
+include::partial$openshift-setup.adoc[]
+--
+====
+endif::[]
+
+ifdef::workshop[]
+include::workshop:partial$openshift-setup.adoc[]
+endif::[]
+
+//include::partial$tutorial-dev-env.adoc[]

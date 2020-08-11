@@ -1,0 +1,54 @@
+
+Before we run the Task using TaskRun let us create the Kubernetes service account and attach the needed permissions to the service account, the following Kubernetes resource defines a service account called `pipeline` in namespace `{tutorial-namespace}` who will have administrative role within the `{tutorial-namespace}` namespace.
+
+[tabs]
+====
+kubectl::
++
+--
+[#create-pipeline-sa]
+[source,bash,subs="+macros,+attributes"]
+----
+kubectl create -n {tutorial-namespace} pipeline-sa-role.yaml
+----
+copyToClipboard::create-pipeline-sa[]
+--
+oc::
++
+--
+Service Account *pipeline* will be created automatically by OpenShift Pipelines operator.
+--
+====
+
+[IMPORTANT]
+====
+Since the TaskRun pod will be run as an underprivleged user with uid `1001`, its required that `fsGroup` of the pod is set correctly. This done by configuring the ConfigMap `config-defaults` of the `tekton-pipelines` namespace. In OpenShift the namespace is called `openshift-pipelines`.
+====
+
+Run the following command to patch the ConfigMap `config-defaults`:
+
+[tabs]
+====
+kubectl::
++
+--
+[#patch-tekton-config-defaults-k8s]
+[source,bash,subs="+macros,+attributes"]
+-----
+kubectl patch -n tekton-pipelines cm config-defaults \
+      --patch  "$(cat $TUTORIAL_HOME/pipelines/pod-template-patch.yaml)"
+-----
+copyToClipboard::patch-tekton-config-defaults-k8s[]
+--
+oc::
++
+--
+[#patch-tekton-config-defaults]
+[source,bash,subs="+macros,+attributes"]
+-----
+oc patch -n openshift-pipelines cm config-defaults \
+    --patch "$(cat $TUTORIAL_HOME/pipelines/pod-template-patch.yaml)"
+-----
+copyToClipboard::patch-tekton-config-defaults[]
+--
+====

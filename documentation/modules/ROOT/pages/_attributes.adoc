@@ -1,4 +1,3 @@
-:experimental:
 :moduledir: ..
 :branch: master
 :github-repo: https://github.com/redhat-developer-demos/tekton-tutorial/blob/{branch}
