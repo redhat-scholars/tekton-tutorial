@@ -49,3 +49,11 @@ cd pass:[$TUTORIAL_HOME]/pipelines
 cd pass:[$TUTORIAL_HOME]/resources
 ----
 #end::resources[]
+
+#tag::openshift[]
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+cd pass:[$TUTORIAL_HOME]/openshift
+----
+#end::openshift[]

@@ -1,30 +1,37 @@
+---
 apiVersion: tekton.dev/v1beta1
 kind: Pipeline
 metadata:
-  name: helloworld-app-deploy
+  name: cloud-native-app
 spec:
   description: >-
-    The Pipline to buld and deploy the Hello World Java App https://github.com/redhat-scholars/tekton-helloworld as Knative Service.
+    The Pipline to buld and deploy the Hello World Java App https://github.com/redhat-scholars/tekton-tutorial/apps/greeter as Kubernetes Service.
   params:
-    - name: image-name #<.>
-      description: The fully qualified image name e.g example.com/tekton-tutorial/helloworld
-      default: example.com/tekton-tutorial/helloworld
-    - name: kn-service-name
-      description: The Knative Service name
-      default: helloworld
+    - name: image-name
+      description: The fully qualified image name
+      default: image-registry.openshift-image-registry.svc:5000/tektontutorial/helloworld
+    - name: context-dir
+      description: >-
+        The context directory within the source repository, possible values are: 
+        * apps/greeter/java/springboot
+        * apps/greeter/java/quarkus
+    - name: manifests-folder
+      description: The Kubernetes manifest files folder within source repo
+      default: k8s
     - name: github-repo-url
       description: The GitHub Repo of the Java Application
-      default: https://github.com/redhat-scholars/tekton-helloworld
+      default: https://github.com/redhat-scholars/tekton-tutorial
     - name: github-repo-revision
       description: The GitHub revision to use
       default: master
   workspaces:
-    - name: source #<.>
-    - name: maven-settings #<.>
+    - name: source
+    - name: maven-settings
   tasks:
     - name: clone-sources
       taskRef:
         name: git-clone
+        kind: ClusterTask
       params:
         - name: url
           value: $(params.github-repo-url)
@@ -40,6 +47,7 @@ spec:
     - name: build-java-test
       taskRef:
         name: maven
+        kind: ClusterTask
       runAfter:
         - clone-sources
       params:
@@ -50,9 +58,11 @@ spec:
           workspace: maven-settings
         - name: source
           workspace: source
+      workingDir: '$(workspaces.source.path)/$(params.context-dir)'
     - name: build-java-app
       taskRef:
         name: maven
+        kind: ClusterTask
       runAfter:
         - build-java-test
       params:
@@ -63,9 +73,11 @@ spec:
           workspace: maven-settings
         - name: source
           workspace: source
+      workingDir: '$(workspaces.source.path)/$(params.context-dir)'
     - name: build-java-app-image
       taskRef:
         name: buildah
+        kind: ClusterTask
       runAfter:
         - build-java-app
       params:
@@ -77,16 +89,17 @@ spec:
       workspaces:
         - name: source
           workspace: source
-    - name: deploy-kn-service
+      workingDir: '$(workspaces.source.path)/$(params.context-dir)'
+    - name: deploy-k8s-service
       taskRef:
-        name: kn
+        name: openshift-client
+        kind: ClusterTask
       runAfter:
         - build-java-app-image
       params:
         - name: ARGS
           value:
-            - 'service'
-            - 'create'
-            - '$(params.kn-service-name)'
-            - '--force'
-            - '--image=$(params.image-name):$(tasks.build-java-app-image.results.IMAGE_DIGEST)' #<.>
+            - 'apply'
+            - '--filename'
+            - '$(manifests-folder)'
+      workingDir: '$(workspaces.source.path)/$(params.context-dir)'

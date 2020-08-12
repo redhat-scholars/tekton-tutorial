@@ -4,7 +4,7 @@ metadata:
   name: helloworld-app-deploy
 spec:
   description: >-
-    The Pipline to buld and deploy the Hello World Java App https://github.com/redhat-developer-demos/tekton-helloworld as Knative Service.
+    The Pipline to buld and deploy the Hello World Java App https://github.com/redhat-scholars/tekton-helloworld as Knative Service.
   params:
     - name: image-name #<.>
       description: The fully qualified image name e.g example.com/tekton-tutorial/helloworld
@@ -14,7 +14,7 @@ spec:
       default: helloworld
     - name: github-repo-url
       description: The GitHub Repo of the Java Application
-      default: https://github.com/redhat-developer-demos/tekton-helloworld
+      default: https://github.com/redhat-scholars/tekton-helloworld
     - name: github-repo-revision
       description: The GitHub revision to use
       default: master

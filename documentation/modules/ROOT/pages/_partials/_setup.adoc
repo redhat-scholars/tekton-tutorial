@@ -54,7 +54,7 @@ The following CLI tools are required for running the exercises in this tutorial.
 
 Before we start setting up the environment, let's clone the tutorial sources and set the `TUTORIAL_HOME` environment variable to point to the root directory of the tutorial:
 
-:tutorial-url: https://github.com/redhat-developer-demos/tekton-tutorial
+:tutorial-url: https://github.com/redhat-scholars/tekton-tutorial
 :folder: tekton-tutorial
 
 ifndef::workshop[]

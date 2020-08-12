@@ -8,7 +8,7 @@ kubectl api-resources --api-group='tekton.dev'
 
 The command show an output like:
 
-[.cosole-output]
+[.console-output]
 [source,bash]
 ----
 NAME                SHORTNAMES   APIGROUP     NAMESPACED   KIND

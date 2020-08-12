@@ -162,7 +162,7 @@ The command should show an output like:
 ? Value for param `contextDir` of type `string`? (Default is `apps/greeter/java/quarkus`) apps/greeter/java/quarkus
 TaskRun started: source-lister-run-nbpvz
 Waiting for logs to be available...
-[git-source-git-source-qtp5j] {"level":"info","ts":1595743350.5350783,"caller":"git/git.go:105","msg":"Successfully cloned https://github.com/redhat-developer-demos/tekton-tutorial @ master in path /workspace/source"}
+[git-source-git-source-qtp5j] {"level":"info","ts":1595743350.5350783,"caller":"git/git.go:105","msg":"Successfully cloned https://github.com/redhat-scholars/tekton-tutorial @ master in path /workspace/source"}
 [git-source-git-source-qtp5j] {"level":"warn","ts":1595743350.5351503,"caller":"git/git.go:152","msg":"Unexpected error: creating symlink: symlink /tekton/home/.ssh /root/.ssh: file exists"}
 [git-source-git-source-qtp5j] {"level":"info","ts":1595743350.5708065,"caller":"git/git.go:133","msg":"Successfully initialized and updated submodules in path /workspace/source"}
 
@@ -216,7 +216,7 @@ Waiting for logs to be available...
 ...
 [git-source-git-source-rdr2k] {"level":"info","ts":1585065123.3817806,"logger":"fallback-logger","caller":"logging/config.go:69","msg":"Fetch GitHub commit ID from kodata failed: open /var/run/ko/refs/heads/master: no such file or directory"}
 [git-source-git-source-rdr2k] {"level":"info","ts":1585065133.3997571,"logger":"fallback-logger","caller":"logging/config.go:69","msg":"Fetch GitHub commit ID from kodata failed: open /var/run/ko/refs/heads/master: no such file or directory"}
-[git-source-git-source-rdr2k] {"level":"info","ts":1585065138.9021251,"logger":"fallback-logger","caller":"git/git.go:102","msg":"Successfully cloned https://github.com/redhat-developer-demos/tekton-tutorial @ master in path /workspace/source"}
+[git-source-git-source-rdr2k] {"level":"info","ts":1585065138.9021251,"logger":"fallback-logger","caller":"git/git.go:102","msg":"Successfully cloned https://github.com/redhat-scholars/tekton-tutorial @ master in path /workspace/source"}
 [git-source-git-source-rdr2k] {"level":"warn","ts":1585065138.902316,"logger":"fallback-logger","caller":"git/git.go:149","msg":"Unexpected error: creating symlink: symlink /tekton/home/.ssh /root/.ssh: file exists"}
 [git-source-git-source-rdr2k] {"level":"info","ts":1585065138.9946759,"logger":"fallback-logger","caller":"git/git.go:130","msg":"Successfully initialized and updated submodules in path /workspace/source"}
 
@@ -423,7 +423,7 @@ The Tekton Task can be of one or more steps. A Cloud Native Java Application at 
 2. Building the linux container image from the build artifacts
 3. Pushing the built container image to remote registry like https://quay.io[Quay.io] or https://hub.docker.com[Docker Hub]
 
-The task `build-app` is used to build the https://github.com/redhat-developer-demos/tekton-tutorial/tree/master/apps/greeter/java/quarkus[Java application] that is part of the tutorial. As a step one(`build-sources`) the application will be built using https://apache.maven.org[Apache Maven], then the step two (`build-image`) the application artifacts a **jar** in this case will be used to built the linux container image using https://buildah.io[buildah], the https://github.com/redhat-developer-demos/tekton-tutorial/tree/master/apps/greeter/java/quarkus/Dockerfile.jvm[Dockerfile] in the sources will be used as base to build the linux container image and as part of the last step(`build-push`) the built linux container image will be pushed to the container registry.
+The task `build-app` is used to build the https://github.com/redhat-scholars/tekton-tutorial/tree/master/apps/greeter/java/quarkus[Java application] that is part of the tutorial. As a step one(`build-sources`) the application will be built using https://apache.maven.org[Apache Maven], then the step two (`build-image`) the application artifacts a **jar** in this case will be used to built the linux container image using https://buildah.io[buildah], the https://github.com/redhat-scholars/tekton-tutorial/tree/master/apps/greeter/java/quarkus/Dockerfile.jvm[Dockerfile] in the sources will be used as base to build the linux container image and as part of the last step(`build-push`) the built linux container image will be pushed to the container registry.
 
 The following section explains the three Task steps. The <<tekton-task-deploy>> will finally deploy all these three steps together as one single `build-app` task.
 

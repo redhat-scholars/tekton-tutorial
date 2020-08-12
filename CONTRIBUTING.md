@@ -16,7 +16,7 @@ Making any changes to your local repositories above cloned earlier, will be auto
 ## Send your contribution
 
 Now you are all set,
-- Open an Issue in http://github.com/redhat-developer-demos/tekton-tutorial.git
+- Open an Issue in http://github.com/redhat-scholars/tekton-tutorial.git
 - Prepare your changes in the respective documentation repository
 - Send the PR to respective repositories listed above
 

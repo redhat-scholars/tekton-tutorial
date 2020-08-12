@@ -49,6 +49,7 @@ list-directory     Simple directory li...   11 hours ago
 maven              This Task can be us...   11 hours ago
 ----
 
+tag::ws-deploy-nexus[]
 [#ws-deploy-nexus]
 === Deploy Nexus
 
@@ -121,6 +122,9 @@ kubectl get -n {chapter-namespace} cm maven-settings -oyaml \
 ----
 
 The output of the above command should be as same as settings.xml listing above.
+tag::end[]
+
+tag::ws-deploy-knative[]
 
 Before we create our pipeline ensure that the kubernetes cluster has a default storage class defined:
 
@@ -151,7 +155,9 @@ OpenShift::
 OpenShift users can install Knative i.e https://docs.openshift.com/container-platform/4.1/serverless/installing-openshift-serverless.html[OpenShift Serverless] using Operators.
 --
 ====
+tag::end[]
 
+tag::ws-create-pvc[]
 [#ws-check-sc]
 === Check Default Storage Class
 
@@ -186,3 +192,4 @@ Create the PVC `tekton-tutorial-sources`, which we will use as part of the exerc
 ----
 kubectl apply -n {chapter-namespace} -f link:{github-repo}/{workspaces-repo}/sources-pvc.yaml[+$TUTORIAL_HOME+/{workspaces-repo}/sources-pvc.yaml^]
 ----
+tag::end[]

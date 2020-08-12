@@ -1,0 +1,13 @@
+= OpenShift Pipelines
+
+[IMPORTANT]
+====
+All the exercies as part of this chapter works only with OpenShift
+====
+
+include::master@tekton-tutorial:ROOT:partial$openshift-setup.adoc[]
+
+include::master@tekton-tutorial:ROOT:partial$tekton-api.adoc[]
+include::master@tekton-tutorial:ROOT:partial$tekton-triggers-api.adoc[]
+
+

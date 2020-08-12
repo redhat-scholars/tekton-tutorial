@@ -68,7 +68,7 @@ The above command should list two resources as shown below:
 [source,bash]
 ----
 NAME                            TYPE    DETAILS
-git-source                      git     url: https://github.com/redhat-developer-demos/tekton-tutorial
+git-source                      git     url: https://github.com/redhat-scholars/tekton-tutorial
 tekton-tutorial-greeter-image   image   url: example.com/rhdevelopers/tekton-tutorial-greeter
 ----
 
@@ -91,7 +91,7 @@ PipelineResource Type:   git
 
 Params
 NAME       VALUE
-url        https://github.com/redhat-developer-demos/tekton-tutorial
+url        https://github.com/redhat-scholars/tekton-tutorial
 revision   master
 
 Secret Params

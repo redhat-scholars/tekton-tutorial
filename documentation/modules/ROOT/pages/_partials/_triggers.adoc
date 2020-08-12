@@ -195,7 +195,7 @@ NOTE: In OpenShift you might no need the *pipeline* SA, as the OpenShift Pipelin
 To run the exercises of this chapter we need the following setup in Git(gogs):
 
 - A Git user, for the demo we will create user called *gogs* with password *gogs*
-- A Git Repository named `tekton-helloworld`, we will use https://github.com/redhat-developer-demos/tekton-helloworld
+- A Git Repository named `tekton-helloworld`, we will use https://github.com/redhat-scholars/tekton-helloworld
 
 We will run the following Task to perform the necessary intializations listed above:
 

@@ -1,0 +1,2 @@
+* xref:openshift:index.adoc[OpenShift Pipelines]
+** xref:openshift:cloud_native_pipeline.adoc[Cloud Native Pipelines]

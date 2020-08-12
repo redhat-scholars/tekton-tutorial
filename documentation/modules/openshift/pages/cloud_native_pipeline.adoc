@@ -1,0 +1,5 @@
+= Cloud Native Application Pipeline
+include::master@tekton-tutorial:ROOT:partial$_attributes.adoc[]
+:chapter-namespace: tektontutorial
+
+include::master@tekton-tutorial:openshift:partial$_cloud_native_pipeline.adoc[]
