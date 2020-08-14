@@ -1,4 +1,5 @@
 :moduledir: ..
+:cli: kubectl
 :branch: master
 :github-repo: https://github.com/redhat-scholars/tekton-tutorial/blob/{branch}
 :experimental:

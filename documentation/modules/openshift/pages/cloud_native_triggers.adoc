@@ -1,0 +1,5 @@
+= Cloud Native Triggers
+include::master@tekton-tutorial:ROOT:partial$_attributes.adoc[]
+:chapter-namespace: pipelines-demos
+
+include::master@tekton-tutorial:openshift:partial$_cloud_native_triggers.adoc[]

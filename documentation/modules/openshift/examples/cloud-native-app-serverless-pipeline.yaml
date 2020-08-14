@@ -9,24 +9,23 @@ metadata:
     pipeline.openshift.io/type: knative #<.>
 spec:
   description: >-
-    The Pipline to buld and deploy the Hello World Java App https://github.com/redhat-scholars/tekton-helloworld as Knative Service.
+    The Pipline to buld and deploy the Hello World Java App https://github.com/redhat-scholars/tekton-tutorial as Knative Service.
   params:
-    - name: image-name
+    - name: IMAGE_NAME
       description: >-
         The fully qualified image name e.g example.com/tekton-tutorial/helloworld
       default: image-registry.openshift-image-registry.svc:5000/tektontutorial/helloworld
-    - name: context-dir
+    - name: CONTEXT_DIR
       description: >-
         The context directory within source from where to build the sources. In this example there are to options:
           * apps/greeter/java/quarkus
           * apps/greeter/java/springboot
-    - name: kn-service-name
+    - name: APP_NAME #<.>
       description: The Knative Service name
-      default: helloworld
-    - name: github-repo-url
+    - name: GITHUB_REPO_URL
       description: The GitHub Repo of the Java Application
-      default: https://github.com/redhat-scholars/tekton-helloworld
-    - name: github-repo-revision
+      default: https://github.com/redhat-scholars/tekton-tutorial
+    - name: GITHUB_REPO_REVISION
       description: The GitHub revision to use
       default: master
   workspaces:
@@ -39,9 +38,9 @@ spec:
         kind: ClusterTask
       params:
         - name: url
-          value: $(params.github-repo-url)
+          value: $(params.GITHUB_REPO_URL)
         - name: revision
-          value: $(params.github-repo-revision)
+          value: $(params.GITHUB_REPO_REVISION)
         # just to do a fresh clone, as we already have the directory cloned
         # to reuse it we can exlude this step
         - name: deleteExisting
@@ -62,7 +61,7 @@ spec:
             - 'clean'
             - 'test'
             - '-f'
-            - '$(params.context-dir)/pom.xml'
+            - '$(params.CONTEXT_DIR)/pom.xml'
       workspaces:
         - name: maven-settings
           workspace: maven-settings
@@ -82,7 +81,7 @@ spec:
             - 'clean'
             - 'package'
             - '-f'
-            - '$(params.context-dir)/pom.xml'
+            - '$(params.CONTEXT_DIR)/pom.xml'
       workspaces:
         - name: maven-settings
           workspace: maven-settings
@@ -96,9 +95,9 @@ spec:
         - build-java-app
       params:
         - name: CONTEXT
-          value: '$(params.context-dir)'
+          value: '$(params.CONTEXT_DIR)'
         - name: IMAGE
-          value: '$(params.image-name)'
+          value: '$(params.IMAGE_NAME)'
         # since pushing to internal registry we skip TLS verify
         - name: TLSVERIFY
           value: 'false'
@@ -116,7 +115,6 @@ spec:
           value:
             - 'service'
             - 'create'
-            - '$(params.kn-service-name)'
+            - '$(params.APP_NAME)'
             - '--force'
-            - '--image=$(params.image-name)@$(tasks.build-java-app-image.results.IMAGE_DIGEST)' #<.>
-      workingDir: '$(workspaces.source.path)/$(params.context-dir)'
+            - '--image=$(params.IMAGE_NAME)@$(tasks.build-java-app-image.results.IMAGE_DIGEST)' #<.>
