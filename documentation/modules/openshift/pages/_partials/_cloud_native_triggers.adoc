@@ -1,0 +1,6 @@
+[#openshift-triggers-overview]
+== Overview
+:exprimental:
+:chapter-namespace: pipelines-demos
+:openshift: yes
+:cli: oc

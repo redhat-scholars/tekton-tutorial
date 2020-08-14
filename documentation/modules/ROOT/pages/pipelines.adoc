@@ -1,5 +1,5 @@
 = Pipelines
-include::_attributes.adoc[]
+include::master@tekton-tutorial:ROOT:partial$_attributes.adoc[]
 :chapter-namespace: tektontutorial
 
 include::master@tekton-tutorial:ROOT:partial$_pipelines.adoc[]

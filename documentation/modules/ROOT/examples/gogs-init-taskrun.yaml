@@ -17,7 +17,7 @@ spec:
       - name: REPO_URL
         type: string
         description: The GitHub Repository to use
-        default: 'https://github.com/redhat-developer-demos/tekton-helloworld'
+        default: 'https://github.com/redhat-scholars/tekton-helloworld'
     stepTemplate:
       env:
         - name: NAMESPACE

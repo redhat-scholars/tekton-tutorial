@@ -1,0 +1,396 @@
+[#openshift-pipelines-overview]
+== Overview
+:exprimental:
+:chapter-namespace: pipelines-demos
+:openshift: yes
+:cli: oc
+
+At the end of this chapter you should be able to:
+
+- Use Cluster Tasks in OpenShift
+- Create or Update Cluster Tasks in OpenShift
+- Use OpenShift Pipelines builder GUI to run a Pipeline
+
+include::master@tekton-tutorial:ROOT:partial$tekton-nav-to-folder.adoc[tags="folder-all,openshift"]
+
+[IMPORTANT.assumptions,caption="Assumptions"]
+====
+It is assumed that you have completed the following chapters before trying this chapters exercies:
+
+- xref:master@tekton-tutorial:ROOT:tasks.adoc[]
+- xref:master@tekton-tutorial:ROOT:pipelines.adoc[]
+- xref:master@tekton-tutorial:ROOT:workspaces.adoc[]
+====
+
+[#openshift-pipelines-demo-app]
+== Demo Application
+
+The Cloud Native Application pipeline will,
+
+* Git clone using `git-clone` task, the https://github.com/redhat-scholars/tekton-helloworld repository
+* Will use maven task, maven task require two workspaces one for source and other for maven-settings
+* Build the container image using the `buildah` task and push to the internal container registry
+* Finally deploy the application onto Kubernetes using `openshift-client` task or use `kn` task to deploy it as Serverless Knative application.
+
+[#ocp-create-project]
+== Project Preperation
+
+include::master@tekton-tutorial:ROOT:partial$namespace-prep.adoc[lines=13..15]
+
+.Create Project
+image::master@tekton-tutorial:openshift:odc_create_project.png[]
+
+.Project Name and Details
+image::master@tekton-tutorial:openshift:odc_create_project_pipelines_demos.png[]
+
+After entering the details click btn:[Create] to create and navigate to the `{chapter-namespace}` project:
+
+.Project pipelines-demos
+image::master@tekton-tutorial:openshift:odc_on_pipelines_demos.png[]
+
+Since we will be use `oc` to execute few commands, lets make sure we are in the `{chapter-namespace}` project:
+
+[.console-input]
+[source,bash,subs="+attributes"]
+----
+oc project {chapter-namespace}
+----
+
+[.console-output]
+[source,bash]
+----
+Now using project "pipelines-demos" on server "https://api.gcp.kameshs.dev:6443".
+----
+
+[#required-tasks]
+== Required Cluster Tasks
+
+The Cloud Native Application pipeline requires the following tasks:
+
+- Git Clone
+- Maven 
+- Buildah 
+- Openshift Client
+- Kn client 
+
+OpenShift has all these tasks intalled as xref:master@tekton-tutorial:ROOT:tasks.adoc#tekton-task-clustertask[ClusterTasks] as part of the `openshift-pipelines` install. 
+
+You can list the available ClusterTasks using the command:
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+tkn clustertasks ls 
+----
+
+The command should show the following output:
+
+[.console-output]
+[source,bash,subs="+quotes"]
+----
+NAME                       DESCRIPTION   AGE
+#buildah                                  13 hours ago#
+buildah-v0-11-3                          13 hours ago
+#git-clone                                13 hours ago#
+jib-maven                                13 hours ago
+#kn                                       13 hours ago#
+#maven                                    13 hours ago#
+#openshift-client                         13 hours ago#
+openshift-client-v0-11-3                 13 hours ago
+s2i                                      13 hours ago
+s2i-dotnet-3                             13 hours ago
+s2i-dotnet-3-v0-11-3                     13 hours ago
+s2i-go                                   13 hours ago
+s2i-go-v0-11-3                           13 hours ago
+s2i-java-11                              13 hours ago
+s2i-java-11-v0-11-3                      13 hours ago
+s2i-java-8                               13 hours ago
+s2i-java-8-v0-11-3                       13 hours ago
+s2i-nodejs                               13 hours ago
+s2i-nodejs-v0-11-3                       13 hours ago
+s2i-perl                                 13 hours ago
+s2i-perl-v0-11-3                         13 hours ago
+s2i-php                                  13 hours ago
+s2i-php-v0-11-3                          13 hours ago
+s2i-python-3                             13 hours ago
+s2i-python-3-v0-11-3                     13 hours ago
+s2i-ruby                                 13 hours ago
+s2i-ruby-v0-11-3                         13 hours ago
+s2i-v0-11-3                              13 hours ago
+tkn                                      13 hours ago
+----
+
+[#ocp-update-cluster-tasks]
+=== Update Cluster Tasks
+
+As we will need the updated version of `kn`, `maven` and `buildah` clustertasks, run the following command to update them:
+
+==== Update *buildah* Cluster Task 
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+oc replace \
+  -f https://raw.githubusercontent.com/tektoncd/catalog/master/task/buildah/0.1/buildah.yaml --dry-run=client -oyaml \
+  | yq w - kind ClusterTask \
+  | oc replace -f -
+----
+
+[.console-output]
+[source,bash,subs="+macros,+attributes"]
+----
+clustertask.tekton.dev/buildah replaced
+----
+
+==== Update *maven* Cluster Task 
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+oc replace \
+  -f https://raw.githubusercontent.com/tektoncd/catalog/master/task/maven/0.1/maven.yaml --dry-run=client -oyaml \
+  | yq w - kind ClusterTask \
+  | oc replace -f -
+----
+
+[.console-output]
+[source,bash,subs="+macros,+attributes"]
+----
+clustertask.tekton.dev/maven replaced
+----
+
+==== Update *kn* Cluster Task 
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+oc replace \
+  -f https://raw.githubusercontent.com/tektoncd/catalog/master/task/kn/0.1/kn.yaml --dry-run=client -oyaml \
+  | yq w - kind ClusterTask \
+  | oc replace -f -
+----
+
+[.console-output]
+[source,bash,subs="+macros,+attributes"]
+----
+clustertask.tekton.dev/kn replaced
+----
+
+[#ocp-deploy-app-from-git]
+== Deploy application from GitHub Repository
+
+Let us use the OpenShift Developer Console(ODC) to deploy the application from GitHub repository, click *From Git* in the OpenShift Developer Console:
+
+image::odc_deploy_app_from_git.png[]
+
+In the *Git Repo URL* field, enter the tutorials GitHub repository URL:
+
+[.console-input]
+[source,text,subs="+macros"]
+----
+https://github.com/redhat-scholars/tekton-tutorial
+----
+
+image::master@tekton-tutorial:openshift:ocp_dc_choose_git.png[]
+
+By default the builder image will choosen `NodeJs` automatically based on the GitHub repository content as shown:
+
+image::master@tekton-tutorial:openshift:odc_default_builder.png[]
+
+But for the exercises of this chapter, we will build and deploy a Pipeline that will build a *Java* application. We can use Java applications under the folder https://github.com/redhat-scholars/tekton-tutorial/tree/master/apps[apps]. Let us change the builder to be Java, by clicking the btn:[Java] from the list of *Builder*:
+
+.Use Java Builder
+image::master@tekton-tutorial:openshift:odc_java_builder.png[]
+
+Leave the Builder Image Version to be *11* and update the *Name* to be `greeter`:
+
+[#odc-name-the-app]
+.Greeter Application
+image::master@tekton-tutorial:openshift:ocp_dc_name_it.png[]
+
+On the resources you can choose either _Deployment_ or _Knative Service_. Try choosing _Deployment_, and should see an option to menu:Add Pipeline[] with default Pipeline template avaiable for this runtime *Java* and resource type *Deployment*, as shown:
+
+.Java Deployment Pipeline
+image::master@tekton-tutorial:openshift:ocp_dc_deploy_add_pipeline.png[]
+
+TIP: You Show/Hide Pipeline visualization by toggling _Show[Hide] Pipeline visualization_
+
+But for this exercise we will deploy the application as *Knative Service*, so flipping *Resources* selection to be of type *Knative Service* will not show any available pipelines: 
+
+.Java Knative Service
+image::master@tekton-tutorial:openshift:ocp_dc_ksvc_no_pipeline.png[]
+
+Hit btn:[Cancel] button to cancel the deployment. We will do a fresh deployment once we deploy the Pipeline template for runtime Java and resource type Knative Service.
+
+[#ocp-create-java-ksvc-pipeline-tpl]
+== Create Pipeline Template for Java and Knative Service
+
+As part of this excecise we will deploy a Pipeline Template, that will allow us to deploy the a Java Knative Service application using ODC.
+
+.link:{github-repo}/openshift/cloud-native-app-serverless-pipeline.yaml[Java and Knative Pipeline Template]
+[source,yaml,subs="macros+,+attributes,+quotes"]
+----
+include::master@tekton-tutorial:openshift:example$cloud-native-app-serverless-pipeline.yaml[]
+----
+
+<.> If you want the Pipeline Template to be visible via the ODC menu:Add Pipeline[] option. For the Pipeline Template to be available when creating application via ODC, the Pipeline Template need to be deployed in `openshift` namespace
+<.> Identifies or tags the Pipeline Template to be used with *Java* runtime applications
+<.> The *APP_NAME* parameter will be automatically set by OpenShift to the Name(<<odc-name-the-app>>) of the application that was set while creating application via ODC
+<.> Identifies or tags the Pipeline Template to be used with *Knative* service type applications
+
+[#oc-deploy-pipeline-template]
+=== Deploy Pipeline Template
+
+Deploy the Pipeline Template `cloud-native-app-serverless` by:
+
+[.console-input]
+[source,bash,subs="macros+,+attributes"]
+----
+oc apply -f cloud-native-app-serverless-pipeline.yaml
+----
+
+[.console-output]
+[source,bash,subs="macros+,+attributes"]
+----
+pipeline.tekton.dev/cloud-native-app-serverless created
+----
+
+When now follow the <<ocp-add-git-project,steps>> to add a git project via ODC, after choosing resources to be *Knative Service*, you should see the available pipeline (*cloud-native-app-serverless*) as shown:
+
+.Java Knative Service Pipeline
+image::master@tekton-tutorial:openshift:ocp_dc_add_kn_pipeline.png[]
+
+[points-to-ponder]
+=== Points to Ponder
+
+Now are all set to deploy the Tekton Tutorial Java applications as Knative Service using OpenShift Pipelines. But before creating the application, lets pause for few minutes to see what we have understood so far:
+
+- What ClusterTasks are available as part of OpenShift Pipelines
+- How to update the ClusterTask with updates/changes
+- How to make Pipeline Template available for *runtime* and service *type* combination
+
+[#openshift-pipelines-prep-app-deploy]
+=== Prepare Application Deployment
+
+Now we are all set to deploy the application, before hitting the create we need prepare the namespace with few additonal resources as shown in the following section:
+
+
+include::master@tekton-tutorial:ROOT:partial$namespace-prep.adoc[tags="ws-deploy-nexus,ws-deploy-knative,ws-create-pvc"]
+
+[#odc-create-ksvc-java-app]
+=== Deploy Application with Pipeline
+
+Getting back to ODC, follow the <<ocp-deploy-app-from-git,steps>> to deploy the application from GitHub, but this time you should be able to see a Pipeline Template available for runtime *Java* and resource type *Knative Service*. Click menu:Add Pipeline[] checkbox to use the Pipeline Template that can build and deploy the Java Knative Service:
+
+.Add Pipeline
+image::master@tekton-tutorial:openshift:ocp_dc_check_add_kn_pipeline.png[]
+
+Then click the btn:[Create] button, to create the "greeter" application with pipeline enabled:
+
+.Greeter Application
+image::master@tekton-tutorial:openshift:odc_greeter_app_created.png[]
+
+As noticed in the above figure the application is yet to be deployed, as no pipelines have run.
+
+[#odc-view-pipelines]
+=== View Pipelines
+
+You should now be able to see a pipeline called *greeter* in ODC, by navigating using sidebar navigation menu:>Pipelines[] as shown:
+
+.greeter Pipeline
+image::master@tekton-tutorial:openshift:odc_view_greeter_pipeline.png[]
+
+The Pipeline name is same as the application name *greeter*, click the greeter Pipeline link, to see more details such as:
+
+- Visualization - this will be actively showing the Pipeline Task status when its run
+- Labels with runtime and type 
+- The list of Tasks that will be run as part of the Pipeline
+
+.greeter Pipeline details
+image::master@tekton-tutorial:openshift:odc_greeter_pipeline_details.png[]
+
+[#odc-run-pipeline]
+== Run Pipeline
+
+To run the Pipeline, get back to the Pipelines list and click menu:Start[] from the actions menu:
+
+.Start greeter Pipeline
+image::master@tekton-tutorial:openshift:odc_greeter_pipeline_start.png[]
+
+The *Start* pipeline will request the details such as Parameters and workspaces to be set for the Pipeline run, provide the details as:
+
+.IMAGE_NAME
+[.console-input,text,subs="+quotes"]
+[source]
+----
+image-registry.openshift-image-registry.svc:5000/#pipelines-demos#/greeter
+----
+
+IMPORTANT: Update the highlighted path to match your namespace, in case you are not using {chapter-namespace} for your deployments
+
+.CONTEXT_DIR
+[.console-input]
+[source,bash]
+----
+apps/greeter/java/springboot #<.>
+----
+<.> You can also set it to be `apps/greeter/java/quarkus`
+
+.APP_NAME
+[.console-output]
+[source]
+----
+greeter #<.>
+----
+<.> As described earlier the *APP_NAME* parameter automatically maps to the Application Name
+
+Leave the *GITHUB_REPO_URL* and *GITHUB_REPO_REVISION* to be defaults
+
+Set the menu:Workspace[Source] to be of type *PVC* and use *tekton-tutorial-sources* as PVC.
+
+Set the menu:Workspace[maven-settings] to be of type *ConfigMap* and use *maven-settings* ConfigMap.
+
+The completed parameters should look like:
+
+.greeter Pipeline parameters
+image::master@tekton-tutorial:openshift:odc_greeter_pipeline_params.png[]
+
+Click the button btn:[Start] to kick start the pipeline. The Pipeline run be automatically show as in the following screenshot:
+
+.greeter Pipeline run
+image::master@tekton-tutorial:openshift:odc_greeter_pipeline_running.png[]
+
+NOTE: It will take few minutes for the pipeline to be running and complete. You can watch the status via visualization.
+
+[#odc-watch-pipelines]
+== Watch Pipelines
+
+You can watch the pipeline from sidebar menu:Pipelines, and selecting *greeter* from the list:
+
+.Pipelines list
+image::master@tekton-tutorial:openshift:odc_greeter_pipeline_running_from_list.png[]
+
+
+[#odc-view-app]
+== Application Topology
+
+When you navigate to sidebar menu menu:Toplogy[], you should see the *greeter* application has transitioned from waiting to running state. When you click on the application you should see more details about the application which includes the running `greeter` Pipeline.
+
+.greeter Knative Service Topology
+image::master@tekton-tutorial:openshift:odc_greeter_topology_view.png[]
+
+A successful pipeline should have the Java Knative Service deployed and running as shown:
+
+image::master@tekton-tutorial:openshift:odc_view_greeter_ksvc.png[]
+
+Click on the URL in the *Routes*, to access the application and see the response, which should be simple *hello* text.
+
+[#odc-pipeline-points]
+== Points to Ponder
+
+Now you have understood:
+
+- What ClusterTasks are available as part of OpenShift Pipelines
+- How to update the ClusterTask with updates/changes
+- How to make Pipeline Template available for *runtime* and service *type* combination
+- Start the Pipeline from the Pipelines view by configuring the required parameters

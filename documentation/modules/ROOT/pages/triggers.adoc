@@ -1,6 +1,6 @@
 = Triggers
 
-include::_attributes.adoc[]
+include::master@tekton-tutorial:ROOT:partial$_attributes.adoc[]
 :chapter-namespace: triggers-demo
 
 include::master@tekton-tutorial:ROOT:partial$_triggers.adoc[]

@@ -9,7 +9,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/redhat-developer-demos/tekton-tutorial.git"
+    "url": "git+https://github.com/redhat-scholars/tekton-tutorial.git"
   },
   "license": "Apache-2.0",
   "babel": {

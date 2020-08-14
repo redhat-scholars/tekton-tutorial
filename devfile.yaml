@@ -5,7 +5,7 @@ projects:
   - name: tekton-tutorial
     source:
       type: git
-      location: 'https://github.com/redhat-developer-demos/tekton-tutorial.git'
+      location: 'https://github.com/redhat-scholars/tekton-tutorial.git'
       branch: master
 components:
   - id: redhat/vscode-yaml/latest

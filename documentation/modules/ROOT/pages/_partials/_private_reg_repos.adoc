@@ -34,7 +34,7 @@ In this exercise we will see how to pull i.e. clone the source code from the pri
 
 To be able to run this exercise you need:
 
-- A remote GitHub Repository, you can pull fork the https://github.com/redhat-developer-demos/tekton-helloworld and push that as your private repository
+- A remote GitHub Repository, you can pull fork the https://github.com/redhat-scholars/tekton-helloworld and push that as your private repository
 - A https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-token[GitHub Personal Access Token(PAT)] to access the remote repository.
 
 Set the requried environment variables to be used when creating the github-pat-secret:
@@ -227,8 +227,8 @@ A successful clone from private repo will show the following output ( trimmed br
 [clone-sources : clone] + test -z
 [clone-sources : clone] + test -z
 [clone-sources : clone] + test -z
-[clone-sources : clone] + /ko-app/git-init -url https://github.com/redhat-developer-demos/tekton-secretworld -revision master -refspec  -path /workspace/output/ '-sslVerify=true' '-submodules=true' -depth 1
-[clone-sources : clone] {"level":"info","ts":1595922137.4565356,"caller":"git/git.go:139","msg":"Successfully cloned https://github.com/redhat-developer-demos/tekton-secretworld @ 5250e1fa185805373e620d1c04a0c48129efd2ee (grafted, HEAD, origin/master) in path /workspace/output/"}
+[clone-sources : clone] + /ko-app/git-init -url https://github.com/redhat-scholars/tekton-secretworld -revision master -refspec  -path /workspace/output/ '-sslVerify=true' '-submodules=true' -depth 1
+[clone-sources : clone] {"level":"info","ts":1595922137.4565356,"caller":"git/git.go:139","msg":"Successfully cloned https://github.com/redhat-scholars/tekton-secretworld @ 5250e1fa185805373e620d1c04a0c48129efd2ee (grafted, HEAD, origin/master) in path /workspace/output/"}
 [clone-sources : clone] {"level":"info","ts":1595922137.4990256,"caller":"git/git.go:180","msg":"Successfully initialized and updated submodules in path /workspace/output/"}
 [clone-sources : clone] + cd /workspace/output/
 [clone-sources : clone] + git+ tr -d '\n'

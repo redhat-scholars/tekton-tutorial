@@ -10,6 +10,10 @@ kubectl create ns {chapter-namespace}
 kubectl config set-context --current --namespace {chapter-namespace}
 ----
 
+ifdef::openshift[]
+All exercises of this chapter will be done a namesapace `{chapter-namespace}`, lets create the project if not done earlier and switch to the `{chapter-namespace}` namespace:
+endif::[]
+
 As part of this exercise we will need to install the following external tasks to be installed in the namespace:
 
 - https://github.com/tektoncd/catalog/tree/master/task/git-clone/0.1[git-clone]
@@ -49,6 +53,7 @@ list-directory     Simple directory li...   11 hours ago
 maven              This Task can be us...   11 hours ago
 ----
 
+tag::ws-deploy-nexus[]
 [#ws-deploy-nexus]
 === Deploy Nexus
 
@@ -57,7 +62,7 @@ To show maven artifact caching and using customized maven `settings.xml` we will
 [.console-input]
 [source,bash,subs="+macros,+attributes"]
 ----
-kubectl apply -n {chapter-namespace} \
+{cli} apply -n {chapter-namespace} \
   -f link:{github-repo}/install/utils/nexus.yaml[$TUTORIAL_HOME/install/utils/nexus.yaml^]
 ----
 
@@ -66,7 +71,7 @@ Wait for the nexus3 pod to come up before proceeding further with exercises:
 [.console-input]
 [source,bash,subs="+macros,+attributes"]
 ----
-watch kubectl -n {chapter-namespace} get pods,svc
+watch {cli} -n {chapter-namespace} get pods,svc
 ----
 
 A sucessfully running nexus3 pod should show the following services and pods:
@@ -81,6 +86,7 @@ NAME                 TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)          
 service/nexus        NodePort    10.100.205.22   <none>        8081:31743/TCP   3m25s
 ----
 
+ifndef::openshift[]
 The nexus maven repository could be opened using the url:
 
 [.console-input]
@@ -88,14 +94,15 @@ The nexus maven repository could be opened using the url:
 ----
 $(minikube service nexus -n {chapter-namespace})
 ----
+endif::[]
 
-[NOTE]
+[NOTE.optional,caption=OPTIONAL]
 =====
-* OpenShift users can use routes to expose the service
+In OpenShift,we can use routes to expose the service if we need to access it from outside,by:
 [.console-input]
 [source,bash,subs="+macros,+attributes"]
 ----
-oc expose svc -n {chapter-namespace} nexus
+{cli} expose svc -n {chapter-namespace} nexus
 ----
 =====
 
@@ -107,8 +114,14 @@ For us to mount the maven `settings.xml`, we will create ConfigMap holding the c
 [.console-input]
 [source,bash,subs="+macros,+attributes"]
 ----
-kubectl create -n {chapter-namespace} cm maven-settings \
+{cli} create -n {chapter-namespace} cm maven-settings \
   --from-file=settings.xml=link:{github-repo}/{workspaces-repo}/maven-settings.xml[+$TUTORIAL_HOME+/{workspaces-repo}/maven-settings.xml^]
+----
+
+[.console-output]
+[source,bash]
+----
+configmap/maven-settings created
 ----
 
 You can check the ConfigMap contents using the command:
@@ -116,11 +129,15 @@ You can check the ConfigMap contents using the command:
 [.console-input]
 [source,bash,subs="+macros,+attributes"]
 ----
-kubectl get -n {chapter-namespace} cm maven-settings -oyaml \
+{cli} get -n {chapter-namespace} cm maven-settings -oyaml \
   | yq r - data['settings.xml']
 ----
 
-The output of the above command should be as same as settings.xml listing above.
+The output of the above command should be same as in link:{github-repo}/{workspaces-repo}/maven-settings.xml[maven-settings.xml^].
+
+end::ws-deploy-nexus[]
+
+tag::ws-deploy-knative[]
 
 Before we create our pipeline ensure that the kubernetes cluster has a default storage class defined:
 
@@ -151,30 +168,53 @@ OpenShift::
 OpenShift users can install Knative i.e https://docs.openshift.com/container-platform/4.1/serverless/installing-openshift-serverless.html[OpenShift Serverless] using Operators.
 --
 ====
+end::ws-deploy-knative[]
 
+tag::ws-create-pvc[]
 [#ws-check-sc]
 === Check Default Storage Class
 
 [.console-input]
 [source,bash,subs="+macros,+attributes"]
 ----
-kubectl get sc
+{cli} get sc
 ----
 
+[tabs]
+====
+Kubernetes::
++
+--
 In minkube cluster it should show an output like:
 
 [.console-output]
 [source,subs="+quotes"]
-----
+-----
 NAME                 PROVISIONER                RECLAIMPOLICY   VOLUMEBINDINGMODE   ALLOWVOLUMEEXPANSION   AGE
 standard (#default#)   k8s.io/minikube-hostpath   Delete          Immediate           false                  9h
-----
+-----
+--
+OpenShift::
++
+--
+
+An example default storage class in Google Cloud:
+
+[.console-output]
+[source,bash]
+-----
+NAME                 PROVISIONER            RECLAIMPOLICY   VOLUMEBINDINGMODE      ALLOWVOLUMEEXPANSION   AGE
+standard (default)   kubernetes.io/gce-pd   Delete          WaitForFirstConsumer   true                   2d3h
+-----
+--
+====
+
 
 [NOTE]
 ====
 - If you dont have one please check https://kubernetes.io/docs/concepts/storage/storage-classes/[Kubernetes Docs] on how to have one configured.
 
-- In OpenShift cluster the default storage class varies based on the underlying cloud platform. Refer to https://docs.openshift.com/container-platform/4.5/storage/dynamic-provisioning.html[documentation] to know more.
+- In OpenShift cluster the default storage class varies based on the underlying cloud platform. Refer to https://docs.openshift.com/container-platform/4.5/storage/dynamic-provisioning.html[OpenShift Documentation] to know more.
 ====
 
 === Create PVC
@@ -184,5 +224,6 @@ Create the PVC `tekton-tutorial-sources`, which we will use as part of the exerc
 [.console-input]
 [source,bash,subs="+macros,+attributes"]
 ----
-kubectl apply -n {chapter-namespace} -f link:{github-repo}/{workspaces-repo}/sources-pvc.yaml[+$TUTORIAL_HOME+/{workspaces-repo}/sources-pvc.yaml^]
+{cli} apply -n {chapter-namespace} -f link:{github-repo}/{workspaces-repo}/sources-pvc.yaml[+$TUTORIAL_HOME+/{workspaces-repo}/sources-pvc.yaml^]
 ----
+end::ws-create-pvc[]

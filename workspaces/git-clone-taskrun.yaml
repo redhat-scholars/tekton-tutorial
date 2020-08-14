@@ -9,7 +9,7 @@ spec:
     name: git-clone
   params:
     - name: url
-      value: https://github.com/redhat-developer-demos/tekton-helloworld
+      value: https://github.com/redhat-scholars/tekton-helloworld
     - name: revision
       value: master
   workspaces:

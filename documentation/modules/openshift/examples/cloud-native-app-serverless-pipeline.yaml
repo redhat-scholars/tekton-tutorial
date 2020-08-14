@@ -1,0 +1,120 @@
+---
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: cloud-native-app-serverless
+  namespace: openshift #<.>
+  labels:
+    pipeline.openshift.io/runtime: java #<.>
+    pipeline.openshift.io/type: knative #<.>
+spec:
+  description: >-
+    The Pipline to buld and deploy the Hello World Java App https://github.com/redhat-scholars/tekton-tutorial as Knative Service.
+  params:
+    - name: IMAGE_NAME
+      description: >-
+        The fully qualified image name e.g example.com/tekton-tutorial/helloworld
+      default: image-registry.openshift-image-registry.svc:5000/tektontutorial/helloworld
+    - name: CONTEXT_DIR
+      description: >-
+        The context directory within source from where to build the sources. In this example there are to options:
+          * apps/greeter/java/quarkus
+          * apps/greeter/java/springboot
+    - name: APP_NAME #<.>
+      description: The Knative Service name
+    - name: GITHUB_REPO_URL
+      description: The GitHub Repo of the Java Application
+      default: https://github.com/redhat-scholars/tekton-tutorial
+    - name: GITHUB_REPO_REVISION
+      description: The GitHub revision to use
+      default: master
+  workspaces:
+    - name: source
+    - name: maven-settings
+  tasks:
+    - name: clone-sources
+      taskRef:
+        name: git-clone
+        kind: ClusterTask
+      params:
+        - name: url
+          value: $(params.GITHUB_REPO_URL)
+        - name: revision
+          value: $(params.GITHUB_REPO_REVISION)
+        # just to do a fresh clone, as we already have the directory cloned
+        # to reuse it we can exlude this step
+        - name: deleteExisting
+          value: 'true'
+      workspaces:
+        - name: output
+          workspace: source
+    - name: build-java-test
+      taskRef:
+        name: maven
+        kind: ClusterTask
+      runAfter:
+        - clone-sources
+      params:
+        - name: GOALS
+          value:
+            - -B
+            - 'clean'
+            - 'test'
+            - '-f'
+            - '$(params.CONTEXT_DIR)/pom.xml'
+      workspaces:
+        - name: maven-settings
+          workspace: maven-settings
+        - name: source
+          workspace: source
+    - name: build-java-app
+      taskRef:
+        name: maven
+        kind: ClusterTask
+      runAfter:
+        - build-java-test
+      params:
+        - name: GOALS
+          value:
+            - -B
+            - '-DskipTests'
+            - 'clean'
+            - 'package'
+            - '-f'
+            - '$(params.CONTEXT_DIR)/pom.xml'
+      workspaces:
+        - name: maven-settings
+          workspace: maven-settings
+        - name: source
+          workspace: source
+    - name: build-java-app-image
+      taskRef:
+        name: buildah
+        kind: ClusterTask
+      runAfter:
+        - build-java-app
+      params:
+        - name: CONTEXT
+          value: '$(params.CONTEXT_DIR)'
+        - name: IMAGE
+          value: '$(params.IMAGE_NAME)'
+        # since pushing to internal registry we skip TLS verify
+        - name: TLSVERIFY
+          value: 'false'
+      workspaces:
+        - name: source
+          workspace: source
+    - name: deploy-kn-service
+      taskRef:
+        name: kn
+        kind: ClusterTask
+      runAfter:
+        - build-java-app-image
+      params:
+        - name: ARGS
+          value:
+            - 'service'
+            - 'create'
+            - '$(params.APP_NAME)'
+            - '--force'
+            - '--image=$(params.IMAGE_NAME)@$(tasks.build-java-app-image.results.IMAGE_DIGEST)' #<.>
