@@ -29,14 +29,14 @@ As part of `workspaces` exercies, we will be building the Java application https
 [#ws-prepare]
 == Prepare for using workspaces
 
-include::ROOT:partial$namespace-prep.adoc[]
+include::ROOT:partial$namespace-prep.adoc[tags="*"]
 
 [#ws-pipeline-overview]
 == Java Application Pipeline
 
 The Java Application build pipeline will,
 
-- Git clone using `git-clone` task, the https://github.com/redhat-scholars/tekton-helloworld repo and build the apps/greeter/java/springboot application
+- Git clone using `git-clone` task, the {tutorial-apps-repo} repo and build the *springboot* application
 - Will use maven task, maven task require two workspaces one for source and other for maven-settings
 - Build the container image using the `buildah` task and push to the internal container registry
 - Finally deploy the application onto Kubernetes using `openshift-client` task
@@ -56,7 +56,7 @@ Since the cluster as *default* Storage Class, just specifying the PersistenceVol
 Let us run the `git-clone` Task with the `TaskRun` definition as shown below:
 
 .link:{github-repo}/{workspaces-repo}/git-clone-taskrun.yaml[git-clone-taskrun^]
-[source,yaml,attributes]
+[source,yaml,subs="macros+,+attributes"]
 ----
 apiVersion: tekton.dev/v1beta1
 kind: TaskRun
@@ -69,9 +69,9 @@ spec:
     name: git-clone
   params: #<.>
     - name: url
-      value: https://github.com/redhat-scholars/tekton-tutorial
+      value: {tutorial-apps-repo}
     - name: revision
-      value: master
+      value: {tutorial-apps-revision}
   workspaces: #<.>
     - name: output
       persistentVolumeClaim:
@@ -83,11 +83,48 @@ spec:
 <.> The GitHub Url and revision to use, for more details check the https://github.com/tektoncd/catalog/blob/master/task/git-clone/0.1/[Task]
 <.> Setting the workspace `output` mapped to PVC `tekton-tutorial-sources`
 
+[tabs]
+====
+tkn::
++
+--
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+tkn task start git-clone \
+  --namespace={chapter-namespace} \
+  --param url={tutorial-apps-repo} \
+  --param revision={tutorial-apps-revision} \
+  --workspace name=output,claimName=tekton-tutorial-sources \
+  --use-param-defaults \#<.>
+  --showlog
+----
+<.> Makes the tkn CLI to use the default values from the task definiton without prompting for values
+
+The workspaces can be PVC or ConfigMap, Secret or emptyDir. The pattern to specify them are as follows:
+
+* PVC
+** `name=my-pvc,claimName=pvc1[,subPath=dir]`
+
+* Secret
+** `name=my-secret,secret=secret-name`
+
+* Secret
+** `name=my-config,config=rpg[,item=ultimav=1]`
+
+* emptyDir
+** `name=my-empty-dir,emptyDir=""`
+--
+kubectl::
++
+--
 [.console-input]
 [source,bash,subs="+macros,+attributes"]
 ----
 kubectl create -n {chapter-namespace} -f git-clone-taskrun.yaml
 ----
+--
+====
 
 include::ROOT:partial$logs-view.adoc[tags='tr']
 
@@ -116,15 +153,15 @@ tekton-tutorial-sources   Bound    pvc-48aa86ae-ec20-4f0c-a2d0-65d906d41bed   1G
 A successful git-clone TaskRun will show the following output:
 
 [.console-output]
-[source,bash]
+[source,bash,subs="attributes+"]
 ----
 [clone] + CHECKOUT_DIR=/workspace/output/
 [clone] + '[[' false '==' true ]]
 [clone] + test -z
 [clone] + test -z
 [clone] + test -z
-[clone] + /ko-app/git-init -url https://github.com/redhat-scholars/tekton-helloworld -revision master -refspec  -path /workspace/output/ '-sslVerify=true' '-submodules=true' -depth 1
-[clone] {"level":"info","ts":1595778607.616774,"caller":"git/git.go:139","msg":"Successfully cloned https://github.com/redhat-scholars/tekton-helloworld @ 2e3336657cc1bbf22e3db183a517dcb0a62207b9 (grafted, HEAD, origin/master) in path /workspace/output/"}
+[clone] + /ko-app/git-init -url {tutorial-apps-repo} -revision {tutorial-apps-revision} -refspec  -path /workspace/output/ '-sslVerify=true' '-submodules=true' -depth 1
+[clone] {"level":"info","ts":1595778607.616774,"caller":"git/git.go:139","msg":"Successfully cloned {tutorial-apps-repo} @ 2e3336657cc1bbf22e3db183a517dcb0a62207b9 (grafted, HEAD, origin/{tutorial-apps-revision}) in path /workspace/output/"}
 [clone] {"level":"info","ts":1595778607.6473103,"caller":"git/git.go:180","msg":"Successfully initialized and updated submodules in path /workspace/output/"}
 [clone] + cd /workspace/output/
 [clone] + git rev-parse+ tr -d '\n'
@@ -159,31 +196,90 @@ spec:
 ----
 <.> Notice that we bind the same PVC to workspace `directory` parameter of the `list-directory`.
 
+[tabs]
+====
+tkn::
++
+--
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+tkn task start list-directory \
+  --namespace={chapter-namespace} \
+  --workspace name=directory,claimName=tekton-tutorial-sources \
+  --use-param-defaults \
+  --showlog
+----
+--
+kubectl::
++
+--
 [.console-input]
 [source,bash,subs="+macros,+attributes"]
 ----
 kubectl create -n {chapter-namespace} -f list-dir-taskrun.yaml
 ----
-
 [.console-output]
 [source,bash]
 ----
 taskrun.tekton.dev/list-directory-mbkvl created
 ----
-
+--
 include::ROOT:partial$logs-view.adoc[tags='tr']
+====
 
-If all went well the list directory should show the directory listing of https://github.com/redhat-scholars/tekton-helloworld.
+If all went well the list directory should show the directory listing of {tutorial-apps-repo}.
 
 [.console-output]
 [source,bash]
 ----
-[list-directory] total 32
-[list-directory] drwxr-xr-x    4 root     root          4096 Jul 26 15:50 src
-[list-directory] -rw-r--r--    1 root     root          4092 Jul 26 15:50 pom.xml
-[list-directory] -rwxr-xr-x    1 root     root          6607 Jul 26 15:50 mvnw.cmd
-[list-directory] -rwxr-xr-x    1 root     root         10069 Jul 26 15:50 mvnw
-[list-directory] -rw-r--r--    1 root     root          1200 Jul 26 15:50 README.md
+[list-directory] total 44
+[list-directory] drwxr-xr-x    3 root     root          4096 Aug 17 07:46 springboot
+[list-directory] -rw-r--r--    1 root     root           515 Aug 17 07:46 settings.xml
+[list-directory] drwxr-xr-x    3 root     root          4096 Aug 17 07:46 quarkus
+[list-directory] -rw-r--r--    1 root     root           926 Aug 17 07:46 pom.xml
+[list-directory] -rwxr-xr-x    1 root     root          6607 Aug 17 07:46 mvnw.cmd
+[list-directory] -rwxr-xr-x    1 root     root         10069 Aug 17 07:46 mvnw
+[list-directory] drwxr-xr-x    2 root     root          4096 Aug 17 07:46 k8s
+[list-directory] -rw-r--r--    1 root     root           596 Aug 17 07:46 README.md
+
+[show-readme] # Tekton Greeter
+[show-readme]
+[show-readme] Project used as part of [Tekton Tutorial](https://dn.dev/tekton-tutorial) execersies.
+[show-readme]
+[show-readme] The application has one simple REST api at URI `/` that says "Meeow from Tekton 😺 !! 🚀".
+[show-readme]
+[show-readme] ## Quarkus
+[show-readme]
+[show-readme] [Quarkus](./quarkus)
+[show-readme]
+[show-readme] ### Building locally
+[show-readme]
+[show-readme] ```shell
+[show-readme] ./mvnw clean package -pl quarkus
+[show-readme] ```
+[show-readme]
+[show-readme] ### Running locally
+[show-readme]
+[show-readme] ```shell
+[show-readme] java -jar quarkus/target/quarkus-app/quarkus-run.jar
+[show-readme] ```
+[show-readme]
+[show-readme] ## SpringBoot
+[show-readme]
+[show-readme] [SpringBoot](./quarkus)
+[show-readme]
+[show-readme] ### Building locally
+[show-readme]
+[show-readme] ```shell
+[show-readme] ./mvnw clean package -pl springboot
+[show-readme] ```
+[show-readme]
+[show-readme] ### Running locally
+[show-readme]
+[show-readme] ```shell
+[show-readme] java -jar springboot/target/tekton-springboot-greeter.jar
+[show-readme] ```
 ----
 
 [#ws-pvc-points-to-ponder]
@@ -221,6 +317,8 @@ spec:
     - name: GOALS #<.>
       value:
         - -B
+        - -pl
+        - springboot
         - -DskipTests
         - clean
         - package
@@ -237,6 +335,26 @@ spec:
 <.> Configure the maven-settings configmap to be used for `maven-settings` workspace
 <.> Configure the tekton-tutorial-sources PVC to be used for `source` workspace
 
+[tabs]
+====
+tkn::
++
+--
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+tkn task start maven \
+  --namespace={chapter-namespace} \
+  --param GOALS='-pl,springboot,-B,-DskipTests,clean,package' \
+  --workspace name=maven-settings,config=maven-settings \
+  --workspace name=source,claimName=tekton-tutorial-sources \
+  --use-param-defaults \
+  --showlog
+----
+--
+kubectl::
++
+--
 [.console-input]
 [source,bash,subs="+macros,+attributes"]
 ----
@@ -250,6 +368,9 @@ taskrun.tekton.dev/maven-build-9cjws created
 ----
 
 include::ROOT:partial$logs-view.adoc[tags='tr']
+--
+====
+
 
 A successfull run should have output like(output trimmed for brevity):
 
@@ -257,14 +378,16 @@ A successfull run should have output like(output trimmed for brevity):
 [source,bash]
 ----
 ...
-[mvn-goals] [INFO] [org.jboss.threads] JBoss Threads version 3.1.1.Final
-[mvn-goals] [INFO] [io.quarkus.deployment.pkg.steps.JarResultBuildStep] Building thin jar: /workspace/source/target/helloworld-1.0.0-SNAPSHOT-runner.jar
-[mvn-goals] [INFO] [io.quarkus.deployment.QuarkusAugmentor] Quarkus augmentation completed in 1343ms
+[mvn-goals] [INFO] Downloaded from nexus: http://nexus:8081/repository/maven-public/org/eclipse/sisu/org.eclipse.sisu.plexus/0.3.4/org.eclipse.sisu.plexus-0.3.4.jar (205 kB at 1.0 MB/s)
+[mvn-goals] [INFO] Downloaded from nexus: http://nexus:8081/repository/maven-public/org/eclipse/sisu/org.eclipse.sisu.inject/0.3.4/org.eclipse.sisu.inject-0.3.4.jar (379 kB at 1.9 MB/s)
+[mvn-goals] [INFO] Downloaded from nexus: http://nexus:8081/repository/maven-public/org/codehaus/plexus/plexus-classworlds/2.6.0/plexus-classworlds-2.6.0.jar (53 kB at 259 kB/s)
+[mvn-goals] [INFO] Downloaded from nexus: http://nexus:8081/repository/maven-public/org/sonatype/plexus/plexus-build-api/0.0.7/plexus-build-api-0.0.7.jar (8.5 kB at 40 kB/s)
+[mvn-goals] [INFO] Replacing main artifact with repackaged archive
 [mvn-goals] [INFO] ------------------------------------------------------------------------
 [mvn-goals] [INFO] BUILD SUCCESS
 [mvn-goals] [INFO] ------------------------------------------------------------------------
-[mvn-goals] [INFO] Total time:  05:15 min
-[mvn-goals] [INFO] Finished at: 2020-07-26T16:45:44Z
+[mvn-goals] [INFO] Total time:  8.572 s
+[mvn-goals] [INFO] Finished at: 2020-08-17T08:20:22Z
 [mvn-goals] [INFO] ------------------------------------------------------------------------
 ...
 ----
@@ -277,6 +400,25 @@ When the TaskRun runs for the first , it will run loner as  it will maven artifa
 [#ws-use-cm-list-target-dir]
 === List build target directory
 
+[tabs]
+====
+tkn::
++
+--
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+tkn task start list-directory \
+  --namespace={chapter-namespace} \
+  --param sub-dirs='springboot/target' \
+  --workspace name=directory,claimName=tekton-tutorial-sources \
+  --use-param-defaults \
+  --showlog
+----
+--
+kubectl::
++
+--
 [.console-input]
 [source,bash,subs="+macros,+attributes"]
 ----
@@ -290,24 +432,26 @@ taskrun.tekton.dev/list-directory-xbzpq created
 ----
 
 include::ROOT:partial$logs-view.adoc[tags='tr']
+--
+====
 
 A successful command should show the following output:
 
-The output of the command should be like:
+The output(trimmed for brevity) of the command should be like:
 
 [.console-output]
 [source,bash]
 ----
-[list-directory] total 252
-[list-directory] drwxr-xr-x    3 root     root          4096 Jul 26 16:47 maven-status
-[list-directory] drwxr-xr-x    3 root     root          4096 Jul 26 16:47 generated-sources
-[list-directory] drwxr-xr-x    3 root     root          4096 Jul 26 16:47 generated-test-sources
-[list-directory] drwxr-xr-x    4 root     root          4096 Jul 26 16:47 classes
-[list-directory] drwxr-xr-x    3 root     root          4096 Jul 26 16:47 test-classes
-[list-directory] drwxr-xr-x    2 root     root          4096 Jul 26 16:47 maven-archiver
-[list-directory] -rw-r--r--    1 root     root          4899 Jul 26 16:47 helloworld-1.0.0-SNAPSHOT.jar
-[list-directory] drwxr-xr-x    2 root     root          4096 Jul 26 16:47 lib
-[list-directory] -rw-r--r--    1 root     root        218817 Jul 26 16:47 helloworld-1.0.0-SNAPSHOT-runner.jar
+[list-directory] total 18020
+[list-directory] drwxr-xr-x    3 root     root          4096 Aug 17 08:21 maven-status
+[list-directory] drwxr-xr-x    3 root     root          4096 Aug 17 08:21 generated-sources
+[list-directory] drwxr-xr-x    3 root     root          4096 Aug 17 08:21 test-classes
+[list-directory] drwxr-xr-x    3 root     root          4096 Aug 17 08:21 generated-test-sources
+[list-directory] drwxr-xr-x    3 root     root          4096 Aug 17 08:21 classes
+[list-directory] -rw-r--r--    1 root     root          3748 Aug 17 08:21 tekton-springboot-greeter.jar.original
+[list-directory] drwxr-xr-x    2 root     root          4096 Aug 17 08:21 maven-archiver
+[list-directory] -rw-r--r--    1 root     root      18421378 Aug 17 08:21 tekton-springboot-greeter.jar
+...
 ----
 
 [#use-cm-points-to-ponder]
@@ -373,6 +517,27 @@ clusterrolebinding.rbac.authorization.k8s.io/kn-deployer-binding created
 [#ws-run-pipeline]
 === Run the Pipeline
 
+[tabs]
+====
+tkn::
++
+--
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+tkn pipeline start helloworld-app-deploy \
+  --namespace={chapter-namespace} \
+  --serviceaccount=kn-deployer-account \
+  --param context-dir='quarkus' \
+  --workspace name=maven-settings,config=maven-settings \
+  --workspace name=source,claimName=tekton-tutorial-sources \
+  --use-param-defaults \
+  --showlog
+----
+--
+kubectl::
++
+--
 .link:{github-repo}/{workspaces-repo}/helloworld-app-deploy-run.yaml[helloworld-app-deploy-run.yaml^]
 [source,yaml,attributes]
 ----
@@ -394,6 +559,9 @@ pipelinerun.tekton.dev/helloworld-app-7k9cw created
 ----
 
 include::ROOT:partial$logs-view.adoc[tags='pr']
+--
+====
+
 
 A successfull Pipelinerun should have the `helloworld` application up and running as shown:
 
@@ -446,9 +614,9 @@ http --body +$KSVC_URL/hello+
 A successfull pipeline deployment should show an output like:
 
 [.console-output]
-[source,bash]
+[source,text,subs="+quotes"]
 ----
-Hello World!
+*Meeow from Tekton 😺 !! 🚀*
 ----
 
 [#tekton-ws-cleanup]

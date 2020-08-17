@@ -1,0 +1,33 @@
+---
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: list-directory
+spec:
+  description: >-
+    Simple directory lister
+  params:
+    - name: sub-dirs
+      type: array
+      description: the sub-directories under workspace
+      default: ['.']
+  workspaces:
+    - name: directory
+  results:
+    - name: README
+      description: echo the README of the repo
+  steps:
+    - name: list-directory
+      image: busybox
+      command:
+        - ls
+      args:
+        - -ltr
+        - '$(params.sub-dirs)'
+      workingDir: '$(workspaces.directory.path)'
+    - name: show-readme
+      image: busybox
+      script: |
+        #!/bin/sh
+        [[ -f $(workspaces.directory.path)/README.md ]] && cat $(workspaces.directory.path)/README.md | tee /tekton/results/README && exit 0
+        [[ -f $(workspaces.directory.path)/README.adoc ]] && cat $(workspaces.directory.path)/README.adoc | tee /tekton/results/README && exit 0

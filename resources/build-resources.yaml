@@ -8,7 +8,7 @@ spec:
     - name: url
       value: https://github.com/redhat-scholars/tekton-tutorial-greeter
     - name: revision
-      value: master
+      value: staging
 ---
 apiVersion: tekton.dev/v1alpha1
 kind: PipelineResource

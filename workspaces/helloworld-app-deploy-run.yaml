@@ -8,6 +8,9 @@ spec:
   serviceAccountName: kn-deployer-account
   pipelineRef:
     name: helloworld-app-deploy
+  params:
+    - name: context-dir
+      value: quarkus
   workspaces:
     - name: maven-settings
       configmap:

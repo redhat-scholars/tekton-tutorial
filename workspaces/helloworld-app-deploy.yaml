@@ -4,20 +4,23 @@ metadata:
   name: helloworld-app-deploy
 spec:
   description: >-
-    The Pipline to buld and deploy the Hello World Java App https://github.com/redhat-scholars/tekton-helloworld as Knative Service.
+    The Pipline to buld and deploy the Hello World Java App https://github.com/redhat-scholars/tekton-tutorial-greeter as Knative Service.
   params:
     - name: image-name #<.>
       description: The fully qualified image name e.g example.com/tekton-tutorial/helloworld
-      default: example.com/tekton-tutorial/helloworld
+      default: example.com/tekton-tutorial/greeter
+    - name: context-dir
+      description: >-
+        The application framework to use, value can be either quarkus or springboot
     - name: kn-service-name
       description: The Knative Service name
-      default: helloworld
+      default: greeter
     - name: github-repo-url
       description: The GitHub Repo of the Java Application
-      default: https://github.com/redhat-scholars/tekton-helloworld
+      default: https://github.com/redhat-scholars/tekton-tutorial-greeter
     - name: github-repo-revision
       description: The GitHub revision to use
-      default: master
+      default: staging
   workspaces:
     - name: source #<.>
     - name: maven-settings #<.>
@@ -33,7 +36,7 @@ spec:
         # just to do a fresh clone, as we already have the directory cloned
         # to reuse it we can exlude this step
         - name: deleteExisting
-          value: 'true'
+          value: "true"
       workspaces:
         - name: output
           workspace: source
@@ -44,7 +47,7 @@ spec:
         - clone-sources
       params:
         - name: GOALS
-          value: ['-B', 'clean', 'test']
+          value: ["-pl", "$(params.context-dir)", "-B", "clean", "test"]
       workspaces:
         - name: maven-settings
           workspace: maven-settings
@@ -57,7 +60,15 @@ spec:
         - build-java-test
       params:
         - name: GOALS
-          value: ['-B', '-DskipTests', 'clean', 'package']
+          value:
+            [
+              "-pl",
+              "$(params.context-dir)",
+              "-B",
+              "-DskipTests",
+              "clean",
+              "package",
+            ]
       workspaces:
         - name: maven-settings
           workspace: maven-settings
@@ -69,11 +80,13 @@ spec:
       runAfter:
         - build-java-app
       params:
+        - name: CONTEXT
+          value: "$(params.context-dir)"
         - name: IMAGE
-          value: '$(params.image-name)'
+          value: "$(params.image-name)"
         # since pushing to internal registry we skip TLS verify
         - name: TLSVERIFY
-          value: 'false'
+          value: "false"
       workspaces:
         - name: source
           workspace: source
@@ -85,8 +98,8 @@ spec:
       params:
         - name: ARGS
           value:
-            - 'service'
-            - 'create'
-            - '$(params.kn-service-name)'
-            - '--force'
-            - '--image=$(params.image-name)@$(tasks.build-java-app-image.results.IMAGE_DIGEST)' #<.>
+            - "service"
+            - "create"
+            - "$(params.kn-service-name)"
+            - "--force"
+            - "--image=$(params.image-name)@$(tasks.build-java-app-image.results.IMAGE_DIGEST)" #<.>

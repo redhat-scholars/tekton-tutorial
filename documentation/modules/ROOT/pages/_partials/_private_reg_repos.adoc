@@ -34,7 +34,7 @@ In this exercise we will see how to pull i.e. clone the source code from the pri
 
 To be able to run this exercise you need:
 
-- A remote GitHub Repository, you can pull fork the https://github.com/redhat-scholars/tekton-helloworld and push that as your private repository
+- A remote GitHub Repository, you can pull fork the {tutorial-apps-repo} and push that as your private repository
 - A https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-token[GitHub Personal Access Token(PAT)] to access the remote repository.
 
 Set the requried environment variables to be used when creating the github-pat-secret:

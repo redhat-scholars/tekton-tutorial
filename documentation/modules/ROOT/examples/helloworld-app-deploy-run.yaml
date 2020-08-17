@@ -5,10 +5,13 @@ metadata:
   labels:
     tekton.dev/pipeline: helloworld-app-deploy
 spec:
-  serviceAccountName: kn-deployer-account #<.>
+  serviceAccountName: kn-deployer-account
   pipelineRef:
     name: helloworld-app-deploy
-  workspaces: #<.>
+  params:
+    - name: context-dir
+      value: quarkus
+  workspaces:
     - name: maven-settings
       configmap:
         name: maven-settings
