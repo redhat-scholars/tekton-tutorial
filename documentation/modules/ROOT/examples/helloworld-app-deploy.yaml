@@ -47,7 +47,7 @@ spec:
         - clone-sources
       params:
         - name: GOALS
-          value: ["-pl", "$(params.contex-dir)", "-B", "clean", "test"]
+          value: ["-pl", "$(params.context-dir)", "-B", "clean", "test"]
       workspaces:
         - name: maven-settings
           workspace: maven-settings
@@ -63,7 +63,7 @@ spec:
           value:
             [
               "-pl",
-              "$(params.contex-dir)",
+              "$(params.context-dir)",
               "-B",
               "-DskipTests",
               "clean",
@@ -81,7 +81,7 @@ spec:
         - build-java-app
       params:
         - name: CONTEXT
-          value: "$(params.contex-dir)"
+          value: "$(params.context-dir)"
         - name: IMAGE
           value: "$(params.image-name)"
         # since pushing to internal registry we skip TLS verify

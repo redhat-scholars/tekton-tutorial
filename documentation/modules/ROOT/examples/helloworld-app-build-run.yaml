@@ -5,7 +5,7 @@ metadata:
   labels:
     tekton.dev/pipeline: helloworld-app-build
 spec:
-  serviceAccountName: #build-bot#
+  serviceAccountName: build-bot
   pipelineRef:
     name: helloworld-app-build
   workspaces:
@@ -14,4 +14,4 @@ spec:
         name: maven-settings
     - name: source
       persistentVolumeClaim:
-        emptyDir: tekton-tutorial-sources
+        claimName: tekton-tutorial-sources

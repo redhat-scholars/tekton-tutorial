@@ -562,7 +562,6 @@ include::ROOT:partial$logs-view.adoc[tags='pr']
 --
 ====
 
-
 A successfull Pipelinerun should have the `helloworld` application up and running as shown:
 
 [.console-input]

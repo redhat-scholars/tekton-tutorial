@@ -1,4 +1,4 @@
-= Using Private Repositories and Registries
+== Using Private Repositories and Registries
 
 include::_attributes.adoc[]
 :chapter-namespace: workspace-auth-demo
@@ -189,16 +189,36 @@ pipeline.tekton.dev/secretworld-app-clone created
 [#tekton-run-clone-pipeline]
 === Run Pipeline
 
+[tabs]
+====
+tkn::
++
+--
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+tkn pipeline start secretworld-app-clone \
+  --namespace={chapter-namespace} \
+  --serviceaccount=github-bot \
+  --param private-github-repo-url='https://github.com/redhat-scholars/tekton-secretworld' \
+  --workspace name=source,claimName=tekton-tutorial-sources \
+  --use-param-defaults \
+  --showlog
+----
+--
+kubectl::
++
+--
 Ensure that the pipeline run has been set to run with the Service Account `github-bot`
 
 [source,yaml,subs="+quotes"]
-----
+-----
 include::ROOT:example$secretworld-app-clone-run.yaml[]
-----
+-----
 [IMPORTANT]
-====
+=====
 <.>  Please make sure you have updated the private GitHub repository to match your private repository
-====
+=====
 
 Run the pipeline:
 
@@ -209,6 +229,8 @@ kubectl create -n {chapter-namespace} -f secretworld-app-clone-run.yaml
 ----
 
 include::ROOT:partial$logs-view.adoc[tags='pr']
+--
+====
 
 A successful clone from private repo will show the following output ( trimmed brevity):
 
@@ -372,6 +394,26 @@ pipeline.tekton.dev/helloworld-app-build created
 [#tekton-run-build-push-pipeline]
 === Run Pipeline
 
+[tabs]
+====
+tkn::
++
+--
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+tkn pipeline start helloworld-app-build \
+  --namespace={chapter-namespace} \
+  --serviceaccount=build-bot \
+  --workspace name=maven-settings,config=maven-settings \
+  --workspace name=source,claimName=tekton-tutorial-sources \
+  --use-param-defaults \
+  --showlog
+----
+--
+kubectl::
++
+--
 Ensure that the pipeline run has been set to run with the Service Account `build-bot`
 
 [source,yaml,subs="+quotes"]
@@ -388,6 +430,8 @@ kubectl create -n {chapter-namespace} -f helloworld-app-build-run.yaml
 ----
 
 include::ROOT:partial$logs-view.adoc[tags='pr']
+--
+====
 
 A successful build and push will show the following output ( trimmed brevity):
 
