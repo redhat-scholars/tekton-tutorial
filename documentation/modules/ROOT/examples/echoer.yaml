@@ -1,3 +1,4 @@
+---
 apiVersion: tekton.dev/v1beta1
 kind: ClusterTask
 metadata:
@@ -5,4 +6,6 @@ metadata:
 spec:
   steps:
     - image: alpine
-      script: echo 'Tekton Rocks!!'
+      script: |
+        #!/bin/sh
+        echo 'Meeow!! from Tekton 😺🚀'

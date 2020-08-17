@@ -22,11 +22,6 @@ The following CLI tools are required for running the exercises in this tutorial.
 | https://kubernetes.io/docs/tasks/tools/install-kubectl/[Install]
 | https://kubernetes.io/docs/tasks/tools/install-kubectl/[Install]
 
-| Knative Client `kn` (>={kn-version})
-| `brew install knative/client/kn`
-| https://github.com/knative/client/releases/download/{kn-version}/kn-linux-amd64[Install]
-| https://github.com/knative/client/releases/download/{kn-version}/kn-windows-amd64.exe[Install]
-
 | https://github.com/wercker/stern[stern]
 | `brew install stern`
 | https://github.com/wercker/stern/releases/download/1.6.0/stern_linux_amd64[Download]
@@ -56,6 +51,7 @@ Before we start setting up the environment, let's clone the tutorial sources and
 
 :tutorial-url: https://github.com/redhat-scholars/tekton-tutorial
 :folder: tekton-tutorial
+include::https://raw.githubusercontent.com/redhat-developer-demos/rhd-tutorial-common/master/download-sources.adoc[]
 
 ifndef::workshop[]
 [IMPORTANT,subs="attributes+,+macros"]

@@ -1,0 +1,37 @@
+---
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: build-and-list-target
+spec:
+  resources:
+    inputs:
+      - name: source
+        type: git
+  params:
+    - name: contextDir
+      description: 'The context directory within the repository for sources'
+      default: apps/greeter/java/quarkus
+  stepTemplate:
+    resources:
+      limits:
+        cpu: 1
+        memory: 2Gi
+    securityContext:
+      allowPrivilegeEscalation: false
+      privileged: false
+      # the default underprivileged user to be used
+      runAsUser: 10001
+  steps:
+    - name: maven-build
+      image: quay.io/rhdevelopers/tutorial-tools:0.0.3
+      workingDir: '/workspace/source/$(inputs.params.contextDir)'
+      args:
+        - mvn
+        - -DskipTests
+        - clean
+        - package
+    - name: ls-target
+      image: busybox
+      command:
+        ['ls', '-ltr', '/workspace/source/$(inputs.params.contextDir)/target']

@@ -20,14 +20,14 @@ spec:
       default: https://repo.maven.apache.org/maven2/
     - name: destinationImage
       description: the fully qualified image name
-      default: '$(outputs.resources.builtImage.url)'
+      default: "$(outputs.resources.builtImage.url)"
     - name: dockerFile
       description: the docker file to used for building the application
       default: Dockerfile
     - name: tlsVerify
       description: tls verify
       type: string
-      default: 'false'
+      default: "false"
   resources:
     inputs:
       - name: source
@@ -37,7 +37,7 @@ spec:
         type: image
   steps:
     - name: build-sources
-      image: docker.io/maven:3.6.3-jdk-8-slim
+      image: docker.io/maven:3.6.3-openjdk-11-slim
       command:
         - mvn
       args:
@@ -47,30 +47,30 @@ spec:
       env:
         - name: user.home
           value: /home/tekton
-      workingDir: '/workspace/source/$(inputs.params.contextDir)'
+      workingDir: "/workspace/source/$(inputs.params.contextDir)"
     - name: build-image
       image: quay.io/buildah/stable
       command:
-        - 'buildah'
+        - "buildah"
       args:
-        - 'bud'
-        - '--layers'
-        - '-f'
-        - '$(inputs.params.dockerFile)'
-        - '-t'
-        - '$(inputs.params.destinationImage)'
-        - '.'
-      workingDir: '/workspace/source/$(inputs.params.contextDir)'
+        - "bud"
+        - "--layers"
+        - "-f"
+        - "$(inputs.params.dockerFile)"
+        - "-t"
+        - "$(inputs.params.destinationImage)"
+        - "."
+      workingDir: "/workspace/source/$(inputs.params.contextDir)"
     - name: push-image
       image: quay.io/buildah/stable
       command:
-        - 'buildah'
+        - "buildah"
       args:
-        - 'push'
-        - '--tls-verify=$(inputs.params.tlsVerify)'
+        - "push"
+        - "--tls-verify=$(inputs.params.tlsVerify)"
         - $(inputs.params.destinationImage)
-        - 'docker://$(inputs.params.destinationImage)'
-      workingDir: '/workspace/source/$(inputs.params.contextDir)'
+        - "docker://$(inputs.params.destinationImage)"
+      workingDir: "/workspace/source/$(inputs.params.contextDir)"
   volumes:
     - name: varlibc
       emptyDir: {}
