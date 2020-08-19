@@ -5,6 +5,7 @@
 :openshift: yes
 :cli: oc
 
+
 At the end of this chapter you should be able to:
 
 - Use Cluster Tasks in OpenShift
@@ -186,9 +187,9 @@ image::odc_deploy_app_from_git.png[]
 In the *Git Repo URL* field, enter the tutorials GitHub repository URL:
 
 [.console-input]
-[source,text,subs="+macros"]
+[source,text,subs="+attributes"]
 ----
-{tekton-tutorial-apps-repo}
+{tutorial-apps-repo}
 ----
 
 image::master@tekton-tutorial:openshift:ocp_dc_choose_git.png[]
@@ -335,11 +336,11 @@ greeter #<.>
 ----
 <.> As described earlier the *APP_NAME* parameter automatically maps to the Application Name
 
-Leave the *GITHUB_REPO_URL* and *GITHUB_REPO_REVISION* to be defaults
+Leave the *GITHUB_REPO_URL* and *GITHUB_REPO_REVISION* to be defaults as, *{tutorial-apps-repo}* and *{tutorial-apps-revision}* respectively.
 
-Set the menu:Workspace[Source] to be of type *PVC* and use *tekton-tutorial-sources* as PVC.
+Choose the menu:Workspace[Source] to be of type *PVC* and use *tekton-tutorial-sources* as the value for PVC.
 
-Set the menu:Workspace[maven-settings] to be of type *ConfigMap* and use *maven-settings* ConfigMap.
+Choose the menu:Workspace[maven-settings] to be of type *ConfigMap* and use *maven-settings* as the value for ConfigMap.
 
 The completed parameters should look like:
 
