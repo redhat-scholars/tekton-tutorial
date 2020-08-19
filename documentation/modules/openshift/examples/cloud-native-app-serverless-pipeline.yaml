@@ -9,22 +9,22 @@ metadata:
     pipeline.openshift.io/type: knative #<.>
 spec:
   description: >-
-    The Pipline to buld and deploy the Hello World Java App https://github.com/redhat-scholars/tekton-tutorial as Knative Service.
+    The Pipline to buld and deploy the Hello World Java App https://github.com/redhat-scholars/tekton-tutorial-greeter as Knative Service.
   params:
     - name: IMAGE_NAME
       description: >-
         The fully qualified image name e.g example.com/tekton-tutorial/greeter
       default: image-registry.openshift-image-registry.svc:5000/tektontutorial/greeter
-    - name: CONTEXT_DIR
+    - name: APP_PROFILE
       description: >-
-        The context directory within source from where to build the sources. In this example there are to options:
-          * apps/greeter/java/quarkus
-          * apps/greeter/java/springboot
+        The application profile to use for building the application. In this example it should be either:
+          * quarkus
+          * springboot
     - name: APP_NAME #<.>
       description: The Knative Service name
     - name: GITHUB_REPO_URL
       description: The GitHub Repo of the Java Application
-      default: https://github.com/redhat-scholars/tekton-tutorial
+      default: https://github.com/redhat-scholars/tekton-tutorial-greeter
     - name: GITHUB_REPO_REVISION
       description: The GitHub revision to use
       default: master
@@ -57,11 +57,11 @@ spec:
       params:
         - name: GOALS
           value:
+            - '-pl'
+            - $(params.APP_PROFILE)
             - -B
             - 'clean'
             - 'test'
-            - '-f'
-            - '$(params.CONTEXT_DIR)/pom.xml'
       workspaces:
         - name: maven-settings
           workspace: maven-settings
@@ -76,12 +76,12 @@ spec:
       params:
         - name: GOALS
           value:
+            - '-pl'
+            - $(params.APP_PROFILE)
             - -B
             - '-DskipTests'
             - 'clean'
             - 'package'
-            - '-f'
-            - '$(params.CONTEXT_DIR)/pom.xml'
       workspaces:
         - name: maven-settings
           workspace: maven-settings
@@ -95,7 +95,7 @@ spec:
         - build-java-app
       params:
         - name: CONTEXT
-          value: '$(params.CONTEXT_DIR)'
+          value: '$(params.APP_PROFILE)'
         - name: IMAGE
           value: '$(params.IMAGE_NAME)'
         # since pushing to internal registry we skip TLS verify
