@@ -1,46 +1,38 @@
----
 apiVersion: tekton.dev/v1beta1
 kind: Pipeline
 metadata:
-  name: cloud-native-app-serverless
-  namespace: openshift
-  labels:
-    pipeline.openshift.io/runtime: java
-    pipeline.openshift.io/type: knative
+  name: greeter-app-deploy
 spec:
   description: >-
     The Pipline to buld and deploy the Hello World Java App https://github.com/redhat-scholars/tekton-tutorial-greeter as Knative Service.
   params:
-    - name: IMAGE_NAME
+    - name: image-name #<.>
+      description: The fully qualified image name e.g example.com/tekton-tutorial/greeter
+      default: example.com/tekton-tutorial/greeter
+    - name: context-dir
       description: >-
-        The fully qualified image name e.g example.com/tekton-tutorial/greeter
-      default: image-registry.openshift-image-registry.svc:5000/tektontutorial/greeter
-    - name: APP_PROFILE
-      description: >-
-        The application profile to use for building the application. In this example it should be either:
-          * quarkus
-          * springboot
-    - name: APP_NAME
+        The application framework to use, value can be either quarkus or springboot
+    - name: kn-service-name
       description: The Knative Service name
-    - name: GITHUB_REPO_URL
+      default: greeter
+    - name: github-repo-url
       description: The GitHub Repo of the Java Application
       default: https://github.com/redhat-scholars/tekton-tutorial-greeter
-    - name: GITHUB_REPO_REVISION
+    - name: github-repo-revision
       description: The GitHub revision to use
-      default: master
+      default: staging
   workspaces:
-    - name: source
-    - name: maven-settings
+    - name: source #<.>
+    - name: maven-settings #<.>
   tasks:
     - name: clone-sources
       taskRef:
         name: git-clone
-        kind: ClusterTask
       params:
         - name: url
-          value: $(params.GITHUB_REPO_URL)
+          value: $(params.github-repo-url)
         - name: revision
-          value: $(params.GITHUB_REPO_REVISION)
+          value: $(params.github-repo-revision)
         # just to do a fresh clone, as we already have the directory cloned
         # to reuse it we can exlude this step
         - name: deleteExisting
@@ -51,17 +43,11 @@ spec:
     - name: build-java-test
       taskRef:
         name: maven
-        kind: ClusterTask
       runAfter:
         - clone-sources
       params:
         - name: GOALS
-          value:
-            - '-pl'
-            - $(params.APP_PROFILE)
-            - -B
-            - 'clean'
-            - 'test'
+          value: ['-pl', '$(params.context-dir)', '-B', 'clean', 'test']
       workspaces:
         - name: maven-settings
           workspace: maven-settings
@@ -70,18 +56,19 @@ spec:
     - name: build-java-app
       taskRef:
         name: maven
-        kind: ClusterTask
       runAfter:
         - build-java-test
       params:
         - name: GOALS
           value:
-            - '-pl'
-            - $(params.APP_PROFILE)
-            - -B
-            - '-DskipTests'
-            - 'clean'
-            - 'package'
+            [
+              '-pl',
+              '$(params.context-dir)',
+              '-B',
+              '-DskipTests',
+              'clean',
+              'package',
+            ]
       workspaces:
         - name: maven-settings
           workspace: maven-settings
@@ -90,14 +77,13 @@ spec:
     - name: build-java-app-image
       taskRef:
         name: buildah
-        kind: ClusterTask
       runAfter:
         - build-java-app
       params:
         - name: CONTEXT
-          value: '$(params.APP_PROFILE)'
+          value: '$(params.context-dir)'
         - name: IMAGE
-          value: '$(params.IMAGE_NAME)'
+          value: '$(params.image-name)'
         # since pushing to internal registry we skip TLS verify
         - name: TLSVERIFY
           value: 'false'
@@ -107,7 +93,6 @@ spec:
     - name: deploy-kn-service
       taskRef:
         name: kn
-        kind: ClusterTask
       runAfter:
         - build-java-app-image
       params:
@@ -115,6 +100,6 @@ spec:
           value:
             - 'service'
             - 'create'
-            - '$(params.APP_NAME)'
+            - '$(params.kn-service-name)'
             - '--force'
-            - '--image=$(params.IMAGE_NAME)@$(tasks.build-java-app-image.results.IMAGE_DIGEST)'
+            - '--image=$(params.image-name)@$(tasks.build-java-app-image.results.IMAGE_DIGEST)' #<.>

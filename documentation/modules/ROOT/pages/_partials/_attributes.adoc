@@ -2,15 +2,13 @@
 :cli: kubectl
 :branch: master
 :github-repo: https://github.com/redhat-scholars/tekton-tutorial/blob/{branch}
+:tutorial-apps-repo: https://github.com/redhat-scholars/tekton-tutorial-greeter
+:tutorial-apps-revision: staging
 :experimental:
 :minikube-version: v1.12.1+
 :openshift-version: v4.5+
 
 :tekton-repo: https://github.com/tektoncd/pipeline/releases/download
-:tekton-version: v0.11.3
-:triggers-version: v0.4.0
-:kn-version: v0.16.0
-:tekton-cli-version: 0.11.0
 :pipelines-repo: pipelines
 :tasks-repo: tasks
 :workspaces-repo: workspaces

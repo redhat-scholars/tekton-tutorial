@@ -5,6 +5,7 @@
 :openshift: yes
 :cli: oc
 
+
 At the end of this chapter you should be able to:
 
 - Use Cluster Tasks in OpenShift
@@ -27,7 +28,7 @@ It is assumed that you have completed the following chapters before trying this 
 
 The Cloud Native Application pipeline will,
 
-* Git clone using `git-clone` task, the https://github.com/redhat-scholars/tekton-helloworld repository
+* Git clone using `git-clone` task, the https://github.com/redhat-scholars/tekton-greeter repository
 * Will use maven task, maven task require two workspaces one for source and other for maven-settings
 * Build the container image using the `buildah` task and push to the internal container registry
 * Finally deploy the application onto Kubernetes using `openshift-client` task or use `kn` task to deploy it as Serverless Knative application.
@@ -35,7 +36,7 @@ The Cloud Native Application pipeline will,
 [#ocp-create-project]
 == Project Preperation
 
-include::master@tekton-tutorial:ROOT:partial$namespace-prep.adoc[lines=13..15]
+include::master@tekton-tutorial:ROOT:partial$namespace-prep.adoc[lines=15..17]
 
 .Create Project
 image::master@tekton-tutorial:openshift:odc_create_project.png[]
@@ -186,23 +187,14 @@ image::odc_deploy_app_from_git.png[]
 In the *Git Repo URL* field, enter the tutorials GitHub repository URL:
 
 [.console-input]
-[source,text,subs="+macros"]
+[source,text,subs="+attributes"]
 ----
-https://github.com/redhat-scholars/tekton-tutorial
+{tutorial-apps-repo}
 ----
 
 image::master@tekton-tutorial:openshift:ocp_dc_choose_git.png[]
 
-By default the builder image will choosen `NodeJs` automatically based on the GitHub repository content as shown:
-
-image::master@tekton-tutorial:openshift:odc_default_builder.png[]
-
-But for the exercises of this chapter, we will build and deploy a Pipeline that will build a *Java* application. We can use Java applications under the folder https://github.com/redhat-scholars/tekton-tutorial/tree/master/apps[apps]. Let us change the builder to be Java, by clicking the btn:[Java] from the list of *Builder*:
-
-.Use Java Builder
-image::master@tekton-tutorial:openshift:odc_java_builder.png[]
-
-Leave the Builder Image Version to be *11* and update the *Name* to be `greeter`:
+By default the builder image will choosen to be `Java`, based on the GitHub repository content. Leave the Builder Image Version to be *11* and update the *Name* to be `greeter`:
 
 [#odc-name-the-app]
 .Greeter Application
@@ -328,13 +320,13 @@ image-registry.openshift-image-registry.svc:5000/#pipelines-demos#/greeter
 
 IMPORTANT: Update the highlighted path to match your namespace, in case you are not using {chapter-namespace} for your deployments
 
-.CONTEXT_DIR
+.APP_PROFILE
 [.console-input]
 [source,bash]
 ----
-apps/greeter/java/springboot #<.>
+quarkus #<.>
 ----
-<.> You can also set it to be `apps/greeter/java/quarkus`
+<.> You can also set it to be `springboot`
 
 .APP_NAME
 [.console-output]
@@ -344,11 +336,11 @@ greeter #<.>
 ----
 <.> As described earlier the *APP_NAME* parameter automatically maps to the Application Name
 
-Leave the *GITHUB_REPO_URL* and *GITHUB_REPO_REVISION* to be defaults
+Leave the *GITHUB_REPO_URL* and *GITHUB_REPO_REVISION* to be defaults as, *{tutorial-apps-repo}* and *{tutorial-apps-revision}* respectively.
 
-Set the menu:Workspace[Source] to be of type *PVC* and use *tekton-tutorial-sources* as PVC.
+Choose the menu:Workspace[Source] to be of type *PVC* and use *tekton-tutorial-sources* as the value for PVC.
 
-Set the menu:Workspace[maven-settings] to be of type *ConfigMap* and use *maven-settings* ConfigMap.
+Choose the menu:Workspace[maven-settings] to be of type *ConfigMap* and use *maven-settings* as the value for ConfigMap.
 
 The completed parameters should look like:
 
@@ -365,7 +357,7 @@ NOTE: It will take few minutes for the pipeline to be running and complete. You 
 [#odc-watch-pipelines]
 == Watch Pipelines
 
-You can watch the pipeline from sidebar menu:Pipelines, and selecting *greeter* from the list:
+You can watch the pipeline from sidebar menu:Pipelines[], and selecting *greeter* from the list:
 
 .Pipelines list
 image::master@tekton-tutorial:openshift:odc_greeter_pipeline_running_from_list.png[]
@@ -383,7 +375,7 @@ A successful pipeline should have the Java Knative Service deployed and running 
 
 image::master@tekton-tutorial:openshift:odc_view_greeter_ksvc.png[]
 
-Click on the URL in the *Routes*, to access the application and see the response, which should be simple *hello* text.
+Click on the URL in the *Routes*, to access the application and see the response *Meeow!! from Tekton 😺🚀*.
 
 [#odc-pipeline-points]
 == Points to Ponder

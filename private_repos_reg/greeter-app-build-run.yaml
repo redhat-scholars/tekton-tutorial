@@ -1,0 +1,17 @@
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  generateName: greeter-app-build-
+  labels:
+    tekton.dev/pipeline: greeter-app-build
+spec:
+  serviceAccountName: build-bot
+  pipelineRef:
+    name: greeter-app-build
+  workspaces:
+    - name: maven-settings
+      configmap:
+        name: maven-settings
+    - name: source
+      persistentVolumeClaim:
+        claimName: tekton-tutorial-sources

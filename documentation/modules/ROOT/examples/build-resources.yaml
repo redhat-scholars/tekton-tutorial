@@ -6,9 +6,9 @@ spec:
   type: git
   params:
     - name: url
-      value: https://github.com/redhat-scholars/tekton-tutorial
+      value: https://github.com/redhat-scholars/tekton-tutorial-greeter
     - name: revision
-      value: master
+      value: staging
 ---
 apiVersion: tekton.dev/v1alpha1
 kind: PipelineResource
@@ -21,4 +21,4 @@ spec:
       # use internal registry
       value: example.com/rhdevelopers/tekton-tutorial-greeter
       # if you are on OpenShift uncomment the line below
-      #value: "image-registry.openshift-image-registry.svc:5000/tektontutorial/helloworld"
+      #value: "image-registry.openshift-image-registry.svc:5000/tektontutorial/greeter"

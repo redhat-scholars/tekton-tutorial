@@ -8,8 +8,8 @@ metadata:
 spec:
   serviceAccountName: pipeline
   triggers:
-    - name: tekton-helloworld-webhook
+    - name: tekton-greeter-webhook
       bindings:
         - name: gogs-triggerbinding
       template:
-        name: tekton-helloworld-trigger-template
+        name: tekton-greeter-trigger-template

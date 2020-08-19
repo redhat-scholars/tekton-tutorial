@@ -17,7 +17,7 @@ spec:
       - name: GOGS_REPO_NAME
         type: string
         description: The GOGS Repo where to add to the webhooks
-        default: tekton-helloworld
+        default: tekton-tutorial-greeter
     stepTemplate:
       env:
         - name: NAMESPACE
@@ -38,7 +38,7 @@ spec:
           webhookURL = "http://" + os.popen('oc get httpproxy el-gogs-webhook-ingress -o template --template="{{.spec.virtualhost.fqdn}}"').read()
           gogsURL = "http://" + os.popen('oc get svc gogs -o template --template="{{.spec.clusterIP}}"').read() + ":3000"
 
-          # configure webhook on tekton-helloworld
+          # configure webhook on tekton-tutorial-greeter
           data_webhook = '{"type": "gogs", "config": { "url": "' + webhookURL + '", "content_type": "json"}, "events": ["push"], "active": true}'
           headers = {'Content-Type': 'application/json'}
           resp = requests.post(url = gogsURL + "/api/v1/repos/" + gogs_user + "/$(params.GOGS_REPO_NAME)/hooks", 

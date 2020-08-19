@@ -6,8 +6,8 @@ metadata:
 spec:
   params:
     - name: contextDir
-      description: 'The context directory within the repository for sources'
-      default: apps/greeter/java/quarkus
+      description: "The context directory within the repository for sources"
+      default: quarkus
   resources:
     inputs:
       - name: source
@@ -15,4 +15,4 @@ spec:
   steps:
     - name: ls-build-sources
       image: busybox
-      command: ['ls', '-ltr', '/workspace/source/$(inputs.params.contextDir)']
+      command: ["ls", "-ltr", "/workspace/source/$(inputs.params.contextDir)"]

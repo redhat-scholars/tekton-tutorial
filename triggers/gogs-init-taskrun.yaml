@@ -17,7 +17,7 @@ spec:
       - name: REPO_URL
         type: string
         description: The GitHub Repository to use
-        default: 'https://github.com/redhat-scholars/tekton-helloworld'
+        default: 'https://github.com/redhat-scholars/tekton-tutorial-greeter'
     stepTemplate:
       env:
         - name: NAMESPACE
@@ -55,8 +55,8 @@ spec:
           else:
             print("Created admin user {}:{}".format(gogs_user, gogs_pwd))
 
-          # create git repo tekton-helloworld
-          data_repo = '{"clone_addr": "$(params.REPO_URL)", "uid": 1, "repo_name": "tekton-helloworld"}'
+          # create git repo tekton-tutorial-greeter
+          data_repo = '{"clone_addr": "$(params.REPO_URL)", "uid": 1, "repo_name": "tekton-tutorial-greeter"}'
           headers = {'Content-Type': 'application/json'}
           resp = requests.post(url = gogsURL + "/api/v1/repos/migrate", headers = headers, auth = (gogs_user, gogs_pwd), data = data_repo)  
 
@@ -64,6 +64,6 @@ spec:
             print("Error creating git repo (status code: {})".format(resp.status_code))
             print(resp.content)
           else:
-            print("Created git repo tekton-helloworld")
+            print("Created git repo tekton-tutorial-greeter")
             repoInfo = json.loads(str(resp.content,"utf8"))            
             print("Repository Clone url {0}".format(repoInfo['clone_url']))

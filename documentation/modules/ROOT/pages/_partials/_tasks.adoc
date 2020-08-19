@@ -301,7 +301,7 @@ spec:
     - image: alpine
       script: | #<.>
         #!/bin/sh
-        echo 'Tekton Rocks!!'
+        echo 'Meeow!! from Tekton 😺🚀'
 
 ----
 <.> The kind ClusterTask makes the task available in all namespaces.
@@ -389,8 +389,7 @@ tkn clustertask start echoer --showlog
 ----
 TaskRun started: echoer-run-75n6g
 Waiting for logs to be available...
-[unnamed-0] + echo 'Tekton Rocks!!'
-[unnamed-0] Tekton Rocks!!
+[unnamed-0] Meeow!! from Tekton 😺🚀
 ----
 
 === Run ClusterTask `echoer` in other namespace(s)
@@ -400,11 +399,16 @@ Let us now shift back to `{tutorial-namespace}` and run the `echoer` task again:
 [.console-input]
 [source,bash,subs="+macros,+attributes"]
 ----
-kubectl config set-context --current --namespace={tutorial-namespace} && \
+kubectl config set-context --current --namespace={tutorial-namespace}
+----
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
 tkn clustertask start echoer --showlog
 ----
 
-The command should produce an identical output as show <<tekton-rocks-output,above>>.
+The command should produce an identical output as shown in <<tekton-rocks-output,above>>.
 
 [#tekton-tasks-points-to-ponder]
 == Points to Ponder
@@ -439,7 +443,7 @@ inputs:
     params:
       - name: contextDir #<.>
         description: the context dir within source
-        default: .
+        default: springboot
       - name: destinationImage #<.>
         description: the fully qualified image name
         default: "$(outputs.resources.builtImage.url)"
@@ -480,6 +484,8 @@ For Task inputs and outputs - we will use the xref:pipeline-resources.adoc#tkn-s
     - mvn
   args: #<.>
     - -DskipTests
+    - -pl
+    - $(inputs.params.contextDir)
     - clean
     - package
   env: #<.>
@@ -487,9 +493,9 @@ For Task inputs and outputs - we will use the xref:pipeline-resources.adoc#tkn-s
       value: /home/tekton
 ----
 
-<.> the working dir or the context directory within the sources from there the build command will be run
+<.> the working dir or the context directory within the sources from where the build command(s) will be run
 <.> the build command to run
-<.> the build command arguments
+<.> the maven build command arguments
 <.> The environment variables that will be set within the step container
 
 [[build-linux-image]]
@@ -614,7 +620,7 @@ The application build task(`build-app`) could be run using the command:
 tkn task start -n {tutorial-namespace} build-app \#<.>
   --inputresource='source=git-source' \#<.>
   --outputresource='builtImage=tekton-tutorial-greeter-image' \#<.>
-  --param contextDir='apps/greeter/java/springboot' \#<.>
+  --param contextDir='springboot' \#<.>
   --showlog#<.>
 ----
 
@@ -762,7 +768,7 @@ SVC_URL=$(oc get routes -o yaml | yq r - 'spec.url.host' )
 http --body $SVC_URL
 ----
 
-The above command should show an output like **hello**
+The above command should show an output like *Meeow!! from Tekton 😺🚀*
 
 [[tekton-task-step-template]]
 == Step Template
@@ -806,7 +812,7 @@ Now try running `build-app` Task again:
 tkn task start -n {tutorial-namespace} build-app \
   --inputresource='source=git-source' \
   --outputresource='builtImage=tekton-tutorial-greeter-image' \
-  --param contextDir='apps/greeter/java/springboot' \
+  --param contextDir='springboot' \
   --showlog
 ----
 
@@ -893,6 +899,11 @@ NOTE: The Task steps can override the stepTemplate values.
 ----
 kubectl delete pod -n {tutorial-namespace} demo-greeter
 kubectl delete svc -n {tutorial-namespace} demo-greeter
-# cleans all completed and failed pods
+----
+
+Clean all completed and failed pods
+[.console-input]
+[source,bash,subs="+macros,attributes+"]
+----
 $TUTORIAL_HOME/bin/clean_completed.sh
 ----

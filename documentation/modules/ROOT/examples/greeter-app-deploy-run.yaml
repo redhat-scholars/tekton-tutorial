@@ -1,0 +1,20 @@
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  generateName: greeter-app-
+  labels:
+    tekton.dev/pipeline: greeter-app-deploy
+spec:
+  serviceAccountName: kn-deployer-account #<.>
+  pipelineRef:
+    name: greeter-app-deploy
+  params:
+    - name: context-dir
+      value: quarkus
+  workspaces: #<.>
+    - name: maven-settings
+      configmap:
+        name: maven-settings
+    - name: source
+      persistentVolumeClaim:
+        claimName: tekton-tutorial-sources

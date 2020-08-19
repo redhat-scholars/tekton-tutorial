@@ -8,4 +8,4 @@ spec:
     - image: alpine
       script: |
         #!/bin/sh
-        echo 'Tekton Rocks!!'
+        echo 'Meeow!! from Tekton 😺🚀'

@@ -1,21 +1,16 @@
 apiVersion: tekton.dev/v1beta1
-kind: TaskRun
+kind: PipelineRun
 metadata:
-  generateName: maven-build-
+  generateName: greeter-app-
   labels:
-    tekton.dev/task: maven
+    tekton.dev/pipeline: greeter-app-deploy
 spec:
-  taskRef:
-    name: maven
+  serviceAccountName: kn-deployer-account
+  pipelineRef:
+    name: greeter-app-deploy
   params:
-    - name: GOALS
-      value:
-        - -B
-        - -pl
-        - springboot
-        - -DskipTests
-        - clean
-        - package
+    - name: context-dir
+      value: quarkus
   workspaces:
     - name: maven-settings
       configmap:

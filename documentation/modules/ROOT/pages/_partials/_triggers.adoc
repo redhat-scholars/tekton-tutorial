@@ -47,18 +47,18 @@ tekton-pipelines-webhook-75bc7666c-9crwq       1/1     Running   1          3d3h
 [#tkn-triggers-prepare]
 == Prepare namespace
 
-include::ROOT:partial$namespace-prep.adoc[]
+include::ROOT:partial$namespace-prep.adoc[tags="*"]
 
 [#tkn-triggers-create-pipeline]
 === Create Pipeline
 
-As part of the Trigger exercise we will be runing the helloworld-app-deploy pipeline, lets deploy the pipeline to be used later:
+As part of the Trigger exercise we will be runing the greeter-app-deploy pipeline, lets deploy the pipeline to be used later:
 
 [.console-input]
 [source,bash,subs="+macros,+attributes"]
 ----
 kubectl apply -n {chapter-namespace} \
-  -f link:{github-repo}/{workspaces-repo}/helloworld-app-deploy.yaml[$TUTORIAL_HOME/{workspaces-repo}/helloworld-app-deploy.yaml^]
+  -f link:{github-repo}/{workspaces-repo}/greeter-app-deploy.yaml[$TUTORIAL_HOME/{workspaces-repo}/greeter-app-deploy.yaml^]
 ----
 
 Verify the available pipelines:
@@ -73,7 +73,7 @@ tkn pipeline -n {chapter-namespace} ls
 [source,bash]
 ----
 NAME                    AGE            LAST RUN   STARTED   DURATION   STATUS
-helloworld-app-deploy   1 minute ago   ---        ---       ---        ---
+greeter-app-deploy   1 minute ago   ---        ---       ---        ---
 ----
 
 === Deploy Gogs
@@ -195,7 +195,7 @@ NOTE: In OpenShift you might no need the *pipeline* SA, as the OpenShift Pipelin
 To run the exercises of this chapter we need the following setup in Git(gogs):
 
 - A Git user, for the demo we will create user called *gogs* with password *gogs*
-- A Git Repository named `tekton-helloworld`, we will use https://github.com/redhat-scholars/tekton-helloworld
+- A Git Repository named `tekton-greeter`, we will use https://github.com/redhat-scholars/tekton-tutorial-greeter
 
 We will run the following Task to perform the necessary intializations listed above:
 
@@ -220,8 +220,8 @@ A successfull initializations should show an output like:
 [source,bash]
 ----
 [init-gogs] Created admin user gogs:gogs
-[init-gogs] Created git repo tekton-helloworld
-[init-gogs] Repository Clone url http://gogs.192.168.64.5.nip.io/gogs/tekton-helloworld.git
+[init-gogs] Created git repo tekton-tutorial-greeter
+[init-gogs] Repository Clone url http://gogs.192.168.64.5.nip.io/gogs/https://github.com/redhat-scholars/tekton-tutorial-greeter.git
 ----
 
 You should now be able to open the *Repository Clone url* from the output above and view the respository content.
@@ -238,13 +238,13 @@ TriggerTemplate is responsible to create the Tekton Resources when it receives t
 [source,bash,subs="+macros,+attributes"]
 ----
 kubectl create -n {chapter-namespace} \
-  -f link:{github-repo}/{triggers-repo}/helloworld-trigger-template.yaml[helloworld-trigger-template.yaml^]
+  -f link:{github-repo}/{triggers-repo}/greeter-trigger-template.yaml[greeter-trigger-template.yaml^]
 ----
 
 [.console-output]
 [source,bash]
 ----
-triggertemplate.triggers.tekton.dev/tekton-helloworld-trigger-template created
+triggertemplate.triggers.tekton.dev/tekton-greeter-trigger-template created
 ----
 
 List the available TriggerTemplates:
@@ -261,7 +261,7 @@ It should be only one now:
 [source,bash]
 ----
 NAME                                 AGE
-tekton-helloworld-trigger-template   1 minute ago
+tekton-greeter-trigger-template   1 minute ago
 ----
 
 [#tkn-triggers-bindings]
@@ -451,7 +451,7 @@ oc expose svc -n {chapter-namespace} el-gogs-webhook --targetPort=http-listener
 [#tkn-triggers-configure-webhook]
 == Configure Webhook
 
-For the GitHub Triggers to work, we need to have the https://gogs.io/docs/features/webhook[Webhook] configured for the Git Repository `tekton-helloworld` to point to the `el-gogs-webhook-ingress`:
+For the GitHub Triggers to work, we need to have the https://gogs.io/docs/features/webhook[Webhook] configured for the Git Repository `tekton-greeter` to point to the `el-gogs-webhook-ingress`:
 
 [.console-input]
 [source,bash,subs="+macros,+attributes"]
@@ -476,7 +476,7 @@ A successfull initializations should show an output like:
 [webhook-gogs] Configured webhook: http://el-gogs-webhook.192.168.64.5.nip.io
 ----
 
-As you note now the `tekton-helloworld` Git repository in Gogs is configured with the webhook to send Git events to EventListener.
+As you note now the `tekton-greeter` Git repository in Gogs is configured with the webhook to send Git events to EventListener.
 
 image::gogs_webhook_settings.png[]
 
@@ -511,39 +511,53 @@ Once the event playload is received from the gogs, you should see output(trimmed
 [source,bash]
 ----
 ...
-el-gogs-webhook-88bc89db-ld6jz event-listener {"level":"info","logger":"eventlistener","caller":"resources/create.go:93","msg":"Generating resource: kind: &APIResource{Name:pipelineruns,Namespaced:true,Kind:PipelineRun,Verbs:[delete deletecollection get list patch create update watch],ShortNames:[pr prs],SingularName:pipelinerun,Categories:[tekton tekton-pipelines],Group:tekton.dev,Version:v1beta1,StorageVersionHash:4xDTCrDXyFg=,}, name: helloworld-app-","knative.dev/controller":"eventlistener"}
+el-gogs-webhook-88bc89db-ld6jz event-listener {"level":"info","logger":"eventlistener","caller":"resources/create.go:93","msg":"Generating resource: kind: &APIResource{Name:pipelineruns,Namespaced:true,Kind:PipelineRun,Verbs:[delete deletecollection get list patch create update watch],ShortNames:[pr prs],SingularName:pipelinerun,Categories:[tekton tekton-pipelines],Group:tekton.dev,Version:v1beta1,StorageVersionHash:4xDTCrDXyFg=,}, name: greeter-app-","knative.dev/controller":"eventlistener"}
 el-gogs-webhook-88bc89db-ld6jz event-listener {"level":"info","logger":"eventlistener","caller":"resources/create.go:101","msg":"For event ID \"rrgcn\" creating resource tekton.dev/v1beta1, Resource=pipelineruns","knative.dev/controller":"eventlistener"}
 ...
 ----
 
 === Clone and Edit the source
 
-Using your favorite IDE clone the repo `tekton-helloworld` from Gogs using the <<tkn-triggers-init-repo,clone url>>. 
+Using your favorite IDE clone the repo `tekton-greeter` from Gogs using the <<tkn-triggers-init-repo,clone url>>. 
 
 [.console-input]
 [source,bash,subs="+macros,+attributes"]
 ----
-git clone <your gogs tekton-helloworld clone url>
+git clone <your gogs tekton-greeter clone url>
 ----
 
-Open the `tekton-hellworld` in your IDE and  edit the Java files:
+Open the `tekton-tutorial-greeter` in your IDE and edit the Java file:
 
-- `src/main/java/com/redhat/developers/GreetingResource.java` to update the "Hello World!" to "😺 Tekton Rocks!" 
+[tabs]
+====
+Quarkus::
++
+--
+- `src/main/java/com/redhat/developers/GreetingResource.java` to update the "Meeow!! from Tekton 😺🚀" to "😺 Tekton Rocks!" 
 
 - `src/test/java/com/redhat/developers/GreetingResourceTest.java` to match "😺 Tekton Rocks!".
+--
+SpringBoot::
++
+--
+- `src/main/java/com/redhat/developer/demos/GreetingController.java` to update the "Meeow!! from Tekton 😺🚀" to "😺 Tekton Rocks!" 
 
-Commit and push to see the 😺 Pipeline `helloworld-app-deploy` running 🚀.
+- `src/test/java/com/redhat/developer/demos/GreetingControllerTest.java` to match "😺 Tekton Rocks!".
+--
+====
+
+Commit and push to see the 😺 Pipeline `greeter-app-deploy` running 🚀.
 
 NOTE: Use the username `gogs` and password `gogs` when prompted during Git push to repository.
 
 include::ROOT:partial$logs-view.adoc[tags='pr']
 
-Once the Pipeline succeeds, verify the Knative Service `helloworld`:
+Once the Pipeline succeeds, verify the Knative Service `greeter`:
 
 [.console-input]
 [source,bash,subs="+macros,+attributes"]
 ----
-http --body (kn service describe helloworld -o url)/hello
+http --body (kn service describe greeter -o url)/hello
 ----
 
 The command should shown output like:

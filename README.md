@@ -19,7 +19,7 @@ This content is brought to you by [Red Hat Developer Program](http://developers.
 
 ## Dev Builds
 
-If you want to grab the latest updats (dev) HTML -- http://redhat-scholars.github.io/tekton-tutorial-staging/
+If you want to grab the latest updats (dev) HTML -- https://redhat-developer-demos.github.io/tekton-tutorial-staging/tekton-tutorial/index.html
 
 ## Contributing
 

@@ -44,5 +44,5 @@ bin/kubectl
 gh-pages
 staging-gh-pages
 
-triggers/tekton-helloworld
+triggers/tekton-greeter
 app.ini

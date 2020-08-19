@@ -1,6 +1,8 @@
 [#ws-tasks-deploy]
 === Deploy Tasks from Catalog
 
+tag::ws-context-setting[]
+
 All exercises of this chapter will be done a namesapace `{chapter-namespace}`, lets create and switch to the `{chapter-namespace}` namespace.
 
 [.console-input]
@@ -52,6 +54,7 @@ kn                 This Task performs ...   9 minutes ago
 list-directory     Simple directory li...   11 hours ago
 maven              This Task can be us...   11 hours ago
 ----
+end::ws-context-setting[]
 
 tag::ws-deploy-nexus[]
 [#ws-deploy-nexus]
