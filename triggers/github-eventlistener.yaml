@@ -8,11 +8,11 @@ metadata:
 spec:
   serviceAccountName: pipeline
   triggers:
-    - name: tekton-helloworld-webhook
+    - name: tekton-greeter-webhook
       bindings:
         - name: github-triggerbinding
       template:
-        name: tekton-helloworld-trigger-template
+        name: tekton-greeter-trigger-template
 ---
 apiVersion: route.openshift.io/v1
 kind: Route

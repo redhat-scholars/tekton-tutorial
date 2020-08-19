@@ -1,14 +1,14 @@
 apiVersion: tekton.dev/v1beta1
 kind: Pipeline
 metadata:
-  name: helloworld-app-build
+  name: greeter-app-build
 spec:
   description: >-
     The Pipline to build and push the Java App from https://github.com/redhat-scholars/tekton-secretworld private repository to an external container registry
   params:
     - name: image-name #<.>
-      description: The fully qualified image name e.g example.com/tekton-tutorial/helloworld
-      default: quay.io/rhdevelopers/tekton-helloworld
+      description: The fully qualified image name e.g example.com/tekton-tutorial/greeter
+      default: quay.io/rhdevelopers/tekton-greeter
   workspaces:
     - name: source #<.>
     - name: maven-settings #<.>
@@ -18,7 +18,7 @@ spec:
         name: maven
       params:
         - name: GOALS
-          value: ["-B", "-DskipTests", "clean", "package"]
+          value: ['-B', '-DskipTests', 'clean', 'package']
       workspaces:
         - name: maven-settings
           workspace: maven-settings
@@ -31,7 +31,7 @@ spec:
         - build-java-app
       params:
         - name: IMAGE
-          value: "$(params.image-name)"
+          value: '$(params.image-name)'
       workspaces:
         - name: source
           workspace: source

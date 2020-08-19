@@ -1,4 +1,4 @@
-#tag::pr[]
+tag::pr[]
 
 View the pipeline run logs using,
 
@@ -7,9 +7,9 @@ View the pipeline run logs using,
 ----
 tkn pr logs -f -a $(tkn pr ls -n {chapter-namespace} | awk 'NR==2{print $1}')
 ----
-#end::pr[]
+end::pr[]
 
-#tag::tr[]
+tag::tr[]
 
 View the task run  logs using,
 
@@ -18,4 +18,4 @@ View the task run  logs using,
 ----
 tkn tr logs -f -a $(tkn tr ls -n {chapter-namespace} | awk 'NR==2{print $1}')
 ----
-#end::tr[]
+end::tr[]

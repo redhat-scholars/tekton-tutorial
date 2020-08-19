@@ -59,7 +59,7 @@ kubectl patch configmap/config-deployment \
     -p '{"data":{"registriesSkippingTagResolving": "ko.local,dev.local,example.com,example.org,test.com,test.org,localhost:5000"}}'
 
 # set nip.io resolution 
-minikube_nip_domain="\"data\":{\""$(minikube ip)".nip.io\": \"\"}"
+minikube_nip_domain="\"data\":{\"127.0.0.1.nip.io\": \"\"}"
 kubectl patch configmap/config-domain \
     -n knative-serving \
     --type merge \

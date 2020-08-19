@@ -19,6 +19,10 @@ asciidoc:
     openshift-console-url: https://console-openshift-console.apps.example.com
     etherpad-url: http://example.com
     page-pagination: true
+    tekton-version: v0.11.3
+    triggers-version: v0.4.0
+    kn-version: v0.16.0
+    tekton-cli-version: 0.11.0
   extensions:
     - ./lib/remote-include-processor.js
     - ./lib/tab-block.js

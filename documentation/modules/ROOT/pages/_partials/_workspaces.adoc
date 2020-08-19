@@ -299,7 +299,7 @@ As part of this exercise we will use and configure Tekton `workspace` with Confi
 
 In this exercise, we will use maven-settings ConfigMap that we created earlier as one of workspace parameter https://github.com/tektoncd/catalog/blob/master/task/maven/0.1/maven.yaml#L16[maven-settings] and for the https://github.com/tektoncd/catalog/blob/master/task/maven/0.1/maven.yaml#L15[source] workspace paramter we use the `tekton-tutorial-sources` PVC.
 
-Let run the maven task to build the tekton-helloworld project we cloned earlier.
+Let run the maven task to build the tekton-greeter project we cloned earlier.
 
 .link:{github-repo}/{workspaces-repo}/maven-taskrun.yaml[maven-taskrun.yaml^]
 [source,yaml,attributes]
@@ -465,10 +465,10 @@ The output(trimmed for brevity) of the command should be like:
 
 Let us now apply what we learned with workspace to build and deploy the application pipeline as shown:
 
-.link:{github-repo}/{workspaces-repo}/helloworld-app-deploy.yaml[helloworld-app-deploy.yaml^]
+.link:{github-repo}/{workspaces-repo}/greeter-app-deploy.yaml[greeter-app-deploy.yaml^]
 [source,yaml,subs="+macros,attributes+,quotes+"]
 ----
-include::ROOT:example$helloworld-app-deploy.yaml[]
+include::ROOT:example$greeter-app-deploy.yaml[]
 ----
 <.> The parameters for the Pipeline
 <.> A workpace named `source`, we will map it to the PVC`tekton-tutorial-sources`  in PipelineRun in upcoming section
@@ -481,13 +481,13 @@ include::ROOT:example$helloworld-app-deploy.yaml[]
 [.console-input]
 [source,bash,subs="+macros,+attributes"]
 ----
-kubectl apply -n {chapter-namespace} -f helloworld-app-deploy.yaml
+kubectl apply -n {chapter-namespace} -f greeter-app-deploy.yaml
 ----
 
 [.console-output]
 [source,bash]
 ----
-pipeline.tekton.dev/helloworld-app-deploy created
+pipeline.tekton.dev/greeter-app-deploy created
 ----
 
 === Create Service Account 
@@ -525,7 +525,7 @@ tkn::
 [.console-input]
 [source,bash,subs="+macros,+attributes"]
 ----
-tkn pipeline start helloworld-app-deploy \
+tkn pipeline start greeter-app-deploy \
   --namespace={chapter-namespace} \
   --serviceaccount=kn-deployer-account \
   --param context-dir='quarkus' \
@@ -538,10 +538,10 @@ tkn pipeline start helloworld-app-deploy \
 kubectl::
 +
 --
-.link:{github-repo}/{workspaces-repo}/helloworld-app-deploy-run.yaml[helloworld-app-deploy-run.yaml^]
+.link:{github-repo}/{workspaces-repo}/greeter-app-deploy-run.yaml[greeter-app-deploy-run.yaml^]
 [source,yaml,attributes]
 ----
-include::ROOT:example$helloworld-app-deploy-run.yaml[]
+include::ROOT:example$greeter-app-deploy-run.yaml[]
 ----
 <.> The service account to be used with the PipelineRun
 <.> The Pipeline workspaces mapping
@@ -549,46 +549,46 @@ include::ROOT:example$helloworld-app-deploy-run.yaml[]
 [.console-input]
 [source,bash,subs="+macros,+attributes"]
 ----
-kubectl create -n {chapter-namespace} -f helloworld-app-deploy-run.yaml
+kubectl create -n {chapter-namespace} -f greeter-app-deploy-run.yaml
 ----
 
 [.console-output]
 [source,bash]
 ----
-pipelinerun.tekton.dev/helloworld-app-7k9cw created
+pipelinerun.tekton.dev/greeter-app-7k9cw created
 ----
 
 include::ROOT:partial$logs-view.adoc[tags='pr']
 --
 ====
 
-A successfull Pipelinerun should have the `helloworld` application up and running as shown:
+A successfull Pipelinerun should have the `greeter` application up and running as shown:
 
 [.console-input]
 [source,bash,subs="+macros,+attributes"]
 ----
-kn service describe -n {chapter-namespace} helloworld
+kn service describe -n {chapter-namespace} greeter
 ----
 
 The command should show an output like :
 
 [.console-output]
-[source,bash,subs="+quotes"]
+[source,bash,subs="+quotes,attributes+"]
 ----
-Name:       helloworld
-Namespace:  triggers-demo
-Age:        1h
-#URL:        http://helloworld.triggers-demo.192.168.64.5.nip.io#
+Name:       greeter
+Namespace:  {chapter-namespace}
+Age:        21s
+#URL:        http://greeter.{chapter-namespace}.127.0.0.1.nip.io#
 
 Revisions:
-  100%  @latest (helloworld-vxndl-1) [2] (12m)
-        Image:  example.com/tekton-tutorial/helloworld@sha256:0c91396144438372cb1396288cdd700a2ff14f7c1e333613df6c0d5af9a68514 (at 0c9139)
+  100%  @latest (greeter-ttyqz-1) [1] (21s)
+        Image:  kind-registry:5000/rhdevelopers/tekton-tutorial-greeter@sha256:79b8a50a6ef29dbc0df5220de5aea13b8b38b7c4cd407ad074968de8cfbd41b6 (at 79b8a5)
 
 Conditions:
   OK TYPE                   AGE REASON
-  ++ Ready                  12m
-  ++ ConfigurationsReady    12m
-  ++ RoutesReady            12m
+  ++ Ready                  13s
+  ++ ConfigurationsReady    14s
+  ++ RoutesReady            13s
 ----
 
 [#ws-verify-service]
@@ -599,7 +599,7 @@ Let us now verify the deployed Knative Service:
 [.console-input]
 [source,bash,subs="+macros,+attributes"]
 ----
-KSVC_URL=$(kn service describe -n {chapter-namespace} helloworld -o url)
+KSVC_URL=$(kn service describe -n {chapter-namespace} greeter -o url)
 ----
 
 Now do a invoke the service like:
@@ -607,7 +607,7 @@ Now do a invoke the service like:
 [.console-input]
 [source,bash,subs="+macros,+attributes"]
 ----
-http --body +$KSVC_URL/hello+
+http --body +$KSVC_URL+
 ----
 
 A successfull pipeline deployment should show an output like:

@@ -382,13 +382,13 @@ Create the build and push app pipeline:
 [source,bash,subs="+macros,+attributes"]
 ----
 kubectl apply -n {chapter-namespace} \
-  -f link:{github-repo}/{auth-repo}/helloworld-app-build.yaml[helloworld-app-build.yaml^]
+  -f link:{github-repo}/{auth-repo}/greeter-app-build.yaml[greeter-app-build.yaml^]
 ----
 
 [.console-output]
 [source,bash]
 ----
-pipeline.tekton.dev/helloworld-app-build created
+pipeline.tekton.dev/greeter-app-build created
 ----
 
 [#tekton-run-build-push-pipeline]
@@ -402,7 +402,7 @@ tkn::
 [.console-input]
 [source,bash,subs="+macros,+attributes"]
 ----
-tkn pipeline start helloworld-app-build \
+tkn pipeline start greeter-app-build \
   --namespace={chapter-namespace} \
   --serviceaccount=build-bot \
   --workspace name=maven-settings,config=maven-settings \
@@ -418,7 +418,7 @@ Ensure that the pipeline run has been set to run with the Service Account `build
 
 [source,yaml,subs="+quotes"]
 ----
-include::ROOT:example$helloworld-app-build-run.yaml[]
+include::ROOT:example$greeter-app-build-run.yaml[]
 ----
 
 Run the pipeline:
@@ -426,7 +426,7 @@ Run the pipeline:
 [.console-input]
 [source,bash,subs="+macros,+attributes"]
 ----
-kubectl create -n {chapter-namespace} -f helloworld-app-build-run.yaml
+kubectl create -n {chapter-namespace} -f greeter-app-build-run.yaml
 ----
 
 include::ROOT:partial$logs-view.adoc[tags='pr']
@@ -439,7 +439,7 @@ A successful build and push will show the following output ( trimmed brevity):
 [source,bash,subs="+quotes"]
 ----
 ...
-[build-java-app-image : push] + buildah --storage-driver=overlay push --tls-verify=true --digestfile /workspace/source/image-digest quay.io/rhdevelopers/tekton-helloworld docker://quay.io/rhdevelopers/tekton-helloworld
+[build-java-app-image : push] + buildah --storage-driver=overlay push --tls-verify=true --digestfile /workspace/source/image-digest quay.io/rhdevelopers/tekton-tutorial-greeter docker://quay.io/rhdevelopers/tekton-tutorial-greeter
 [build-java-app-image : push] Getting image source signatures
 [build-java-app-image : push] Copying blob sha256:90c2e42f948b524cf98005073e0b0aa2065160abf9e8b314976c064e270d92ac
 [build-java-app-image : push] Copying blob sha256:869b43e5dca37fa63d84e9bc588613678c4fe6fa2072a72a6ab5487424db2891

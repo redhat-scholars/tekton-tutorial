@@ -27,7 +27,7 @@ It is assumed that you have completed the following chapters before trying this 
 
 The Cloud Native Application pipeline will,
 
-* Git clone using `git-clone` task, the https://github.com/redhat-scholars/tekton-helloworld repository
+* Git clone using `git-clone` task, the https://github.com/redhat-scholars/tekton-greeter repository
 * Will use maven task, maven task require two workspaces one for source and other for maven-settings
 * Build the container image using the `buildah` task and push to the internal container registry
 * Finally deploy the application onto Kubernetes using `openshift-client` task or use `kn` task to deploy it as Serverless Knative application.
@@ -35,7 +35,7 @@ The Cloud Native Application pipeline will,
 [#ocp-create-project]
 == Project Preperation
 
-include::master@tekton-tutorial:ROOT:partial$namespace-prep.adoc[lines=13..15]
+include::master@tekton-tutorial:ROOT:partial$namespace-prep.adoc[lines=15..17]
 
 .Create Project
 image::master@tekton-tutorial:openshift:odc_create_project.png[]

@@ -2,25 +2,25 @@
 apiVersion: triggers.tekton.dev/v1alpha1
 kind: TriggerTemplate
 metadata:
-  name: tekton-helloworld-trigger-template
+  name: tekton-greeter-trigger-template
 spec:
   params:
     - name: gitrevision
       description: The git revision
-      default: master
+      default: staging
     - name: gitrepositoryurl
       description: The git repository url
   resourcetemplates:
     - apiVersion: tekton.dev/v1beta1
       kind: PipelineRun
       metadata:
-        generateName: helloworld-app-
+        generateName: greeter-app-
         labels:
-          tekton.dev/pipeline: helloworld-app-deploy
+          tekton.dev/pipeline: greeter-app-deploy
       spec:
         serviceAccountName: pipeline
         pipelineRef:
-          name: helloworld-app-deploy
+          name: greeter-app-deploy
         params:
           - name: github-repo-url
             value: '$(params.gitrepositoryurl)'

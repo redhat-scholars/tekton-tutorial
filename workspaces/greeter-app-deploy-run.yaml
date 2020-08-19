@@ -1,13 +1,16 @@
 apiVersion: tekton.dev/v1beta1
 kind: PipelineRun
 metadata:
-  generateName: helloworld-app-build-
+  generateName: greeter-app-
   labels:
-    tekton.dev/pipeline: helloworld-app-build
+    tekton.dev/pipeline: greeter-app-deploy
 spec:
-  serviceAccountName: build-bot
+  serviceAccountName: kn-deployer-account
   pipelineRef:
-    name: helloworld-app-build
+    name: greeter-app-deploy
+  params:
+    - name: context-dir
+      value: quarkus
   workspaces:
     - name: maven-settings
       configmap:

@@ -13,8 +13,8 @@ spec:
   params:
     - name: IMAGE_NAME
       description: >-
-        The fully qualified image name e.g example.com/tekton-tutorial/helloworld
-      default: image-registry.openshift-image-registry.svc:5000/tektontutorial/helloworld
+        The fully qualified image name e.g example.com/tekton-tutorial/greeter
+      default: image-registry.openshift-image-registry.svc:5000/tektontutorial/greeter
     - name: CONTEXT_DIR
       description: >-
         The context directory within source from where to build the sources. In this example there are to options:
