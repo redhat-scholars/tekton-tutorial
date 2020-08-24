@@ -145,10 +145,16 @@ tag::ws-deploy-knative[]
 Before we create our pipeline ensure that the kubernetes cluster has a default storage class defined:
 
 [#ws-deploy-knative]
+ifndef::openshift[]
 === Deploy Knative Serving
+endif::[]
+ifdef::openshift[]
+=== Deploy OpenShift Serverless
+endif::[]
 
-As we will be dpeloying a https://knative.dev[Knative] serverless application as part of the pipeline we will be running later in this chapter, lets deploy Knative to the cluster:
+As we will be deploying a https://knative.dev[Knative] serverless application as part of the pipeline, that we will be running later in this chapter, lets deploy Knative to the cluster:
 
+ifndef::openshift[]
 [tabs]
 ====
 Minikube::
@@ -168,9 +174,12 @@ Wait for the serving deployment to complete without errors.
 OpenShift::
 +
 --
-OpenShift users can install Knative i.e https://docs.openshift.com/container-platform/4.1/serverless/installing-openshift-serverless.html[OpenShift Serverless] using Operators.
+endif::[]
+OpenShift users can install Knative i.e https://docs.openshift.com/container-platform/4.1/serverless/installing-openshift-serverless.html[OpenShift Serverless] using its Operators.
+ifndef::openshift[]
 --
 ====
+endif::[]
 end::ws-deploy-knative[]
 
 tag::ws-create-pvc[]
@@ -183,6 +192,7 @@ tag::ws-create-pvc[]
 {cli} get sc
 ----
 
+ifndef::openshift[]
 [tabs]
 ====
 Kubernetes::
@@ -200,6 +210,7 @@ standard (#default#)   k8s.io/minikube-hostpath   Delete          Immediate     
 OpenShift::
 +
 --
+endif::[]
 
 An example default storage class in Google Cloud:
 
@@ -209,14 +220,17 @@ An example default storage class in Google Cloud:
 NAME                 PROVISIONER            RECLAIMPOLICY   VOLUMEBINDINGMODE      ALLOWVOLUMEEXPANSION   AGE
 standard (default)   kubernetes.io/gce-pd   Delete          WaitForFirstConsumer   true                   2d3h
 -----
+ifndef::openshift[]
 --
 ====
+endif::[]
 
 
 [NOTE]
 ====
+ifndef::openshift[]
 - If you dont have one please check https://kubernetes.io/docs/concepts/storage/storage-classes/[Kubernetes Docs] on how to have one configured.
-
+endif::[]
 - In OpenShift cluster the default storage class varies based on the underlying cloud platform. Refer to https://docs.openshift.com/container-platform/4.5/storage/dynamic-provisioning.html[OpenShift Documentation] to know more.
 ====
 
