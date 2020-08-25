@@ -1,0 +1,13 @@
+= OpenShift Pipelines API
+:openshift:
+:cli: oc
+
+The OpenShift Pipelines adds set of Custom Resources Defintion (CRD), that allows to run Pipelines and Triggers.
+
+== Pipelines API 
+
+include::master@tekton-tutorial:ROOT:partial$tekton-api.adoc[lines=3..22]
+
+== Triggers API
+
+include::master@tekton-tutorial:ROOT:partial$tekton-triggers-api.adoc[lines=3..19]

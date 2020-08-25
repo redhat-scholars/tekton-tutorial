@@ -34,7 +34,7 @@ The Cloud Native Application pipeline will,
 * Finally deploy the application onto Kubernetes using `openshift-client` task or use `kn` task to deploy it as Serverless Knative application.
 
 [#ocp-create-project]
-== Project Preperation
+== Project Preparation
 
 include::master@tekton-tutorial:ROOT:partial$namespace-prep.adoc[lines=15..17]
 
@@ -62,6 +62,14 @@ oc project {chapter-namespace}
 ----
 Now using project "pipelines-demos" on server "https://api.gcp.kameshs.dev:6443".
 ----
+
+[#openshift-pipelines-prep-app-deploy]
+== Prepare Application Deployment
+
+Now we are all set to deploy the application, before hitting the create we need prepare the namespace with few additonal resources as shown in the following section:
+
+
+include::master@tekton-tutorial:ROOT:partial$namespace-prep.adoc[tags="ws-deploy-nexus,ws-deploy-knative,ws-create-pvc"]
 
 [#required-tasks]
 == Required Cluster Tasks
@@ -182,7 +190,7 @@ clustertask.tekton.dev/kn replaced
 
 Let us use the OpenShift Developer Console(ODC) to deploy the application from GitHub repository, click *From Git* in the OpenShift Developer Console:
 
-image::odc_deploy_app_from_git.png[]
+image::master@tekton-tutorial:openshift:odc_deploy_app_from_git.png[]
 
 In the *Git Repo URL* field, enter the tutorials GitHub repository URL:
 
@@ -260,14 +268,6 @@ Now are all set to deploy the Tekton Tutorial Java applications as Knative Servi
 - What ClusterTasks are available as part of OpenShift Pipelines
 - How to update the ClusterTask with updates/changes
 - How to make Pipeline Template available for *runtime* and service *type* combination
-
-[#openshift-pipelines-prep-app-deploy]
-=== Prepare Application Deployment
-
-Now we are all set to deploy the application, before hitting the create we need prepare the namespace with few additonal resources as shown in the following section:
-
-
-include::master@tekton-tutorial:ROOT:partial$namespace-prep.adoc[tags="ws-deploy-nexus,ws-deploy-knative,ws-create-pvc"]
 
 [#odc-create-ksvc-java-app]
 === Deploy Application with Pipeline
