@@ -3,7 +3,7 @@ Ensure Tekton Triggers is deployed and the API is available for use
 [.console-input]
 [source,bash,subs="+macros,attributes+"]
 ----
-kubectl api-resources --api-group='triggers.tekton.dev'
+{cli} api-resources --api-group='triggers.tekton.dev'
 ----
 
 The command show an output like:

@@ -22,6 +22,7 @@ tkn version
 
 The command should show a result like:
 
+ifndef::openshift[]
 [.console-output]
 [source,bash,subs="+macros,attributes+"]
 ----
@@ -31,3 +32,15 @@ Triggers version: unknown
 ----
 
 NOTE: Since Tekton Triggers is not installed, the version is shown as unknown
+
+endif::[]
+
+ifdef::openshift[]
+[.console-output]
+[source,bash,subs="+macros,attributes+"]
+----
+Client version: {tekton-cli-version}
+Pipeline version: {tekton-version}
+Triggers version: {triggers-version}
+----
+endif::[]

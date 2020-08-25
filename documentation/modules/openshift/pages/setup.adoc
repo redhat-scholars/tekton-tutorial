@@ -1,0 +1,9 @@
+= Openshift Pipelines
+include::master@tekton-tutorial:ROOT:partial$_attributes.adoc[]
+:chapter-namespace: pipelines-demos
+:openshift:
+:cli: oc
+
+include::master@tekton-tutorial:ROOT:partial$openshift-setup.adoc[]
+
+include::master@tekton-tutorial:ROOT:partial$tekton-cli.adoc[]

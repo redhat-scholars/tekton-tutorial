@@ -23,6 +23,8 @@ asciidoc:
     triggers-version: v0.4.0
     kn-version: v0.16.0
     tekton-cli-version: 0.11.0
+    cli: kubectl
+    openshift-version: 4.5
   extensions:
     - ./lib/remote-include-processor.js
     - ./lib/tab-block.js
