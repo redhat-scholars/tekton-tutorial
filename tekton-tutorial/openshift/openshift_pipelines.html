@@ -1,0 +1,1307 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>OpenShift Pipelines :: Tekton Tutorial</title>
+    <link rel="canonical" href="https://redhat-scholars.github.io/tekton-tutorial/tekton-tutorial/openshift/openshift_pipelines.html">
+    <link rel="prev" href="setup.html">
+    <meta name="generator" content="Antora 2.3.3">
+    <link rel="stylesheet" href="../../_/css/site.css">
+  </head>
+  <body class="article">
+<header class="header">
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="https://developers.redhat.com" target="_blank"><img src="../../_/img/NewRHDFullLogo_4-color_white-wordmark.png" height="40px" alt="Red Hat Developer Program"></a>
+      <a class="navbar-item" style="font-size: 24px; color: white" href="https://redhat-scholars.github.io/tekton-tutorial">Tekton Tutorial</a>
+      <button class="navbar-burger" data-target="topbar-nav">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+    <div id="topbar-nav" class="navbar-menu">
+      <div class="navbar-end">
+        <a class="navbar-item" href="https://developers.redhat.com/ebooks/" target="_blank">Books</a>
+        <a class="navbar-item" href="https://developers.redhat.com/cheatsheets/" target="_blank">Cheat Sheets</a>
+        <a class="navbar-item" href="https://developers.redhat.com/events/" target="_blank">Upcoming Events</a>
+        <div class="navbar-item has-dropdown is-hoverable">
+          <a class="navbar-link" href="#">More Tutorials</a>
+          <div class="navbar-dropdown">
+            <a class="navbar-item" href="https://redhat-developer-demos.github.io/kubernetes-tutorial/" target="_blank">Kubernetes</a>
+            <a class="navbar-item" href="https://redhat-developer-demos.github.io/istio-tutorial/" target="_blank">Istio</a>
+            <a class="navbar-item" href="https://redhat-developer-demos.github.io/quarkus-tutorial/" target="_blank">Quarkus</a>
+            <a class="navbar-item" href="https://redhat-developer-demos.github.io/knative-tutorial/" target="_blank">Knative</a>
+            <a class="navbar-item" href="https://redhat-developer-demos.github.io/tekton-tutorial/" target="_blank">Tekton</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+</header>
+<div class="body">
+<div class="nav-container" data-component="tekton-tutorial" data-version="master">
+  <aside class="nav">
+    <div class="panels">
+<div class="nav-panel-menu is-active" data-panel="menu">
+  <nav class="nav-menu">
+    <h3 class="title"><a href="../index.html"></a></h3>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../setup.html">Setup</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../setup.html#tekton-prerequisites">Prerequisites</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../setup.html#download-tutorial-sources">Download Tutorial Sources</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../setup.html#kubernetes-cluster">Choose your Kubernetes Cluster</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../setup.html#tutorial-dev-env">Development Environment</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../setup.html#deploy-tekton">Install Tekton</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../setup.html#install-tekton-cli">Install Tekton CLI</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../pipeline-resources.html">Pipeline Resources</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../pipeline-resources.html#tekton-res-prerequisite">Prerequisites</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../pipeline-resources.html#tekton-res-create">Create Pipeline Resource</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../pipeline-resources.html#tekton-res-deploy">Deploy Pipeline Resource</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../pipeline-resources.html#tkn-see-what-you-have-deployed">See what you have deployed</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../tasks.html">Tasks</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../tasks.html#tekton-tasks]">Tasks</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="3">
+    <a class="nav-link" href="../tasks.html#tekton-task-clone">Clone Source Code</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../tasks.html#tekton-task-list-ws">Know your Workspace</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../tasks.html#tekton-task-clustertask">Cluster Task</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../tasks.html#tekton-tasks-points-to-ponder">Points to Ponder</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../tasks.html#tekton-task-build-sources">Build Cloud Native Application</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="3">
+    <a class="nav-link" href="../tasks.html#build-sources">Build Sources</a>
+  </li>
+  <li class="nav-item" data-depth="3">
+    <a class="nav-link" href="../tasks.html#build-linux-image">Build Image</a>
+  </li>
+  <li class="nav-item" data-depth="3">
+    <a class="nav-link" href="../tasks.html#push-linux-image">Push Image</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../tasks.html#tekton-task-deploy">Deploy Task</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../tasks.html#tekton-task-run">TaskRun</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../tasks.html#tekton-test-task-output">Test Task Output</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../tasks.html#tekton-task-step-template">Step Template</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../tasks.html#tekton-task-cleanup">Clean</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../pipelines.html">Pipelines</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../pipelines.html#tekton-add-tasks">Add Tasks from Catalog</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../pipelines.html#tekton-pipeline-create">Create Pipeline</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../pipelines.html#tekton-pipeline-deploy">Deploy Pipeline</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../pipelines.html#tekton-pipeline-run">Run Pipeline</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../pipelines.html#tekton-test-pipeline">Test Pipeline</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../pipelines.html#tekton-pipeline-cleanup">Clean</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../workspaces.html">Workspaces</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../workspaces.html#ws-overview">Overview</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../workspaces.html#ws-prepare">Prepare for Using Workspaces</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="3">
+    <a class="nav-link" href="../workspaces.html#ws-tasks-deploy">Deploy Tasks from Catalog</a>
+  </li>
+  <li class="nav-item" data-depth="3">
+    <a class="nav-link" href="../workspaces.html#ws-deploy-nexus">Deploy Nexus</a>
+  </li>
+  <li class="nav-item" data-depth="3">
+    <a class="nav-link" href="../workspaces.html#ws-create-maven-settings-cm">Create Maven Settings</a>
+  </li>
+  <li class="nav-item" data-depth="3">
+    <a class="nav-link" href="../workspaces.html#ws-deploy-knative">Deploy Knative</a>
+  </li>
+  <li class="nav-item" data-depth="3">
+    <a class="nav-link" href="../workspaces.html#ws-check-sc">Check Default Storage Class</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../workspaces.html#ws-pipeline-overview">Java Application Pipeline</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../workspaces.html#ws-use-pvc">Using Persistent Volumes as Workspace</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="3">
+    <a class="nav-link" href="../workspaces.html#ws-use-pvc-git-clone">Git Clone TaskRun</a>
+  </li>
+  <li class="nav-item" data-depth="3">
+    <a class="nav-link" href="../workspaces.html#ws-pvc-points-to-ponder">Points to Ponder</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../workspaces.html#ws-use-cm">Using ConfigMap as Workspace</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="3">
+    <a class="nav-link" href="../workspaces.html#ws-use-cm-mvn-run">Run maven Task</a>
+  </li>
+  <li class="nav-item" data-depth="3">
+    <a class="nav-link" href="../workspaces.html#use-cm-points-to-ponder">Points to Ponder</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../workspaces.html#ws-deploy-pipeline">Deploy Pipeline</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="3">
+    <a class="nav-link" href="../workspaces.html#ws-create-pipeline">Create Pipeline</a>
+  </li>
+  <li class="nav-item" data-depth="3">
+    <a class="nav-link" href="../workspaces.html#ws-run-pipeline">Run Pipeline</a>
+  </li>
+  <li class="nav-item" data-depth="3">
+    <a class="nav-link" href="../workspaces.html#ws-verify-service">Verify Deployed Service</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../workspaces.html#tekton-ws-cleanup">Cleanup</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../private_reg_repos.html">Private Registries and Repositories</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../private_reg_repos.html#tkn-prr-overview">Overview</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../private_reg_repos.html#tekton-pull-from-remote-repo">Pulling from Private Source Repository</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="3">
+    <a class="nav-link" href="../private_reg_repos.html#tekton-github-repo-secret">Create Github PAT Secret</a>
+  </li>
+  <li class="nav-item" data-depth="3">
+    <a class="nav-link" href="../private_reg_repos.html#tekton-github-sa">Create Service Account</a>
+  </li>
+  <li class="nav-item" data-depth="3">
+    <a class="nav-link" href="../private_reg_repos.html#tekton-create-clone-pipeline">Create And Run Pipeline</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../private_reg_repos.html#tekton-push-to-external-reg">Pushing To External Registry</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="3">
+    <a class="nav-link" href="../private_reg_repos.html#tekton-push-registry-secret">Create Registry Secret</a>
+  </li>
+  <li class="nav-item" data-depth="3">
+    <a class="nav-link" href="../private_reg_repos.html#tekton-build-sa">Create Service Account</a>
+  </li>
+  <li class="nav-item" data-depth="3">
+    <a class="nav-link" href="../private_reg_repos.html#tekton-create-build-push-pipeline">Create And Run Pipeline</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../private_reg_repos.html#tekton-remote-ref-points">Points to Ponder</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../private_reg_repos.html#tekton-auth-cleanup">Cleanup</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../triggers.html">Triggers</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../triggers.html#install-tekton-triggers">Instal Tekton Triggers</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../triggers.html#tkn-triggers-prepare">Prepare Namespace</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../triggers.html#tkn-triggers-init-repo">Initialize Source Repository</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../triggers.html#tkn-triggers-create-sa"> Pipeline Service Account</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../triggers.html#tkn-triggers-template">Trigger Template</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../triggers.html#tkn-triggers-bindings">Trigger Bindings</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../triggers.html#tkn-triggers-eventlistener">Trigger Event Listener</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../triggers.html#tekton-triggers-in-action">Triggers in Action</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../triggers.html#tekton-triggers-ptp">Points to Ponder</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="index.html">OpenShift Pipelines</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="setup.html">Setup</a>
+  </li>
+  <li class="nav-item is-current-page" data-depth="2">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="openshift_pipelines.html">Pipelines</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="3">
+    <a class="nav-link" href="#ocp-create-project">Create Project</a>
+  </li>
+  <li class="nav-item" data-depth="3">
+    <a class="nav-link" href="#openshift-pipelines-prep-app-deploy">Prepare Application Deployment</a>
+  </li>
+  <li class="nav-item" data-depth="3">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="#required-tasks">Required Cluster Tasks</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="4">
+    <a class="nav-link" href="#ocp-update-cluster-tasks">Update Cluster Tasks</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="3">
+    <a class="nav-link" href="#ocp-deploy-app-from-git">Deploy Application from GitHub</a>
+  </li>
+  <li class="nav-item" data-depth="3">
+    <a class="nav-link" href="#ocp-create-java-ksvc-pipeline-tpl">Pipeline Template for Java and Knative Service</a>
+  </li>
+  <li class="nav-item" data-depth="3">
+    <a class="nav-link" href="#odc-create-ksvc-java-app">Deploy Application with Pipeline</a>
+  </li>
+  <li class="nav-item" data-depth="3">
+    <a class="nav-link" href="#odc-view-pipelines">View Pipelines</a>
+  </li>
+  <li class="nav-item" data-depth="3">
+    <a class="nav-link" href="#odc-watch-pipelines">Watch Pipelines</a>
+  </li>
+  <li class="nav-item" data-depth="3">
+    <a class="nav-link" href="#odc-view-app">Application Topology</a>
+  </li>
+  <li class="nav-item" data-depth="3">
+    <a class="nav-link" href="#odc-pipeline-points">Points to Ponder</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+</ul>
+  </nav>
+</div>
+    </div>
+  </aside>
+</div>
+<main class="article">
+<div class="toolbar" role="navigation">
+<button class="nav-toggle"></button>
+  <a href="../index.html" class="home-link"></a>
+<nav class="breadcrumbs" aria-label="breadcrumbs">
+  <ul>
+    <li><a href="../index.html">Tekton Tutorial</a></li>
+    <li><a href="index.html">OpenShift Pipelines</a></li>
+    <li><a href="openshift_pipelines.html">Pipelines</a></li>
+  </ul>
+</nav>
+  <div class="edit-this-page"><a href="https://github.com/redhat-scholars/tekton-tutorial/edit/master/documentation/modules/openshift/pages/openshift_pipelines.adoc">Edit this Page</a></div>
+  </div>
+  <div class="content">
+<article class="doc">
+<h1 class="page">OpenShift Pipelines</h1>
+<div class="sect1">
+<h2 id="openshift-pipelines-overview"><a class="anchor" href="#openshift-pipelines-overview"></a>Overview</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>At the end of this chapter you should be able to:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Use Cluster Tasks in OpenShift</p>
+</li>
+<li>
+<p>Create or Update Cluster Tasks in OpenShift</p>
+</li>
+<li>
+<p>Use OpenShift Pipelines builder GUI to run a Pipeline</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>If you are not in tutorial chapter folder, then navigate to the folder:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">cd $TUTORIAL_HOME/openshift</code></pre>
+</div>
+</div>
+<div class="admonitionblock important assumptions">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Assumptions"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>It is assumed that you have completed the following chapters before trying this chapters exercies:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="../tasks.html" class="page">Tasks</a></p>
+</li>
+<li>
+<p><a href="../pipelines.html" class="page">Pipelines</a></p>
+</li>
+<li>
+<p><a href="../workspaces.html" class="page">Workspaces</a></p>
+</li>
+</ul>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="openshift-pipelines-demo-app"><a class="anchor" href="#openshift-pipelines-demo-app"></a>Demo Application</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The Cloud Native Application pipeline will,</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Git clone using <code>git-clone</code> task, the <a href="https://github.com/redhat-scholars/tekton-greeter" class="bare">https://github.com/redhat-scholars/tekton-greeter</a> repository</p>
+</li>
+<li>
+<p>Will use maven task, maven task require two workspaces one for source and other for maven-settings</p>
+</li>
+<li>
+<p>Build the container image using the <code>buildah</code> task and push to the internal container registry</p>
+</li>
+<li>
+<p>Finally deploy the application onto Kubernetes using <code>openshift-client</code> task or use <code>kn</code> task to deploy it as Serverless Knative application.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="ocp-create-project"><a class="anchor" href="#ocp-create-project"></a>Project Preparation</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>All exercises of this chapter will be done a namesapace <code>pipelines-demos</code>, lets create the project if not done earlier and switch to the <code>pipelines-demos</code> namespace:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/odc_create_project.png" alt="odc create project">
+</div>
+<div class="title">Figure 1. Create Project</div>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/odc_create_project_pipelines_demos.png" alt="odc create project pipelines demos">
+</div>
+<div class="title">Figure 2. Project Name and Details</div>
+</div>
+<div class="paragraph">
+<p>After entering the details click <b class="button">Create</b> to create and navigate to the <code>pipelines-demos</code> project:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/odc_on_pipelines_demos.png" alt="odc on pipelines demos">
+</div>
+<div class="title">Figure 3. Project pipelines-demos</div>
+</div>
+<div class="paragraph">
+<p>Since we will be use <code>oc</code> to execute few commands, lets make sure we are in the <code>pipelines-demos</code> project:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc project pipelines-demos</code></pre>
+</div>
+</div>
+<div class="listingblock console-output">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">Now using project "pipelines-demos" on server "https://api.gcp.kameshs.dev:6443".</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="openshift-pipelines-prep-app-deploy"><a class="anchor" href="#openshift-pipelines-prep-app-deploy"></a>Prepare Application Deployment</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Now we are all set to deploy the application, before hitting the create we need prepare the namespace with few additonal resources as shown in the following section:</p>
+</div>
+<div class="sect2">
+<h3 id="ws-deploy-nexus"><a class="anchor" href="#ws-deploy-nexus"></a>Deploy Nexus</h3>
+<div class="paragraph">
+<p>To show maven artifact caching and using customized maven <code>settings.xml</code> we will deploy Sonatype Nexus to the cluster:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl apply -n pipelines-demos \
+  -f <a href="https://github.com/redhat-scholars/tekton-tutorial/blob/master/install/utils/nexus.yaml" target="_blank" rel="noopener">$TUTORIAL_HOME/install/utils/nexus.yaml</a></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Wait for the nexus3 pod to come up before proceeding further with exercises:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">watch kubectl -n pipelines-demos get pods,svc</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>A sucessfully running nexus3 pod should show the following services and pods:</p>
+</div>
+<div class="listingblock console-output">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">NAME                         READY   STATUS    RESTARTS   AGE
+pod/nexus-75fff8bbbd-cmlxs   1/1     Running   0          3m25s
+
+NAME                 TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)          AGE
+service/nexus        NodePort    10.100.205.22   &lt;none&gt;        8081:31743/TCP   3m25s</code></pre>
+</div>
+</div>
+<div class="admonitionblock note optional">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="OPTIONAL"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>In OpenShift,we can use routes to expose the service if we need to access it from outside,by:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl expose svc -n pipelines-demos nexus</code></pre>
+</div>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="ws-create-maven-settings-cm"><a class="anchor" href="#ws-create-maven-settings-cm"></a>Create maven-settings ConfigMap</h3>
+<div class="paragraph">
+<p>For us to mount the maven <code>settings.xml</code>, we will create ConfigMap holding the custom maven settings.xml:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl create -n pipelines-demos cm maven-settings \
+  --from-file=settings.xml=<a href="https://github.com/redhat-scholars/tekton-tutorial/blob/master/workspaces/maven-settings.xml" target="_blank" rel="noopener">$TUTORIAL_HOME/workspaces/maven-settings.xml</a></code></pre>
+</div>
+</div>
+<div class="listingblock console-output">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">configmap/maven-settings created</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>You can check the ConfigMap contents using the command:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl get -n pipelines-demos cm maven-settings -oyaml \
+  | yq r - data['settings.xml']</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The output of the above command should be same as in <a href="https://github.com/redhat-scholars/tekton-tutorial/blob/master/workspaces/maven-settings.xml" target="_blank" rel="noopener">maven-settings.xml</a>.</p>
+</div>
+<div class="paragraph">
+<p>Before we create our pipeline ensure that the kubernetes cluster has a default storage class defined:</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="ws-deploy-knative"><a class="anchor" href="#ws-deploy-knative"></a>Deploy OpenShift Serverless</h3>
+<div class="paragraph">
+<p>As we will be deploying a <a href="https://knative.dev">Knative</a> serverless application as part of the pipeline, that we will be running later in this chapter, lets deploy Knative to the cluster:</p>
+</div>
+<div class="paragraph">
+<p>OpenShift users can install Knative i.e <a href="https://docs.openshift.com/container-platform/4.1/serverless/installing-openshift-serverless.html">OpenShift Serverless</a> using its Operators.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="ws-check-sc"><a class="anchor" href="#ws-check-sc"></a>Check Default Storage Class</h3>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl get sc</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>An example default storage class in Google Cloud:</p>
+</div>
+<div class="listingblock console-output">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">NAME                 PROVISIONER            RECLAIMPOLICY   VOLUMEBINDINGMODE      ALLOWVOLUMEEXPANSION   AGE
+standard (default)   kubernetes.io/gce-pd   Delete          WaitForFirstConsumer   true                   2d3h</code></pre>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<div class="ulist">
+<ul>
+<li>
+<p>In OpenShift cluster the default storage class varies based on the underlying cloud platform. Refer to <a href="https://docs.openshift.com/container-platform/4.5/storage/dynamic-provisioning.html">OpenShift Documentation</a> to know more.</p>
+</li>
+</ul>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_create_pvc"><a class="anchor" href="#_create_pvc"></a>Create PVC</h3>
+<div class="paragraph">
+<p>Create the PVC <code>tekton-tutorial-sources</code>, which we will use as part of the exercises in this chapter and the upcoming ones.</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl apply -n pipelines-demos -f <a href="https://github.com/redhat-scholars/tekton-tutorial/blob/master/workspaces/sources-pvc.yaml" target="_blank" rel="noopener">$TUTORIAL_HOME/workspaces/sources-pvc.yaml</a></code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="required-tasks"><a class="anchor" href="#required-tasks"></a>Required Cluster Tasks</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The Cloud Native Application pipeline requires the following tasks:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Git Clone</p>
+</li>
+<li>
+<p>Maven</p>
+</li>
+<li>
+<p>Buildah</p>
+</li>
+<li>
+<p>Openshift Client</p>
+</li>
+<li>
+<p>Kn client</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>OpenShift has all these tasks intalled as <a href="../tasks.html#tekton-task-clustertask" class="page">ClusterTasks</a> as part of the <code>openshift-pipelines</code> install.</p>
+</div>
+<div class="paragraph">
+<p>You can list the available ClusterTasks using the command:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">tkn clustertasks ls</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The command should show the following output:</p>
+</div>
+<div class="listingblock console-output">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">NAME                       DESCRIPTION   AGE
+<mark>buildah                                  13 hours ago</mark>
+buildah-v0-11-3                          13 hours ago
+<mark>git-clone                                13 hours ago</mark>
+jib-maven                                13 hours ago
+<mark>kn                                       13 hours ago</mark>
+<mark>maven                                    13 hours ago</mark>
+<mark>openshift-client                         13 hours ago</mark>
+openshift-client-v0-11-3                 13 hours ago
+s2i                                      13 hours ago
+s2i-dotnet-3                             13 hours ago
+s2i-dotnet-3-v0-11-3                     13 hours ago
+s2i-go                                   13 hours ago
+s2i-go-v0-11-3                           13 hours ago
+s2i-java-11                              13 hours ago
+s2i-java-11-v0-11-3                      13 hours ago
+s2i-java-8                               13 hours ago
+s2i-java-8-v0-11-3                       13 hours ago
+s2i-nodejs                               13 hours ago
+s2i-nodejs-v0-11-3                       13 hours ago
+s2i-perl                                 13 hours ago
+s2i-perl-v0-11-3                         13 hours ago
+s2i-php                                  13 hours ago
+s2i-php-v0-11-3                          13 hours ago
+s2i-python-3                             13 hours ago
+s2i-python-3-v0-11-3                     13 hours ago
+s2i-ruby                                 13 hours ago
+s2i-ruby-v0-11-3                         13 hours ago
+s2i-v0-11-3                              13 hours ago
+tkn                                      13 hours ago</code></pre>
+</div>
+</div>
+<div class="sect2">
+<h3 id="ocp-update-cluster-tasks"><a class="anchor" href="#ocp-update-cluster-tasks"></a>Update Cluster Tasks</h3>
+<div class="paragraph">
+<p>As we will need the updated version of <code>kn</code>, <code>maven</code> and <code>buildah</code> clustertasks, run the following command to update them:</p>
+</div>
+<div class="sect3">
+<h4 id="_update_buildah_cluster_task"><a class="anchor" href="#_update_buildah_cluster_task"></a>Update <strong>buildah</strong> Cluster Task</h4>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc replace \
+  -f <a href="https://raw.githubusercontent.com/tektoncd/catalog/master/task/buildah/0.1/buildah.yaml" class="bare">https://raw.githubusercontent.com/tektoncd/catalog/master/task/buildah/0.1/buildah.yaml</a> --dry-run=client -oyaml \
+  | yq w - kind ClusterTask \
+  | oc replace -f -</code></pre>
+</div>
+</div>
+<div class="listingblock console-output">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">clustertask.tekton.dev/buildah replaced</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_update_maven_cluster_task"><a class="anchor" href="#_update_maven_cluster_task"></a>Update <strong>maven</strong> Cluster Task</h4>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc replace \
+  -f <a href="https://raw.githubusercontent.com/tektoncd/catalog/master/task/maven/0.1/maven.yaml" class="bare">https://raw.githubusercontent.com/tektoncd/catalog/master/task/maven/0.1/maven.yaml</a> --dry-run=client -oyaml \
+  | yq w - kind ClusterTask \
+  | oc replace -f -</code></pre>
+</div>
+</div>
+<div class="listingblock console-output">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">clustertask.tekton.dev/maven replaced</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_update_kn_cluster_task"><a class="anchor" href="#_update_kn_cluster_task"></a>Update <strong>kn</strong> Cluster Task</h4>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc replace \
+  -f <a href="https://raw.githubusercontent.com/tektoncd/catalog/master/task/kn/0.1/kn.yaml" class="bare">https://raw.githubusercontent.com/tektoncd/catalog/master/task/kn/0.1/kn.yaml</a> --dry-run=client -oyaml \
+  | yq w - kind ClusterTask \
+  | oc replace -f -</code></pre>
+</div>
+</div>
+<div class="listingblock console-output">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">clustertask.tekton.dev/kn replaced</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="ocp-deploy-app-from-git"><a class="anchor" href="#ocp-deploy-app-from-git"></a>Deploy application from GitHub Repository</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Let us use the OpenShift Developer Console(ODC) to deploy the application from GitHub repository, click <strong>From Git</strong> in the OpenShift Developer Console:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/odc_deploy_app_from_git.png" alt="odc deploy app from git">
+</div>
+</div>
+<div class="paragraph">
+<p>In the <strong>Git Repo URL</strong> field, enter the tutorials GitHub repository URL:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-text hljs" data-lang="text">https://github.com/redhat-scholars/tekton-tutorial-greeter</code></pre>
+</div>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/ocp_dc_choose_git.png" alt="ocp dc choose git">
+</div>
+</div>
+<div class="paragraph">
+<p>By default the builder image will choosen to be <code>Java</code>, based on the GitHub repository content. Leave the Builder Image Version to be <strong>11</strong> and update the <strong>Name</strong> to be <code>greeter</code>:</p>
+</div>
+<div id="odc-name-the-app" class="imageblock">
+<div class="content">
+<img src="_images/ocp_dc_name_it.png" alt="ocp dc name it">
+</div>
+<div class="title">Figure 4. Greeter Application</div>
+</div>
+<div class="paragraph">
+<p>On the resources you can choose either <em>Deployment</em> or <em>Knative Service</em>. Try choosing <em>Deployment</em>, and should see an option to <b class="menuref">Add Pipeline</b> with default Pipeline template avaiable for this runtime <strong>Java</strong> and resource type <strong>Deployment</strong>, as shown:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/ocp_dc_deploy_add_pipeline.png" alt="ocp dc deploy add pipeline">
+</div>
+<div class="title">Figure 5. Java Deployment Pipeline</div>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+You Show/Hide Pipeline visualization by toggling <em>Show[Hide] Pipeline visualization</em>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>But for this exercise we will deploy the application as <strong>Knative Service</strong>, so flipping <strong>Resources</strong> selection to be of type <strong>Knative Service</strong> will not show any available pipelines:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/ocp_dc_ksvc_no_pipeline.png" alt="ocp dc ksvc no pipeline">
+</div>
+<div class="title">Figure 6. Java Knative Service</div>
+</div>
+<div class="paragraph">
+<p>Hit <b class="button">Cancel</b> button to cancel the deployment. We will do a fresh deployment once we deploy the Pipeline template for runtime Java and resource type Knative Service.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="ocp-create-java-ksvc-pipeline-tpl"><a class="anchor" href="#ocp-create-java-ksvc-pipeline-tpl"></a>Create Pipeline Template for Java and Knative Service</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>As part of this excecise we will deploy a Pipeline Template, that will allow us to deploy the a Java Knative Service application using ODC.</p>
+</div>
+<div class="listingblock">
+<div class="title"><a href="https://github.com/redhat-scholars/tekton-tutorial/blob/master/openshift/cloud-native-app-serverless-pipeline.yaml">Java and Knative Pipeline Template</a></div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">---
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: cloud-native-app-serverless
+  namespace: openshift <i class="conum" data-value="1"></i><b>(1)</b>
+  labels:
+    pipeline.openshift.io/runtime: java <i class="conum" data-value="2"></i><b>(2)</b>
+    pipeline.openshift.io/type: knative <i class="conum" data-value="3"></i><b>(3)</b>
+spec:
+  description: &gt;-
+    The Pipline to buld and deploy the Hello World Java App &lt;a href="https://github.com/redhat-scholars/tekton-tutorial-greeter" class="bare"&gt;https://github.com/redhat-scholars/tekton-tutorial-greeter&lt;/a&gt; as Knative Service.
+  params:
+    - name: IMAGE_NAME
+      description: &gt;-
+        The fully qualified image name e.g example.com/tekton-tutorial/greeter
+      default: image-registry.openshift-image-registry.svc:5000/tektontutorial/greeter
+    - name: APP_PROFILE
+      description: &gt;-
+        The application profile to use for building the application. In this example it should be either:
+          * quarkus
+          * springboot
+    - name: APP_NAME <i class="conum" data-value="4"></i><b>(4)</b>
+      description: The Knative Service name
+    - name: GITHUB_REPO_URL
+      description: The GitHub Repo of the Java Application
+      default: &lt;a href="https://github.com/redhat-scholars/tekton-tutorial-greeter" class="bare"&gt;https://github.com/redhat-scholars/tekton-tutorial-greeter&lt;/a&gt;
+    - name: GITHUB_REPO_REVISION
+      description: The GitHub revision to use
+      default: master
+  workspaces:
+    - name: source
+    - name: maven-settings
+  tasks:
+    - name: clone-sources
+      taskRef:
+        name: git-clone
+        kind: ClusterTask
+      params:
+        - name: url
+          value: $(params.GITHUB_REPO_URL)
+        - name: revision
+          value: $(params.GITHUB_REPO_REVISION)
+        # just to do a fresh clone, as we already have the directory cloned
+        # to reuse it we can exlude this step
+        - name: deleteExisting
+          value: 'true'
+      workspaces:
+        - name: output
+          workspace: source
+    - name: build-java-test
+      taskRef:
+        name: maven
+        kind: ClusterTask
+      runAfter:
+        - clone-sources
+      params:
+        - name: GOALS
+          value:
+            - '-pl'
+            - $(params.APP_PROFILE)
+            - -B
+            - 'clean'
+            - 'test'
+      workspaces:
+        - name: maven-settings
+          workspace: maven-settings
+        - name: source
+          workspace: source
+    - name: build-java-app
+      taskRef:
+        name: maven
+        kind: ClusterTask
+      runAfter:
+        - build-java-test
+      params:
+        - name: GOALS
+          value:
+            - '-pl'
+            - $(params.APP_PROFILE)
+            - -B
+            - '-DskipTests'
+            - 'clean'
+            - 'package'
+      workspaces:
+        - name: maven-settings
+          workspace: maven-settings
+        - name: source
+          workspace: source
+    - name: build-java-app-image
+      taskRef:
+        name: buildah
+        kind: ClusterTask
+      runAfter:
+        - build-java-app
+      params:
+        - name: CONTEXT
+          value: '$(params.APP_PROFILE)'
+        - name: IMAGE
+          value: '$(params.IMAGE_NAME)'
+        # since pushing to internal registry we skip TLS verify
+        - name: TLSVERIFY
+          value: 'false'
+      workspaces:
+        - name: source
+          workspace: source
+    - name: deploy-kn-service
+      taskRef:
+        name: kn
+        kind: ClusterTask
+      runAfter:
+        - build-java-app-image
+      params:
+        - name: ARGS
+          value:
+            - 'service'
+            - 'create'
+            - '$(params.APP_NAME)'
+            - '--force'
+            - '--image=$(params.IMAGE_NAME)@$(tasks.build-java-app-image.results.IMAGE_DIGEST)' <i class="conum" data-value="5"></i><b>(5)</b></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>If you want the Pipeline Template to be visible via the ODC <b class="menuref">Add Pipeline</b> option. For the Pipeline Template to be available when creating application via ODC, the Pipeline Template need to be deployed in <code>openshift</code> namespace</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Identifies or tags the Pipeline Template to be used with <strong>Java</strong> runtime applications</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>The <strong>APP_NAME</strong> parameter will be automatically set by OpenShift to the Name(<a href="#odc-name-the-app">Greeter Application</a>) of the application that was set while creating application via ODC</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>Identifies or tags the Pipeline Template to be used with <strong>Knative</strong> service type applications</td>
+</tr>
+</table>
+</div>
+<div class="sect2">
+<h3 id="oc-deploy-pipeline-template"><a class="anchor" href="#oc-deploy-pipeline-template"></a>Deploy Pipeline Template</h3>
+<div class="paragraph">
+<p>Deploy the Pipeline Template <code>cloud-native-app-serverless</code> by:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc apply -f cloud-native-app-serverless-pipeline.yaml</code></pre>
+</div>
+</div>
+<div class="listingblock console-output">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">pipeline.tekton.dev/cloud-native-app-serverless created</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>When now follow the <a href="#ocp-add-git-project">steps</a> to add a git project via ODC, after choosing resources to be <strong>Knative Service</strong>, you should see the available pipeline (<strong>cloud-native-app-serverless</strong>) as shown:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/ocp_dc_add_kn_pipeline.png" alt="ocp dc add kn pipeline">
+</div>
+<div class="title">Figure 7. Java Knative Service Pipeline</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_points_to_ponder"><a class="anchor" href="#_points_to_ponder"></a>Points to Ponder</h3>
+<div class="paragraph">
+<p>Now are all set to deploy the Tekton Tutorial Java applications as Knative Service using OpenShift Pipelines. But before creating the application, lets pause for few minutes to see what we have understood so far:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>What ClusterTasks are available as part of OpenShift Pipelines</p>
+</li>
+<li>
+<p>How to update the ClusterTask with updates/changes</p>
+</li>
+<li>
+<p>How to make Pipeline Template available for <strong>runtime</strong> and service <strong>type</strong> combination</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="odc-create-ksvc-java-app"><a class="anchor" href="#odc-create-ksvc-java-app"></a>Deploy Application with Pipeline</h3>
+<div class="paragraph">
+<p>Getting back to ODC, follow the <a href="#ocp-deploy-app-from-git">steps</a> to deploy the application from GitHub, but this time you should be able to see a Pipeline Template available for runtime <strong>Java</strong> and resource type <strong>Knative Service</strong>. Click <b class="menuref">Add Pipeline</b> checkbox to use the Pipeline Template that can build and deploy the Java Knative Service:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/ocp_dc_check_add_kn_pipeline.png" alt="ocp dc check add kn pipeline">
+</div>
+<div class="title">Figure 8. Add Pipeline</div>
+</div>
+<div class="paragraph">
+<p>Then click the <b class="button">Create</b> button, to create the "greeter" application with pipeline enabled:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/odc_greeter_app_created.png" alt="odc greeter app created">
+</div>
+<div class="title">Figure 9. Greeter Application</div>
+</div>
+<div class="paragraph">
+<p>As noticed in the above figure the application is yet to be deployed, as no pipelines have run.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="odc-view-pipelines"><a class="anchor" href="#odc-view-pipelines"></a>View Pipelines</h3>
+<div class="paragraph">
+<p>You should now be able to see a pipeline called <strong>greeter</strong> in ODC, by navigating using sidebar navigation <b class="menuref">&gt;Pipelines</b> as shown:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/odc_view_greeter_pipeline.png" alt="odc view greeter pipeline">
+</div>
+<div class="title">Figure 10. greeter Pipeline</div>
+</div>
+<div class="paragraph">
+<p>The Pipeline name is same as the application name <strong>greeter</strong>, click the greeter Pipeline link, to see more details such as:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Visualization - this will be actively showing the Pipeline Task status when its run</p>
+</li>
+<li>
+<p>Labels with runtime and type</p>
+</li>
+<li>
+<p>The list of Tasks that will be run as part of the Pipeline</p>
+</li>
+</ul>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/odc_greeter_pipeline_details.png" alt="odc greeter pipeline details">
+</div>
+<div class="title">Figure 11. greeter Pipeline details</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="odc-run-pipeline"><a class="anchor" href="#odc-run-pipeline"></a>Run Pipeline</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>To run the Pipeline, get back to the Pipelines list and click <b class="menuref">Start</b> from the actions menu:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/odc_greeter_pipeline_start.png" alt="odc greeter pipeline start">
+</div>
+<div class="title">Figure 12. Start greeter Pipeline</div>
+</div>
+<div class="paragraph">
+<p>The <strong>Start</strong> pipeline will request the details such as Parameters and workspaces to be set for the Pipeline run, provide the details as:</p>
+</div>
+<div class="listingblock console-input">
+<div class="title">IMAGE_NAME</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-text hljs" data-lang="text">image-registry.openshift-image-registry.svc:5000/<mark>pipelines-demos</mark>/greeter</code></pre>
+</div>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+Update the highlighted path to match your namespace, in case you are not using pipelines-demos for your deployments
+</td>
+</tr>
+</table>
+</div>
+<div class="listingblock console-input">
+<div class="title">APP_PROFILE</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">quarkus <i class="conum" data-value="1"></i><b>(1)</b></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>You can also set it to be <code>springboot</code></td>
+</tr>
+</table>
+</div>
+<div class="listingblock console-output">
+<div class="title">APP_NAME</div>
+<div class="content">
+<pre class="highlightjs highlight"><code>greeter <i class="conum" data-value="1"></i><b>(1)</b></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>As described earlier the <strong>APP_NAME</strong> parameter automatically maps to the Application Name</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Leave the <strong>GITHUB_REPO_URL</strong> and <strong>GITHUB_REPO_REVISION</strong> to be defaults as, <strong><a href="https://github.com/redhat-scholars/tekton-tutorial-greeter" class="bare">https://github.com/redhat-scholars/tekton-tutorial-greeter</a></strong> and <strong>staging</strong> respectively.</p>
+</div>
+<div class="paragraph">
+<p>Choose the <span class="menuseq"><b class="menu">Workspace</b>&#160;<i class="fa fa-angle-right caret"></i> <b class="menuitem">Source</b></span> to be of type <strong>PVC</strong> and use <strong>tekton-tutorial-sources</strong> as the value for PVC.</p>
+</div>
+<div class="paragraph">
+<p>Choose the <span class="menuseq"><b class="menu">Workspace</b>&#160;<i class="fa fa-angle-right caret"></i> <b class="menuitem">maven-settings</b></span> to be of type <strong>ConfigMap</strong> and use <strong>maven-settings</strong> as the value for ConfigMap.</p>
+</div>
+<div class="paragraph">
+<p>The completed parameters should look like:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/odc_greeter_pipeline_params.png" alt="odc greeter pipeline params">
+</div>
+<div class="title">Figure 13. greeter Pipeline parameters</div>
+</div>
+<div class="paragraph">
+<p>Click the button <b class="button">Start</b> to kick start the pipeline. The Pipeline run be automatically show as in the following screenshot:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/odc_greeter_pipeline_running.png" alt="odc greeter pipeline running">
+</div>
+<div class="title">Figure 14. greeter Pipeline run</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+It will take few minutes for the pipeline to be running and complete. You can watch the status via visualization.
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="odc-watch-pipelines"><a class="anchor" href="#odc-watch-pipelines"></a>Watch Pipelines</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>You can watch the pipeline from sidebar <b class="menuref">Pipelines</b>, and selecting <strong>greeter</strong> from the list:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/odc_greeter_pipeline_running_from_list.png" alt="odc greeter pipeline running from list">
+</div>
+<div class="title">Figure 15. Pipelines list</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="odc-view-app"><a class="anchor" href="#odc-view-app"></a>Application Topology</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>When you navigate to sidebar menu <b class="menuref">Toplogy</b>, you should see the <strong>greeter</strong> application has transitioned from waiting to running state. When you click on the application you should see more details about the application which includes the running <code>greeter</code> Pipeline.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/odc_greeter_topology_view.png" alt="odc greeter topology view">
+</div>
+<div class="title">Figure 16. greeter Knative Service Topology</div>
+</div>
+<div class="paragraph">
+<p>A successful pipeline should have the Java Knative Service deployed and running as shown:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/odc_view_greeter_ksvc.png" alt="odc view greeter ksvc">
+</div>
+</div>
+<div class="paragraph">
+<p>Click on the URL in the <strong>Routes</strong>, to access the application and see the response <strong>Meeow!! from Tekton 😺🚀</strong>.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="odc-pipeline-points"><a class="anchor" href="#odc-pipeline-points"></a>Points to Ponder</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Now you have understood:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>What ClusterTasks are available as part of OpenShift Pipelines</p>
+</li>
+<li>
+<p>How to update the ClusterTask with updates/changes</p>
+</li>
+<li>
+<p>How to make Pipeline Template available for <strong>runtime</strong> and service <strong>type</strong> combination</p>
+</li>
+<li>
+<p>Start the Pipeline from the Pipelines view by configuring the required parameters</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<nav class="pagination">
+  <span class="prev"><a href="setup.html">Setup</a></span>
+</nav>
+</article>
+<aside class="toc sidebar" data-title="Contents" data-levels="2">
+  <div class="toc-menu"></div>
+</aside>
+  </div>
+</main>
+</div>
+<footer class="footer">
+  <a class="rhd-logo" href="https://developers.redhat.com" target="_blank"></div>
+</footer>
+<script src="../../_/js/vendor/clipboard.js"></script>
+<script src="../../_/js/site.js"></script>
+<script async src="../../_/js/vendor/highlight.js"></script>
+  </body>
+</html>

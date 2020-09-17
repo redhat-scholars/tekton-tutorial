@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>Setup :: Tekton Tutorial</title>
-    <link rel="canonical" href="https://redhat-developer-demos.github.io/tekton-tutorial/tekton-tutorial/setup.html">
+    <link rel="canonical" href="https://redhat-scholars.github.io/tekton-tutorial/tekton-tutorial/setup.html">
     <link rel="prev" href="index.html">
     <link rel="next" href="pipeline-resources.html">
     <meta name="generator" content="Antora 2.3.3">
@@ -15,7 +15,7 @@
   <nav class="navbar">
     <div class="navbar-brand">
       <a class="navbar-item" href="https://developers.redhat.com" target="_blank"><img src="../_/img/NewRHDFullLogo_4-color_white-wordmark.png" height="40px" alt="Red Hat Developer Program"></a>
-      <a class="navbar-item" style="font-size: 24px; color: white" href="https://redhat-developer-demos.github.io/tekton-tutorial">Tekton Tutorial</a>
+      <a class="navbar-item" style="font-size: 24px; color: white" href="https://redhat-scholars.github.io/tekton-tutorial">Tekton Tutorial</a>
       <button class="navbar-burger" data-target="topbar-nav">
         <span></span>
         <span></span>
@@ -326,6 +326,61 @@
   </li>
 </ul>
   </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="openshift/index.html">OpenShift Pipelines</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="openshift/setup.html">Setup</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="openshift/openshift_pipelines.html">Pipelines</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="3">
+    <a class="nav-link" href="openshift/openshift_pipelines.html#ocp-create-project">Create Project</a>
+  </li>
+  <li class="nav-item" data-depth="3">
+    <a class="nav-link" href="openshift/openshift_pipelines.html#openshift-pipelines-prep-app-deploy">Prepare Application Deployment</a>
+  </li>
+  <li class="nav-item" data-depth="3">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="openshift/openshift_pipelines.html#required-tasks">Required Cluster Tasks</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="4">
+    <a class="nav-link" href="openshift/openshift_pipelines.html#ocp-update-cluster-tasks">Update Cluster Tasks</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="3">
+    <a class="nav-link" href="openshift/openshift_pipelines.html#ocp-deploy-app-from-git">Deploy Application from GitHub</a>
+  </li>
+  <li class="nav-item" data-depth="3">
+    <a class="nav-link" href="openshift/openshift_pipelines.html#ocp-create-java-ksvc-pipeline-tpl">Pipeline Template for Java and Knative Service</a>
+  </li>
+  <li class="nav-item" data-depth="3">
+    <a class="nav-link" href="openshift/openshift_pipelines.html#odc-create-ksvc-java-app">Deploy Application with Pipeline</a>
+  </li>
+  <li class="nav-item" data-depth="3">
+    <a class="nav-link" href="openshift/openshift_pipelines.html#odc-view-pipelines">View Pipelines</a>
+  </li>
+  <li class="nav-item" data-depth="3">
+    <a class="nav-link" href="openshift/openshift_pipelines.html#odc-watch-pipelines">Watch Pipelines</a>
+  </li>
+  <li class="nav-item" data-depth="3">
+    <a class="nav-link" href="openshift/openshift_pipelines.html#odc-view-app">Application Topology</a>
+  </li>
+  <li class="nav-item" data-depth="3">
+    <a class="nav-link" href="openshift/openshift_pipelines.html#odc-pipeline-points">Points to Ponder</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
 </ul>
   </nav>
 </div>
@@ -342,7 +397,7 @@
     <li><a href="setup.html">Setup</a></li>
   </ul>
 </nav>
-  <div class="edit-this-page"><a href="https://github.com/redhat-developer-demos/tekton-tutorial/edit/master/documentation/modules/ROOT/pages/setup.adoc">Edit this Page</a></div>
+  <div class="edit-this-page"><a href="https://github.com/redhat-scholars/tekton-tutorial/edit/master/documentation/modules/ROOT/pages/setup.adoc">Edit this Page</a></div>
   </div>
   <div class="content">
 <article class="doc">
@@ -388,12 +443,6 @@
 <td class="tableblock halign-center valign-top"><p class="tableblock"><a href="https://kubernetes.io/docs/tasks/tools/install-kubectl/">Install</a></p></td>
 </tr>
 <tr>
-<td class="tableblock halign-center valign-top"><p class="tableblock">Knative Client <code>kn</code> (&gt;=v0.16.0)</p></td>
-<td class="tableblock halign-center valign-top"><p class="tableblock"><code>brew install knative/client/kn</code></p></td>
-<td class="tableblock halign-center valign-top"><p class="tableblock"><a href="https://github.com/knative/client/releases/download/v0.16.0/kn-linux-amd64">Install</a></p></td>
-<td class="tableblock halign-center valign-top"><p class="tableblock"><a href="https://github.com/knative/client/releases/download/v0.16.0/kn-windows-amd64.exe">Install</a></p></td>
-</tr>
-<tr>
 <td class="tableblock halign-center valign-top"><p class="tableblock"><a href="https://github.com/wercker/stern">stern</a></p></td>
 <td class="tableblock halign-center valign-top"><p class="tableblock"><code>brew install stern</code></p></td>
 <td class="tableblock halign-center valign-top"><p class="tableblock"><a href="https://github.com/wercker/stern/releases/download/1.6.0/stern_linux_amd64">Download</a></p></td>
@@ -427,6 +476,24 @@
 <div class="paragraph">
 <p>Before we start setting up the environment, let&#8217;s clone the tutorial sources and set the <code>TUTORIAL_HOME</code> environment variable to point to the root directory of the tutorial:</p>
 </div>
+<div class="paragraph">
+<p>Before we start setting up the environment, let’s clone the tutorial sources and set the <code>TUTORIAL_HOME</code> environment variable to point to the root directory of the tutorial:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">git clone <a href="https://github.com/redhat-scholars/tekton-tutorial" class="bare">https://github.com/redhat-scholars/tekton-tutorial</a> tekton-tutorial</code></pre>
+</div>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">export TUTORIAL_HOME="$(pwd)/tekton-tutorial"</code></pre>
+</div>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">cd $TUTORIAL_HOME</code></pre>
+</div>
+</div>
 <div class="admonitionblock important">
 <table>
 <tr>
@@ -440,19 +507,19 @@
 <div class="ulist">
 <ul>
 <li>
-<p>Tekton <code>v0.11.3</code></p>
+<p>Tekton <code>v0.14.3</code></p>
 </li>
 <li>
-<p>Tekton Triggers <code>v0.4.0</code></p>
+<p>Tekton Triggers <code>v0.6.1</code></p>
 </li>
 <li>
 <p>Minikube <code>v1.12.1+</code></p>
 </li>
 <li>
-<p>OpenShift <code>v4.5+</code></p>
+<p>OpenShift <code>4.5</code></p>
 </li>
 <li>
-<p>Tekton CLI <code>0.11.0</code></p>
+<p>Tekton CLI <code>0.12.0</code></p>
 </li>
 <li>
 <p>Knative Client(kn) <code>v0.16.0</code></p>
@@ -576,7 +643,7 @@
 <div class="listingblock console-input">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl apply --filename \
-<a href="https://github.com/tektoncd/pipeline/releases/download/v0.11.3/release.yaml" class="bare">https://github.com/tektoncd/pipeline/releases/download/v0.11.3/release.yaml</a></code></pre>
+<a href="https://github.com/tektoncd/pipeline/releases/download/v0.14.3/release.yaml" class="bare">https://github.com/tektoncd/pipeline/releases/download/v0.14.3/release.yaml</a></code></pre>
 </div>
 </div>
 <div class="admonitionblock note">
@@ -623,13 +690,13 @@ tekton-pipelines-webhook-75bc7666c-9crwq       1/1     Running   85s</code></pre
 <div class="ulist">
 <ul>
 <li>
-<p><a href="https://github.com/tektoncd/cli/releases/download/v0.11.0/tkn_0.11.0_Darwin_x86_64.tar.gz">Download for macOS</a></p>
+<p><a href="https://github.com/tektoncd/cli/releases/download/v0.12.0/tkn_0.12.0_Darwin_x86_64.tar.gz">Download for macOS</a></p>
 </li>
 <li>
-<p><a href="https://github.com/tektoncd/cli/releases/download/v0.11.0/tkn_0.11.0_Linux_x86_64.tar.gz">Download for Linux</a></p>
+<p><a href="https://github.com/tektoncd/cli/releases/download/v0.12.0/tkn_0.12.0_Linux_x86_64.tar.gz">Download for Linux</a></p>
 </li>
 <li>
-<p><a href="https://github.com/tektoncd/cli/releases/download/v0.11.0/tkn_0.11.0_Windows_x86_64.zip">Download for Windows</a></p>
+<p><a href="https://github.com/tektoncd/cli/releases/download/v0.12.0/tkn_0.12.0_Windows_x86_64.zip">Download for Windows</a></p>
 </li>
 </ul>
 </div>
@@ -646,8 +713,8 @@ tekton-pipelines-webhook-75bc7666c-9crwq       1/1     Running   85s</code></pre
 </div>
 <div class="listingblock console-output">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">Client version: 0.11.0
-Pipeline version: v0.11.3
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">Client version: 0.12.0
+Pipeline version: v0.14.3
 Triggers version: unknown</code></pre>
 </div>
 </div>
@@ -659,10 +726,12 @@ Triggers version: unknown</code></pre>
 </td>
 <td class="content">
 Since Tekton Triggers is not installed, the version is shown as unknown
-<strong>Configuring Kubernetes namespace</strong>
 </td>
 </tr>
 </table>
+</div>
+<div class="paragraph">
+<p><strong>Configuring Kubernetes namespace</strong></p>
 </div>
 <div class="paragraph">
 <p>All the tutorial exercises will be deployed in namespace called <code>tektontutorial</code>:</p>
@@ -676,16 +745,16 @@ kubectl config set-context --current --namespace=tektontutorial</code></pre>
 </div>
 <div class="tab-pane" aria-labelledby="tabset1_openshift">
 <div class="paragraph">
-<p>The following section details on how to install openshift-pipeline(Tekton on OpenShift).</p>
+<p>The following section details on how to install OpenShift Pipelines(Tekton on OpenShift).</p>
 </div>
 <div class="paragraph">
-<p><strong>Login as admin</strong></p>
+<p>== Login as Cluster Admin</p>
 </div>
 <div class="paragraph">
-<p>Login to OpenShift console using the cluster admin credentials. Follow the <a href="https://docs.openshift.com/container-platform/4.5/pipelines/installing-pipelines.html">OpenShift Documentation</a> to have OpenShift Pipelines installed in your OpenShift cluster.</p>
+<p>Login to OpenShift console using the cluster admin credentials. Follow the <a href="https://docs.openshift.com/container-platform/4.5/pipelines/installing-pipelines.html" target="_blank" rel="noopener">OpenShift Documentation</a> to have OpenShift Pipelines installed in your OpenShift cluster.</p>
 </div>
 <div class="paragraph">
-<p>All the tutorial exercises will be deployed in namespace called <code>tektontutorial</code>:</p>
+<p>Unless and until explictiy quoted, all the tutorial exercises will be deployed in namespace called <code>tektontutorial</code>:</p>
 </div>
 <div class="listingblock console-input">
 <div class="content">

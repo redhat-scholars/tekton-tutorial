@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>Using Private Repositories and Registries :: Tekton Tutorial</title>
-    <link rel="canonical" href="https://redhat-developer-demos.github.io/tekton-tutorial/tekton-tutorial/private_reg_repos.html">
+    <link rel="canonical" href="https://redhat-scholars.github.io/tekton-tutorial/tekton-tutorial/private_reg_repos.html">
     <link rel="prev" href="workspaces.html">
     <link rel="next" href="triggers.html">
     <meta name="generator" content="Antora 2.3.3">
@@ -15,7 +15,7 @@
   <nav class="navbar">
     <div class="navbar-brand">
       <a class="navbar-item" href="https://developers.redhat.com" target="_blank"><img src="../_/img/NewRHDFullLogo_4-color_white-wordmark.png" height="40px" alt="Red Hat Developer Program"></a>
-      <a class="navbar-item" style="font-size: 24px; color: white" href="https://redhat-developer-demos.github.io/tekton-tutorial">Tekton Tutorial</a>
+      <a class="navbar-item" style="font-size: 24px; color: white" href="https://redhat-scholars.github.io/tekton-tutorial">Tekton Tutorial</a>
       <button class="navbar-burger" data-target="topbar-nav">
         <span></span>
         <span></span>
@@ -326,6 +326,61 @@
   </li>
 </ul>
   </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="openshift/index.html">OpenShift Pipelines</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="openshift/setup.html">Setup</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="openshift/openshift_pipelines.html">Pipelines</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="3">
+    <a class="nav-link" href="openshift/openshift_pipelines.html#ocp-create-project">Create Project</a>
+  </li>
+  <li class="nav-item" data-depth="3">
+    <a class="nav-link" href="openshift/openshift_pipelines.html#openshift-pipelines-prep-app-deploy">Prepare Application Deployment</a>
+  </li>
+  <li class="nav-item" data-depth="3">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="openshift/openshift_pipelines.html#required-tasks">Required Cluster Tasks</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="4">
+    <a class="nav-link" href="openshift/openshift_pipelines.html#ocp-update-cluster-tasks">Update Cluster Tasks</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="3">
+    <a class="nav-link" href="openshift/openshift_pipelines.html#ocp-deploy-app-from-git">Deploy Application from GitHub</a>
+  </li>
+  <li class="nav-item" data-depth="3">
+    <a class="nav-link" href="openshift/openshift_pipelines.html#ocp-create-java-ksvc-pipeline-tpl">Pipeline Template for Java and Knative Service</a>
+  </li>
+  <li class="nav-item" data-depth="3">
+    <a class="nav-link" href="openshift/openshift_pipelines.html#odc-create-ksvc-java-app">Deploy Application with Pipeline</a>
+  </li>
+  <li class="nav-item" data-depth="3">
+    <a class="nav-link" href="openshift/openshift_pipelines.html#odc-view-pipelines">View Pipelines</a>
+  </li>
+  <li class="nav-item" data-depth="3">
+    <a class="nav-link" href="openshift/openshift_pipelines.html#odc-watch-pipelines">Watch Pipelines</a>
+  </li>
+  <li class="nav-item" data-depth="3">
+    <a class="nav-link" href="openshift/openshift_pipelines.html#odc-view-app">Application Topology</a>
+  </li>
+  <li class="nav-item" data-depth="3">
+    <a class="nav-link" href="openshift/openshift_pipelines.html#odc-pipeline-points">Points to Ponder</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
 </ul>
   </nav>
 </div>
@@ -342,12 +397,13 @@
     <li><a href="private_reg_repos.html">Private Registries and Repositories</a></li>
   </ul>
 </nav>
-  <div class="edit-this-page"><a href="https://github.com/redhat-developer-demos/tekton-tutorial/edit/master/documentation/modules/ROOT/pages/private_reg_repos.adoc">Edit this Page</a></div>
+  <div class="edit-this-page"><a href="https://github.com/redhat-scholars/tekton-tutorial/edit/master/documentation/modules/ROOT/pages/private_reg_repos.adoc">Edit this Page</a></div>
   </div>
   <div class="content">
 <article class="doc">
 <h1 class="page">Using Private Repositories and Registries</h1>
-<div id="preamble">
+<div class="sect1">
+<h2 id="_using_private_repositories_and_registries"><a class="anchor" href="#_using_private_repositories_and_registries"></a>Using Private Repositories and Registries</h2>
 <div class="sectionbody">
 <div class="admonitionblock warning">
 <table>
@@ -434,7 +490,7 @@ This chapter build is in progress, expect to change and not working as expected
 <div class="ulist">
 <ul>
 <li>
-<p>A remote GitHub Repository, you can pull fork the <a href="https://github.com/redhat-developer-demos/tekton-helloworld" class="bare">https://github.com/redhat-developer-demos/tekton-helloworld</a> and push that as your private repository</p>
+<p>A remote GitHub Repository, you can pull fork the <a href="https://github.com/redhat-scholars/tekton-tutorial-greeter" class="bare">https://github.com/redhat-scholars/tekton-tutorial-greeter</a> and push that as your private repository</p>
 </li>
 <li>
 <p>A <a href="https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-token">GitHub Personal Access Token(PAT)</a> to access the remote repository.</p>
@@ -576,7 +632,7 @@ secrets:
 </div>
 <div class="listingblock console-input">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl apply -n workspace-auth-demo -f <a href="https://github.com/redhat-developer-demos/tekton-tutorial/blob/master/private_repos_reg/secretworld-app-clone.yaml" target="_blank" rel="noopener">secretworld-app-clone.yaml</a></code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl apply -n workspace-auth-demo -f <a href="https://github.com/redhat-scholars/tekton-tutorial/blob/master/private_repos_reg/secretworld-app-clone.yaml" target="_blank" rel="noopener">secretworld-app-clone.yaml</a></code></pre>
 </div>
 </div>
 <div class="listingblock console-output">
@@ -587,6 +643,32 @@ secrets:
 </div>
 <div class="sect2">
 <h3 id="tekton-run-clone-pipeline"><a class="anchor" href="#tekton-run-clone-pipeline"></a>Run Pipeline</h3>
+<div class="tabset is-loading">
+<div class="ulist tabs">
+<ul>
+<li>
+<p><a id="tabset1_tkn"></a>tkn</p>
+</li>
+<li>
+<p><a id="tabset1_kubectl"></a>kubectl</p>
+</li>
+</ul>
+</div>
+<div class="content">
+<div class="tab-pane" aria-labelledby="tabset1_tkn">
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">tkn pipeline start secretworld-app-clone \
+  --namespace=workspace-auth-demo \
+  --serviceaccount=github-bot \
+  --param private-github-repo-url='https://github.com/redhat-scholars/tekton-secretworld' \
+  --workspace name=source,claimName=tekton-tutorial-sources \
+  --use-param-defaults \
+  --showlog</code></pre>
+</div>
+</div>
+</div>
+<div class="tab-pane" aria-labelledby="tabset1_kubectl">
 <div class="paragraph">
 <p>Ensure that the pipeline run has been set to run with the Service Account <code>github-bot</code></p>
 </div>
@@ -599,12 +681,12 @@ metadata:
   labels:
     tekton.dev/pipeline: secretworld-app-clone
 spec:
-  serviceAccountName: <mark>github-bot</mark>
+  serviceAccountName: github-bot <i class="conum" data-value="1"></i><b>(1)</b>
   pipelineRef:
     name: secretworld-app-clone
   params:
     - name: private-github-repo-url
-      value: https://github.com/redhat-developer-demos/tekton-secretworld <i class="conum" data-value="1"></i><b>(1)</b>
+      value: https://github.com/redhat-scholars/tekton-secretworld
   workspaces:
     - name: source
       persistentVolumeClaim:
@@ -646,6 +728,9 @@ spec:
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">tkn pr logs -f -a $(tkn pr ls -n workspace-auth-demo | awk 'NR==2{print $1}')</code></pre>
 </div>
 </div>
+</div>
+</div>
+</div>
 <div class="paragraph">
 <p>A successful clone from private repo will show the following output ( trimmed brevity):</p>
 </div>
@@ -663,8 +748,8 @@ spec:
 [clone-sources : clone] + test -z
 [clone-sources : clone] + test -z
 [clone-sources : clone] + test -z
-[clone-sources : clone] + /ko-app/git-init -url https://github.com/redhat-developer-demos/tekton-secretworld -revision master -refspec  -path /workspace/output/ '-sslVerify=true' '-submodules=true' -depth 1
-[clone-sources : clone] {"level":"info","ts":1595922137.4565356,"caller":"git/git.go:139","msg":"Successfully cloned https://github.com/redhat-developer-demos/tekton-secretworld @ 5250e1fa185805373e620d1c04a0c48129efd2ee (grafted, HEAD, origin/master) in path /workspace/output/"}
+[clone-sources : clone] + /ko-app/git-init -url https://github.com/redhat-scholars/tekton-secretworld -revision master -refspec  -path /workspace/output/ '-sslVerify=true' '-submodules=true' -depth 1
+[clone-sources : clone] {"level":"info","ts":1595922137.4565356,"caller":"git/git.go:139","msg":"Successfully cloned https://github.com/redhat-scholars/tekton-secretworld @ 5250e1fa185805373e620d1c04a0c48129efd2ee (grafted, HEAD, origin/master) in path /workspace/output/"}
 [clone-sources : clone] {"level":"info","ts":1595922137.4990256,"caller":"git/git.go:180","msg":"Successfully initialized and updated submodules in path /workspace/output/"}
 [clone-sources : clone] + cd /workspace/output/
 [clone-sources : clone] + git+ tr -d '\n'
@@ -801,17 +886,43 @@ secrets:
 <div class="listingblock console-input">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl apply -n workspace-auth-demo \
-  -f <a href="https://github.com/redhat-developer-demos/tekton-tutorial/blob/master/private_repos_reg/helloworld-app-build.yaml" target="_blank" rel="noopener">helloworld-app-build.yaml</a></code></pre>
+  -f <a href="https://github.com/redhat-scholars/tekton-tutorial/blob/master/private_repos_reg/greeter-app-build.yaml" target="_blank" rel="noopener">greeter-app-build.yaml</a></code></pre>
 </div>
 </div>
 <div class="listingblock console-output">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">pipeline.tekton.dev/helloworld-app-build created</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">pipeline.tekton.dev/greeter-app-build created</code></pre>
 </div>
 </div>
 </div>
 <div class="sect2">
 <h3 id="tekton-run-build-push-pipeline"><a class="anchor" href="#tekton-run-build-push-pipeline"></a>Run Pipeline</h3>
+<div class="tabset is-loading">
+<div class="ulist tabs">
+<ul>
+<li>
+<p><a id="tabset2_tkn"></a>tkn</p>
+</li>
+<li>
+<p><a id="tabset2_kubectl"></a>kubectl</p>
+</li>
+</ul>
+</div>
+<div class="content">
+<div class="tab-pane" aria-labelledby="tabset2_tkn">
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">tkn pipeline start greeter-app-build \
+  --namespace=workspace-auth-demo \
+  --serviceaccount=build-bot \
+  --workspace name=maven-settings,config=maven-settings \
+  --workspace name=source,claimName=tekton-tutorial-sources \
+  --use-param-defaults \
+  --showlog</code></pre>
+</div>
+</div>
+</div>
+<div class="tab-pane" aria-labelledby="tabset2_kubectl">
 <div class="paragraph">
 <p>Ensure that the pipeline run has been set to run with the Service Account <code>build-bot</code></p>
 </div>
@@ -820,20 +931,20 @@ secrets:
 <pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">apiVersion: tekton.dev/v1beta1
 kind: PipelineRun
 metadata:
-  generateName: helloworld-app-build-
+  generateName: greeter-app-build-
   labels:
-    tekton.dev/pipeline: helloworld-app-build
+    tekton.dev/pipeline: greeter-app-build
 spec:
-  serviceAccountName: <mark>build-bot</mark>
+  serviceAccountName: build-bot
   pipelineRef:
-    name: helloworld-app-build
+    name: greeter-app-build
   workspaces:
     - name: maven-settings
       configmap:
         name: maven-settings
     - name: source
       persistentVolumeClaim:
-        emptyDir: tekton-tutorial-sources</code></pre>
+        claimName: tekton-tutorial-sources</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -841,7 +952,7 @@ spec:
 </div>
 <div class="listingblock console-input">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl create -n workspace-auth-demo -f helloworld-app-build-run.yaml</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl create -n workspace-auth-demo -f greeter-app-build-run.yaml</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -852,13 +963,16 @@ spec:
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">tkn pr logs -f -a $(tkn pr ls -n workspace-auth-demo | awk 'NR==2{print $1}')</code></pre>
 </div>
 </div>
+</div>
+</div>
+</div>
 <div class="paragraph">
 <p>A successful build and push will show the following output ( trimmed brevity):</p>
 </div>
 <div class="listingblock console-output">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">...
-[build-java-app-image : push] + buildah --storage-driver=overlay push --tls-verify=true --digestfile /workspace/source/image-digest quay.io/rhdevelopers/tekton-helloworld docker://quay.io/rhdevelopers/tekton-helloworld
+[build-java-app-image : push] + buildah --storage-driver=overlay push --tls-verify=true --digestfile /workspace/source/image-digest quay.io/rhdevelopers/tekton-tutorial-greeter docker://quay.io/rhdevelopers/tekton-tutorial-greeter
 [build-java-app-image : push] Getting image source signatures
 [build-java-app-image : push] Copying blob sha256:90c2e42f948b524cf98005073e0b0aa2065160abf9e8b314976c064e270d92ac
 [build-java-app-image : push] Copying blob sha256:869b43e5dca37fa63d84e9bc588613678c4fe6fa2072a72a6ab5487424db2891
