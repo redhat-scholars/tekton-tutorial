@@ -8,20 +8,24 @@ site:
 content:
   sources:
     - url: git@github.com:redhat-scholars/tekton-tutorial.git
-      tags: []
-      branches: release/0.11.x
+      tags:
+        - v0.14.3
       start_path: documentation
 asciidoc:
   attributes:
     tutorial-namespace: tektontutorial
-    kubernetes-version: v1.18.2
+    workshop-domain: guru.devx.red
+    kubernetes-version: v1.18.0
     release-version: master
+    openshift-console-url: https://console-openshift-console.apps.example.com
+    etherpad-url: http://example.com
     page-pagination: true
-    # TODO: #24 Update the versions before release
-    tekton-version: v0.11.3
-    triggers-version: v0.4.0
+    tekton-version: v0.14.3
+    triggers-version: v0.6.1
     kn-version: v0.16.0
-    tekton-cli-version: 0.11.0
+    tekton-cli-version: 0.12.0
+    cli: kubectl
+    openshift-version: 4.5
   extensions:
     - ./lib/remote-include-processor.js
     - ./lib/tab-block.js

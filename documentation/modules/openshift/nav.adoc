@@ -12,4 +12,3 @@
 *** xref:openshift:openshift_pipelines.adoc#odc-watch-pipelines[Watch Pipelines]
 *** xref:openshift:openshift_pipelines.adoc#odc-view-app[Application Topology]
 *** xref:openshift:openshift_pipelines.adoc#odc-pipeline-points[Points to Ponder]
-** xref:openshift:openshift_triggers.adoc[Triggers]
