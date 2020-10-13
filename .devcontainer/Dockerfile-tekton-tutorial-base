@@ -1,0 +1,28 @@
+# syntax = docker/dockerfile:1.0-experimental
+FROM registry.access.redhat.com/ubi8/nodejs-12
+
+USER root
+
+RUN wget https://github.com/mikefarah/yq/releases/download/3.4.0/yq_linux_amd64 -O /usr/local/bin/yq && \
+    chmod 755 /usr/local/bin/yq
+
+RUN wget https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl -O /usr/local/bin/kubectl && \
+    chmod 755 /usr/local/bin/kubectl
+
+RUN wget https://github.com/wercker/stern/releases/download/1.11.0/stern_linux_amd64 -O /usr/local/bin/stern && \
+    chmod 755 /usr/local/bin/stern
+
+# DOCKER_BUILDKIT=1 docker build --progress=plain --secret id=myuser,src=../docker-secrets/myuser.txt --secret id=mypass,src=../docker-secrets/mypass.txt -f Dockerfile-tekton-tutorial-base -t quay.io/mhildenb/tekton-tutorial-base:1.0 .
+RUN --mount=type=secret,id=myuser --mount=type=secret,id=mypass \
+    subscription-manager register  --username=$(cat /run/secrets/myuser) \
+    --password=$(cat /run/secrets/mypass) --auto-attach
+
+# RUN yum install -y yum-utils
+
+RUN yum install -y python36
+
+RUN pip3 install httpie
+
+RUN subscription-manager unregister
+
+USER default
