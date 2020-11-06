@@ -1,0 +1,1 @@
+FROM quay.io/mhildenb/tekton-tutorial-base:latest
