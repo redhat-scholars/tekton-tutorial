@@ -25,4 +25,8 @@ RUN pip3 install httpie
 
 RUN subscription-manager unregister
 
+RUN curl -L https://github.com/tektoncd/cli/releases/download/v0.12.1/tkn_0.12.1_Linux_x86_64.tar.gz | \
+    tar -xvzf - -C /usr/local/bin/ tkn && chmod 755 /usr/local/bin/tkn && \
+    wget -qO- https://mirror.openshift.com/pub/openshift-v4/clients/serverless/0.16.1/kn-linux-amd64-0.16.1.tar.gz | tar -zxvf - -C /usr/local/bin ./kn && chmod 755 /usr/local/bin/kn 
+
 USER default
