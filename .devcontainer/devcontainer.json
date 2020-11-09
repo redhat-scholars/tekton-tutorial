@@ -7,6 +7,12 @@
 		// Update 'VARIANT' to pick a Node version: 10, 12, 14
 		"args": { "VARIANT": "12" }
 	},
+	
+	"runArgs": [
+		"-v", "${env:HOME}/.kube:/opt/app-root/src/.kube",
+		"-v", "${env:HOME}/.minikube:/opt/app-root/src/.minikube",
+		"-e", "MAC_USER=${env:USER}"
+	],
 
 	// Set *default* container specific settings.json values on container create.
 	"settings": { 
