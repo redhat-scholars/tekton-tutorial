@@ -20,6 +20,7 @@ minikube start -p $PROFILE_NAME \
   --memory=$MEMORY --cpus=$CPUS \
   --disk-size=50g \
   --insecure-registry='10.0.0.0/24' \
+  --driver hyperkit \
   --apiserver-names=docker.for.mac.localhost
   
 minikube profile $PROFILE_NAME
