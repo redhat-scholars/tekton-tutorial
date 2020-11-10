@@ -1,5 +1,3 @@
-set -eu
-
 export TUTORIAL_HOME=$(pwd)
 echo "In .bashrc at directory ${TUTORIAL_HOME}"
 
