@@ -1,13 +1,22 @@
+set -eu
+
 export TUTORIAL_HOME=$(pwd)
 echo "In .bashrc at directory ${TUTORIAL_HOME}"
 
-if [ ! -f /tmp/config ]; then
+declare -r LOCAL_KUBECONFIG=/tmp/config
+
+if [ ! -f ${LOCAL_KUBECONFIG} ]; then
     echo "Creating kubeconfig for use inside container"
     if [ -f ~/.kube/config ]; then
-        cp ~/.kube/config /tmp/config
-        ${TUTORIAL_HOME}/bin/convert-kubeconfig-for-devcontainer.sh "/tmp/config"
+        cp ~/.kube/config ${LOCAL_KUBECONFIG}
+        ${TUTORIAL_HOME}/bin/convert-kubeconfig-for-devcontainer.sh "${LOCAL_KUBECONFIG}"
     fi
 fi
 
-export KUBECONFIG=/tmp/config
+if [ -f ${LOCAL_KUBECONFIG} ]; then
+    echo "Using local kubeconfig at ${LOCAL_KUBECONFIG}"
+    export KUBECONFIG=${LOCAL_KUBECONFIG}
+fi
+
+echo "Welcome to the Tekton Tutorial!"
 
