@@ -49,6 +49,7 @@ spec:
       args:
         - "bud"
         - "--layers"
+        - '--storage-driver=vfs'
         - "-f"
         - "$(inputs.params.dockerFile)"
         - "-t"
@@ -68,6 +69,7 @@ spec:
       args:
         - "push"
         - "--tls-verify=$(inputs.params.tlsVerify)"
+        - '--storage-driver=vfs'
         - $(inputs.params.destinationImage)
         - "docker://$(inputs.params.destinationImage)"
       securityContext:
