@@ -76,98 +76,73 @@ NAME                    AGE            LAST RUN   STARTED   DURATION   STATUS
 greeter-app-deploy   1 minute ago   ---        ---       ---        ---
 ----
 
-=== Deploy Gogs
+=== Deploy Gitea
 
 Since we need to trigger a Pipeline with a git push, we will deploy a Git server to the local cluster. This will avoid us the need to expose the service to the public internet and also helps us to test things quickly with our local cluster setup.
 
-https://gogs.io/[Gogs] is super quick and easy to install i.e. self-hosted git service. Lets deploy that into the Kubernetes Cluster.
+https://gitea.io/[Gitea] is super quick and easy to install i.e. self-hosted git service. Lets deploy that into the Kubernetes Cluster.
 
-=== Create Gogs Ingress
+=== Create Gitea Server
 
-Create the gogs ingress so that we can access the application from host machine using http:
-
-[.console-input]
-[source,bash,subs="+macros,+attributes"]
-----
-export GOGS_HOSTNAME="gogs.$(minikube ip).nip.io"
-----
+We'll run a script that creates the gitea server for us locally passing in as a parameter to the script a minikube based hostname `GITEA_HOSTNAME` that will allow us to access the instance of gitea from our host machine
 
 [.console-input]
 [source,bash,subs="+macros,+attributes"]
 ----
-yq w link:{github-repo}/install/git/gogs-ingress.yaml[+$TUTORIAL_HOME+/install/git/gogs-ingress.yaml] \
-  spec.virtualhost.fqdn $GOGS_HOSTNAME |\
-  kubectl apply -n {chapter-namespace} -f -
+export GITEA_HOSTNAME="gogs.$(minikube ip).nip.io"
+$TUTORIAL_HOME/bin/link:{github-repo}/bin/create-gitea.sh[create-gitea.sh^] $GITEA_HOSTNAME
 ----
 
-Create gogs config file `app.ini` from the template and add that to gogs ConfigMap:
-
-[.console-input]
-[source,bash,subs="+macros,+attributes"]
-----
-sed "s/@GOGS_HOSTNAME@/$GOGS_HOSTNAME/g" link:{github-repo}/install/git/app.ini.template[+$TUTORIAL_HOME+/install/git/app.ini.template] \
-  | tee +$TUTORIAL_HOME+/install/git/app.ini
-----
+In a separate shell you can follow the installation progress by tailing the logs of the gitea operator that was installed into your minikube cluster.
 
 [.console-input]
 [source,bash,subs="+macros,+attributes"]
 ----
-kubectl apply -n {chapter-namespace} \
-  -k link:{github-repo}/install/git[+$TUTORIAL_HOME+/install/git/]
+stern gitea -n gitea-operator
 ----
 
-NOTE: We use https://kubernetes-sigs.github.io/kustomize/[kustomize] that allows us to do some customizations on the Kubenetes manifests before we apply them. Kustomize is built into kubectl and can be used with `-k` option.
+When the script finishes, your gitea deployment should be completed.  A successful deployment will report:
+[.console-output]
+[source,bash]
+----
+Gitea server installed and running
+----
+
+If you want, you can confirm this by running this command
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+kubectl get pods,svc -lapp=gitea
+----
+
+Which should yield output that looks something like the following
 
 [.console-output]
 [source,bash]
 ----
-configmap/gogs-config created
-service/gogs-postgresql created
-service/gogs created
-deployment.apps/gogs-postgresql created
-deployment.apps/gogs created
-persistentvolumeclaim/gogs-data created
-persistentvolumeclaim/pgdata-pvc created
-persistentvolumeclaim/pgwal-pvc created
+NAME                        READY   STATUS    RESTARTS   AGE
+pod/gitea-dc5699668-xnzm9   1/1     Running   0          69m
+
+NAME            TYPE       CLUSTER-IP       EXTERNAL-IP   PORT(S)          AGE
+service/gitea   NodePort   10.107.208.196   <none>        3000:31850/TCP   69m
 ----
 
-Wait for the `gogs-postgresql` and `gogs` pods to come up, watch the status using :
+You can access the gitea service using ingress url:
 
 [.console-input]
 [source,bash,subs="+macros,+attributes"]
 ----
-watch kubectl get pods,svc -lapp=gogs
+open http://$GITEA_HOSTNAME
 ----
 
-A suceesfull deployment should show:
-
-[.console-output]
-[source,bash]
-----
-NAME                                  READY   STATUS    RESTARTS   AGE
-pod/gogs-854766b6d7-nsmsp             1/1     Running   0          64s
-pod/gogs-postgresql-745dfd5cb-spc46   1/1     Running   0          64s
-
-NAME                      TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)          AGE
-service/gogs              NodePort    10.106.116.15    <none>        3000:31550/TCP   64s
-service/gogs-postgresql   ClusterIP   10.105.150.118   <none>        5432/TCP         64s
-----
-
-You can access the gogs service using ingress url:
-
-[.console-input]
-[source,bash,subs="+macros,+attributes"]
-----
-open http://$GOGS_HOSTNAME
-----
-
-.Gogs Home
-image::gogs_home.png[]
+.Gitea Home
+image::gitea_home.png[]
 
 [#tkn-create-sa]
-== Create ServiceAccount, Roles and Role Bindins
+== Create ServiceAccount, Roles and Role Bindings
 
-We need to query Kubernetes objects, create Triggers and finally deploy the Knative Service as part of this chapter' exercies. Lets create a Kubernetes Service Account and add the required roles/permissions:
+We need to query Kubernetes objects, create Triggers and finally deploy the Knative Service as part of this chapter's exercies. Let's create a Kubernetes Service Account and add the required roles/permissions:
 
 [.console-input]
 [source,bash,subs="+macros,+attributes"]
@@ -187,14 +162,14 @@ rolebinding.rbac.authorization.k8s.io/tekton-triggers-admin-binding created
 rolebinding.rbac.authorization.k8s.io/tekton-triggers-createwebhook-binding created
 ----
 
-NOTE: In OpenShift you might no need the *pipeline* SA, as the OpenShift Pipelines creates it by default
+NOTE: In OpenShift you might not need the *pipeline* SA, as the OpenShift Pipelines creates it by default
 
 [#tkn-triggers-init-repo]
 == Initialize Source Repository
 
-To run the exercises of this chapter we need the following setup in Git(gogs):
+To run the exercises of this chapter we need the following setup in Git(gitea):
 
-- A Git user, for the demo we will create user called *gogs* with password *gogs*
+- A Git user, for the demo we will create user called *gitea* with password *gitea*
 - A Git Repository named `tekton-greeter`, we will use https://github.com/redhat-scholars/tekton-tutorial-greeter
 
 We will run the following Task to perform the necessary intializations listed above:
@@ -203,13 +178,13 @@ We will run the following Task to perform the necessary intializations listed ab
 [source,bash,subs="+macros,+attributes"]
 ----
 kubectl create -n {chapter-namespace} \
-  -f link:{github-repo}/{triggers-repo}/gogs-init-taskrun.yaml[gogs-init-taskrun.yaml^]
+  -f link:{github-repo}/{triggers-repo}/gitea-init-taskrun.yaml[+$TUTORIAL_HOME+/{triggers-repo}/gitea-init-taskrun.yaml^]
 ----
 
 [.console-output]
 [source,bash]
 ----
-taskrun.tekton.dev/init-gogs-qkf84 created
+taskrun.tekton.dev/init-gitea-qkf84 created
 ----
 
 include::ROOT:partial$logs-view.adoc[tags='tr']
@@ -219,12 +194,13 @@ A successfull initializations should show an output like:
 [.console-output]
 [source,bash]
 ----
-[init-gogs] Created admin user gogs:gogs
-[init-gogs] Created git repo tekton-tutorial-greeter
-[init-gogs] Repository Clone url http://gogs.192.168.64.5.nip.io/gogs/https://github.com/redhat-scholars/tekton-tutorial-greeter.git
+[create-gitea-admin] Created Gitea admin user gitea:gitea
+
+[init-gitea] Created git repo tekton-tutorial-greeter
+[init-gitea] Repository Clone url http://gitea.192.168.64.7.nip.io/gitea/tekton-tutorial-greeter.git
 ----
 
-You should now be able to open the *Repository Clone url* from the output above and view the respository content.
+You should now be able to open the *Repository Clone url* from the output above and view the repository content.
 
 [#tkn-triggers-template]
 == Trigger Template
