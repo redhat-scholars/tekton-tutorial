@@ -89,7 +89,7 @@ We'll run a script that creates the gitea server for us locally passing in as a 
 [.console-input]
 [source,bash,subs="+macros,+attributes"]
 ----
-export GITEA_HOSTNAME="gogs.$(minikube ip).nip.io"
+export GITEA_HOSTNAME="gitea.$(minikube ip).nip.io"
 $TUTORIAL_HOME/bin/link:{github-repo}/bin/create-gitea.sh[create-gitea.sh^] $GITEA_HOSTNAME
 ----
 
@@ -214,7 +214,7 @@ TriggerTemplate is responsible to create the Tekton Resources when it receives t
 [source,bash,subs="+macros,+attributes"]
 ----
 kubectl create -n {chapter-namespace} \
-  -f link:{github-repo}/{triggers-repo}/greeter-trigger-template.yaml[greeter-trigger-template.yaml^]
+  -f link:{github-repo}/{triggers-repo}/greeter-trigger-template.yaml[+$TUTORIAL_HOME+/{triggers-repo}/greeter-trigger-template.yaml^]
 ----
 
 [.console-output]
@@ -243,14 +243,14 @@ tekton-greeter-trigger-template   1 minute ago
 [#tkn-triggers-bindings]
 == Trigger Bindings
 
-TriggerBinding is responsible to bind the Event payload with Template Parameters. In this case it will bind the gogs event playload to TriggerTemplate parameters, inputs, outputs and workspaces.
+TriggerBinding is responsible to bind the Event payload with Template Parameters. In this case it will bind the gitea event playload to TriggerTemplate parameters, inputs, outputs and workspaces.
 
-Let us see a sample webhook payload that Git events from Gogs might look like:
+Let us see a sample webhook payload that Git events from Gitea might look like:
 
-.Gogs Payload sample
+.Gitea Payload sample
 [source,json,subs="+quotes"]
 ----
-include::ROOT:example$gogs-payload.json[]
+include::ROOT:example$gitea-payload.json[]
 ----
 
 We can use any attribute/data from the JSON payload and bind them as the value in TriggerBindings. For this chapter exercise we are interested in two attributes namely:
@@ -258,29 +258,29 @@ We can use any attribute/data from the JSON payload and bind them as the value i
 - *after*: the commit hash after our push is merged into the master
 - *repository.clone_url*: The Git Repo clone url
 
-The HTTP Body and Headers of the eventt payload are available as `body` and `header` JSONPath variables. We can retrieve the values using JSONPath expressions. Check the https://github.com/tektoncd/triggers/blob/master/docs/triggerbindings.md#event-variable-interpolation[Event Variable Interpolation] for more details.
+The HTTP Body and Headers of the event payload are available as `body` and `header` JSONPath variables. We can retrieve the values using JSONPath expressions. Check the https://github.com/tektoncd/triggers/blob/master/docs/triggerbindings.md#event-variable-interpolation[Event Variable Interpolation] for more details.
 
 To retreieve the `after` and `repository.clone_url` we will the JSONPath expressions `$(body.after)` and `$(body.repoistory.clone_url)` respectively. 
 
 [#tkn-triggers-create-bindings]
 === Create Trigger Bindings
 
-.link:{github-repo}/{triggers-repo}/gogs-triggerbindings.yaml[gogs-triggerbindings.yaml^]
+.link:{github-repo}/{triggers-repo}/gitea-triggerbindings.yaml[gitea-triggerbindings.yaml^]
 [source,yaml,subs="+quotes"]
 ----
-include::ROOT:example$gogs-triggerbindings.yaml[]
+include::ROOT:example$gitea-triggerbindings.yaml[]
 ----
 
 [.console-input]
 [source,bash,subs="+macros,+attributes"]
 ----
-kubectl create -n {chapter-namespace} -f gogs-triggerbindings.yaml
+kubectl create -n {chapter-namespace} -f link:{github-repo}/{triggers-repo}/gitea-triggerbindings.yaml[+$TUTORIAL_HOME+/{triggers-repo}/gitea-triggerbindings.yaml^]
 ----
 
 [.console-output]
 [source,bash]
 ----
-triggerbinding.triggers.tekton.dev/gogs-triggerbinding created
+triggerbinding.triggers.tekton.dev/gitea-triggerbinding created
 ----
 
 List the available TriggerBindings:
@@ -297,7 +297,7 @@ It should show an output like:
 [source,bash]
 ----
 NAME                  AGE
-gogs-triggerbinding   7 seconds ago
+gitea-triggerbinding   7 seconds ago
 ----
 
 [#tkn-triggers-eventlistener]
@@ -311,13 +311,13 @@ Event Listener is primary interace for external sources to send events, that wil
 [.console-input]
 [source,bash,subs="+macros,+attributes"]
 ----
-kubectl apply -n {chapter-namespace} -f link:{github-repo}/{triggers-repo}/gogs-eventlistener.yaml[gogs-eventlistener.yaml]
+kubectl apply -n {chapter-namespace} -f link:{github-repo}/{triggers-repo}/gitea-eventlistener.yaml[+$TUTORIAL_HOME+/{triggers-repo}/gitea-eventlistener.yaml^]
 ----
 
 [.console-output]
 [source,bash]
 ----
-eventlistener.triggers.tekton.dev/gogs-webhook created
+eventlistener.triggers.tekton.dev/gitea-webhook created
 ----
 
 List the available EventListeners:
@@ -334,7 +334,7 @@ It should show an output like:
 [source,bash]
 ----
 NAME           AGE
-gogs-webhook   4 seconds ago
+gitea-webhook   4 seconds ago
 ----
 
 Each EventListener will have a service named `el-<EventListener Name>` exposed automatically for sources to send events to Triggers.
@@ -342,19 +342,19 @@ Each EventListener will have a service named `el-<EventListener Name>` exposed a
 [.console-input]
 [source,bash,subs="+macros,+attributes"]
 ----
-kubectl get svc -n {chapter-namespace} -leventlistener=gogs-webhook
+kubectl get svc -n {chapter-namespace} -leventlistener=gitea-webhook
 ----
 
 [.console-output]
 [source,bash,subs="+quotes"]
 ----
 NAME              TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)          AGE
-#el-gogs-webhook   ClusterIP   10.97.199.207    <none>        8080/TCP         51s#
+#el-gitea-webhook   ClusterIP   10.97.199.207    <none>        8080/TCP         51s#
 ----
 
 === Create Event Listener Ingress
 
-If you need the EventListner service to be available outside of the cluster thereby you can use them as part of the webhook, the service `el-gogs-webhook` needs to be exposed via Ingress:
+If you need the EventListner service to be available outside of the cluster thereby you can use them as part of the webhook, the service `el-gitea-webhook` needs to be exposed via Ingress:
 
 [tabs]
 ====
@@ -364,18 +364,18 @@ Minikube::
 [.console-input]
 [source,bash,subs="+macros,+attributes"]
 ----
-export EL_WEBHOOK_URL="$(kubectl get svc -n {chapter-namespace} el-gogs-webhook -o yaml \
+export EL_WEBHOOK_URL="$(kubectl get svc -n {chapter-namespace} el-gitea-webhook -o yaml \
   | yq r - 'metadata.name').$(minikube ip).nip.io"
-export EL_WEBHOOK_LISTENER_PORT="$(kubectl get svc -n {chapter-namespace} el-gogs-webhook -o yaml \
+export EL_WEBHOOK_LISTENER_PORT="$(kubectl get svc -n {chapter-namespace} el-gitea-webhook -o yaml \
   | yq r - 'spec.ports.(name==http-listener).port')"
 ----
 
 [.console-input]
 [source,bash,subs="+macros,+attributes"]
 ----
-yq w link:{github-repo}/{triggers-repo}/eventlistener-ingress.yaml[eventlistener-ingress.yaml] \
+yq w link:{github-repo}/{triggers-repo}/eventlistener-ingress.yaml[+$TUTORIAL_HOME+/{triggers-repo}/eventlistener-ingress.yaml^] \
   spec.virtualhost.fqdn $EL_WEBHOOK_URL \
-  | yq w - 'spec.routes[0].services[0].name' el-gogs-webhook \
+  | yq w - 'spec.routes[0].services[0].name' el-gitea-webhook \
   | yq w - 'spec.routes[0].services[0].port' $EL_WEBHOOK_LISTENER_PORT \
   | kubectl apply -n {chapter-namespace} -f  -
 ----
@@ -383,7 +383,7 @@ yq w link:{github-repo}/{triggers-repo}/eventlistener-ingress.yaml[eventlistener
 [.console-output]
 [source,bash]
 ----
-httpproxy.projectcontour.io/el-gogs-webhook-ingress 
+httpproxy.projectcontour.io/el-gitea-webhook-ingress created
 ----
 
 Lets verify if the ingress has been configured correctly:
@@ -391,7 +391,7 @@ Lets verify if the ingress has been configured correctly:
 [.console-input]
 [source,bash,subs="+macros,+attributes"]
 ----
-kubectl get httpproxy -n {chapter-namespace} el-gogs-webhook-ingress -o yaml
+kubectl get httpproxy -n {chapter-namespace} el-gitea-webhook-ingress -o yaml
 ----
 
 The command should the following output (trimmed for brevity):
@@ -402,15 +402,15 @@ The command should the following output (trimmed for brevity):
 apiVersion: projectcontour.io/v1
 kind: HTTPProxy
 metadata:
-  name: el-gogs-webhook-ingress
+  name: el-gitea-webhook-ingress
   namespace: triggers-demo
 spec:
   routes:
   - services:
-    - name: #el-gogs-webhook#
+    - name: #el-gitea-webhook#
       port: #8080#
   virtualhost:
-    fqdn: #el-gogs-webhook.192.168.64.5.nip.io#
+    fqdn: #el-gitea-webhook.192.168.64.7.nip.io#
 ----
 --
 OpenShift::
@@ -419,7 +419,7 @@ OpenShift::
 [.console-input]
 [source,bash,subs="macros+,+attributes"]
 ----
-oc expose svc -n {chapter-namespace} el-gogs-webhook --targetPort=http-listener
+oc expose svc -n {chapter-namespace} el-gitea-webhook --targetPort=http-listener
 ----
 --
 ====
@@ -427,34 +427,34 @@ oc expose svc -n {chapter-namespace} el-gogs-webhook --targetPort=http-listener
 [#tkn-triggers-configure-webhook]
 == Configure Webhook
 
-For the GitHub Triggers to work, we need to have the https://gogs.io/docs/features/webhook[Webhook] configured for the Git Repository `tekton-greeter` to point to the `el-gogs-webhook-ingress`:
+For the GitHub Triggers to work, we need to have the https://docs.gitea.io/en-us/webhooks/[Webhook] configured for the Git Repository `tekton-greeter` to point to the `el-gitea-webhook-ingress`:
 
 [.console-input]
 [source,bash,subs="+macros,+attributes"]
 ----
 kubectl create -n {chapter-namespace} \
-  -f link:{github-repo}/{triggers-repo}/gogs-webhook-taskrun.yaml[gogs-webhook-taskrun.yaml^]
+  -f link:{github-repo}/{triggers-repo}/gitea-webhook-taskrun.yaml[+$TUTORIAL_HOME+/{triggers-repo}/gitea-webhook-taskrun.yaml^]
 ----
 
 [.console-output]
 [source,bash]
 ----
-taskrun.tekton.dev/webhook-gogs-lwkjt created
+taskrun.tekton.dev/webhook-gitea-bm8gv created
 ----
 
 include::ROOT:partial$logs-view.adoc[tags='tr']
 
-A successfull initializations should show an output like:
+A successful initializations should show an output like:
 
 [.console-output]
 [source,bash]
 ----
-[webhook-gogs] Configured webhook: http://el-gogs-webhook.192.168.64.5.nip.io
+[webhook-gitea] Configured webhook: http://el-gitea-webhook.192.168.64.7.nip.io
 ----
 
-As you note now the `tekton-greeter` Git repository in Gogs is configured with the webhook to send Git events to EventListener.
+As you note now the `tekton-greeter` Git repository in Gitea is configured with the webhook to send Git events to EventListener.
 
-image::gogs_webhook_settings.png[]
+image::gitea_webhook_settings.png[]
 
 [#tekton-triggers-in-action]
 == Triggers in Action
@@ -478,28 +478,28 @@ Open a new terminal and watch the logs the event listener to see the incoming ev
 [.console-input]
 [source,bash,subs="+macros,+attributes"]
 ----
-stern -n {chapter-namespace} gogs-webhook
+stern -n {chapter-namespace} gitea-webhook
 ----
 
-Once the event playload is received from the gogs, you should see output(trimmed for brevity) as shown below:
+Once the event playload is received from the gitea server, you should see output(trimmed for brevity) as shown below:
 
 [.console-output]
 [source,bash]
 ----
 ...
-el-gogs-webhook-88bc89db-ld6jz event-listener {"level":"info","logger":"eventlistener","caller":"resources/create.go:93","msg":"Generating resource: kind: &APIResource{Name:pipelineruns,Namespaced:true,Kind:PipelineRun,Verbs:[delete deletecollection get list patch create update watch],ShortNames:[pr prs],SingularName:pipelinerun,Categories:[tekton tekton-pipelines],Group:tekton.dev,Version:v1beta1,StorageVersionHash:4xDTCrDXyFg=,}, name: greeter-app-","knative.dev/controller":"eventlistener"}
-el-gogs-webhook-88bc89db-ld6jz event-listener {"level":"info","logger":"eventlistener","caller":"resources/create.go:101","msg":"For event ID \"rrgcn\" creating resource tekton.dev/v1beta1, Resource=pipelineruns","knative.dev/controller":"eventlistener"}
+el-gitea-webhook-88bc89db-ld6jz event-listener {"level":"info","logger":"eventlistener","caller":"resources/create.go:93","msg":"Generating resource: kind: &APIResource{Name:pipelineruns,Namespaced:true,Kind:PipelineRun,Verbs:[delete deletecollection get list patch create update watch],ShortNames:[pr prs],SingularName:pipelinerun,Categories:[tekton tekton-pipelines],Group:tekton.dev,Version:v1beta1,StorageVersionHash:4xDTCrDXyFg=,}, name: greeter-app-","knative.dev/controller":"eventlistener"}
+el-gitea-webhook-88bc89db-ld6jz event-listener {"level":"info","logger":"eventlistener","caller":"resources/create.go:101","msg":"For event ID \"rrgcn\" creating resource tekton.dev/v1beta1, Resource=pipelineruns","knative.dev/controller":"eventlistener"}
 ...
 ----
 
 === Clone and Edit the source
 
-Using your favorite IDE clone the repo `tekton-greeter` from Gogs using the <<tkn-triggers-init-repo,clone url>>. 
+Using your favorite IDE clone the repo `tekton-greeter` from Gitea using the <<tkn-triggers-init-repo,clone url>>. 
 
 [.console-input]
 [source,bash,subs="+macros,+attributes"]
 ----
-git clone <your gogs tekton-greeter clone url>
+git clone <your gitea tekton-greeter clone url>
 ----
 
 Open the `tekton-tutorial-greeter` in your IDE and edit the Java file:
@@ -524,7 +524,7 @@ SpringBoot::
 
 Commit and push to see the 😺 Pipeline `greeter-app-deploy` running 🚀.
 
-NOTE: Use the username `gogs` and password `gogs` when prompted during Git push to repository.
+NOTE: Use the username `gitea` and password `gitea` when prompted during Git push to repository.
 
 include::ROOT:partial$logs-view.adoc[tags='pr']
 
@@ -565,4 +565,12 @@ If you no longer going to use the {chapter-namespace}, you can do:
 [source,bash,subs="+macros,attributes+"]
 ----
 kubectl delete ns {chapter-namespace}
+----
+
+If you no longer wish to have the Gitea operator installed, you can run:
+
+[.console-input]
+[source,bash,subs="+macros,attributes+"]
+----
+kubectl delete ns gitea-operator
 ----

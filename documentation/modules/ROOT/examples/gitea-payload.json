@@ -1,0 +1,115 @@
+{
+  "secret": "",
+  "ref": "refs/heads/master",
+  "before": "7efe116eb6a9763f648aad9061ce8d2f34b702bc",
+  "after": "36865805cbaf23a865daa6b1e87fb0498b5eba61",
+  "compare_url": "http://gitea.192.168.64.7.nip.io/gitea/tekton-tutorial-greeter/compare/7efe116eb6a9763f648aad9061ce8d2f34b702bc...36865805cbaf23a865daa6b1e87fb0498b5eba61",
+  "commits": [
+    {
+      "id": "36865805cbaf23a865daa6b1e87fb0498b5eba61",
+      "message": "Fix test\n",
+      "url": "http://gitea.192.168.64.7.nip.io/gitea/tekton-tutorial-greeter/commit/36865805cbaf23a865daa6b1e87fb0498b5eba61",
+      "author": {
+        "name": "gitea",
+        "email": "gitea@gitea.com",
+        "username": "gitea"
+      },
+      "committer": {
+        "name": "gitea",
+        "email": "gitea@gitea.com",
+        "username": "gitea"
+      },
+      "verification": null,
+      "timestamp": "2020-11-16T07:25:01Z",
+      "added": [],
+      "removed": [],
+      "modified": [
+        "src/test/java/com/redhat/developers/GreetingResourceTest.java"
+      ]
+    }
+  ],
+  "head_commit": null,
+  "repository": {
+    "id": 1,
+    "owner": {
+      "id": 1,
+      "login": "gitea",
+      "full_name": "",
+      "email": "gitea@gitea.com",
+      "avatar_url": "http://gitea.192.168.64.7.nip.io/user/avatar/gitea/-1",
+      "language": "en-US",
+      "is_admin": false,
+      "last_login": "2020-11-16T06:38:46Z",
+      "created": "2020-11-16T06:32:30Z",
+      "username": "gitea"
+    },
+    "name": "tekton-tutorial-greeter",
+    "full_name": "gitea/tekton-tutorial-greeter",
+    "description": "",
+    "empty": false,
+    "private": false,
+    "fork": false,
+    "template": false,
+    "parent": null,
+    "mirror": false,
+    "size": 112,
+    "html_url": "http://gitea.192.168.64.7.nip.io/gitea/tekton-tutorial-greeter",
+    "ssh_url": "ssh://gitea@gitea.192.168.64.7.nip.io:2022/gitea/tekton-tutorial-greeter.git",
+    "clone_url": "http://gitea.192.168.64.7.nip.io/gitea/tekton-tutorial-greeter.git",
+    "original_url": "",
+    "website": "",
+    "stars_count": 0,
+    "forks_count": 0,
+    "watchers_count": 1,
+    "open_issues_count": 0,
+    "open_pr_counter": 0,
+    "release_counter": 0,
+    "default_branch": "master",
+    "archived": false,
+    "created_at": "2020-11-16T06:32:30Z",
+    "updated_at": "2020-11-16T07:25:04Z",
+    "permissions": {
+      "admin": true,
+      "push": true,
+      "pull": true
+    },
+    "has_issues": true,
+    "internal_tracker": {
+      "enable_time_tracker": true,
+      "allow_only_contributors_to_track_time": true,
+      "enable_issue_dependencies": true
+    },
+    "has_wiki": true,
+    "has_pull_requests": true,
+    "ignore_whitespace_conflicts": false,
+    "allow_merge_commits": true,
+    "allow_rebase": true,
+    "allow_rebase_explicit": true,
+    "allow_squash_merge": true,
+    "avatar_url": ""
+  },
+  "pusher": {
+    "id": 1,
+    "login": "gitea",
+    "full_name": "",
+    "email": "gitea@gitea.com",
+    "avatar_url": "http://gitea.192.168.64.7.nip.io/user/avatar/gitea/-1",
+    "language": "en-US",
+    "is_admin": false,
+    "last_login": "2020-11-16T06:38:46Z",
+    "created": "2020-11-16T06:32:30Z",
+    "username": "gitea"
+  },
+  "sender": {
+    "id": 1,
+    "login": "gitea",
+    "full_name": "",
+    "email": "gitea@gitea.com",
+    "avatar_url": "http://gitea.192.168.64.7.nip.io/user/avatar/gitea/-1",
+    "language": "en-US",
+    "is_admin": false,
+    "last_login": "2020-11-16T06:38:46Z",
+    "created": "2020-11-16T06:32:30Z",
+    "username": "gitea"
+  }
+}

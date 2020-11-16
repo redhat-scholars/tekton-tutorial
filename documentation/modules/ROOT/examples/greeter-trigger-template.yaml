@@ -26,6 +26,9 @@ spec:
             value: '$(params.gitrepositoryurl)'
           - name: github-repo-revision
             value: '$(params.gitrevision)'
+          # Use the quarkus context by default
+          - name: context-dir
+            value: quarkus
         workspaces:
           - name: maven-settings
             configmap:
