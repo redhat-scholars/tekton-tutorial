@@ -509,16 +509,16 @@ Open the `tekton-tutorial-greeter` in your IDE and edit the Java file:
 Quarkus::
 +
 --
-- `src/main/java/com/redhat/developers/GreetingResource.java` to update the "Meeow!! from Tekton 😺🚀" to "😺 Tekton Rocks!" 
+- `quarkus/src/main/java/com/redhat/developers/GreetingResource.java` to update the "Tekton 😺 rocks 🚀" to "Tekton 😺 Triggered" 
 
-- `src/test/java/com/redhat/developers/GreetingResourceTest.java` to match "😺 Tekton Rocks!".
+- `quarkus/src/test/java/com/redhat/developers/GreetingResourceTest.java` to match "Tekton 😺 Triggered".
 --
 SpringBoot::
 +
 --
-- `src/main/java/com/redhat/developer/demos/GreetingController.java` to update the "Meeow!! from Tekton 😺🚀" to "😺 Tekton Rocks!" 
+- `springboot/src/main/java/com/redhat/developer/demos/GreetingController.java` to update the "Tekton 😺 rocks 🚀" to "Tekton 😺 Triggered" 
 
-- `src/test/java/com/redhat/developer/demos/GreetingControllerTest.java` to match "😺 Tekton Rocks!".
+- `springboot/src/test/java/com/redhat/developer/demos/GreetingControllerTest.java` to match "Tekton 😺 Triggered" .
 --
 ====
 
