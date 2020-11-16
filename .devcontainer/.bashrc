@@ -7,7 +7,7 @@ if [ ! -f ${LOCAL_KUBECONFIG} ]; then
     echo "Creating kubeconfig for use inside container"
     if [ -f ~/.kube/config ]; then
         cp ~/.kube/config ${LOCAL_KUBECONFIG}
-        ${TUTORIAL_HOME}/bin/convert-kubeconfig-for-devcontainer.sh "${LOCAL_KUBECONFIG}"
+        ~/bin/convert-kubeconfig-for-devcontainer.sh "${LOCAL_KUBECONFIG}"
     fi
 fi
 
