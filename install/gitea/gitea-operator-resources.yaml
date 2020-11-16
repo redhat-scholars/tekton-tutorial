@@ -1,0 +1,154 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: gitea-operator
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  creationTimestamp: null
+  name: gitea-operator
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  - services
+  - services/finalizers
+  - endpoints
+  - persistentvolumeclaims
+  - events
+  - configmaps
+  - secrets
+  - serviceaccounts
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - apps
+  resources:
+  - deployments
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - monitoring.coreos.com
+  resources:
+  - servicemonitors
+  verbs:
+  - get
+  - create
+- apiGroups:
+  - apps
+  resourceNames:
+  - gitea-operator
+  resources:
+  - deployments/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  verbs:
+  - get
+- apiGroups:
+  - apps
+  resources:
+  - replicasets
+  - deployments
+  verbs:
+  - get
+- apiGroups:
+  - projectcontour.io
+  resources:
+  - HTTPProxy
+  - httpproxies
+  verbs:
+  - create
+  - update
+  - delete
+  - get
+  - list
+  - watch
+  - patch
+- apiGroups:
+  - gpte.opentlc.com
+  resources:
+  - '*'
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  creationTimestamp: "2020-11-10T07:51:53Z"
+  name: gitea-operator
+  namespace: gitea-operator
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: gitea-operator
+subjects:
+  - kind: ServiceAccount
+    name: gitea-operator
+    namespace: gitea-operator
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: gitea-operator
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gitea-operator
+  namespace: gitea-operator
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: gitea-operator
+  template:
+    metadata:
+      labels:
+        name: gitea-operator
+    spec:
+      serviceAccountName: gitea-operator
+      containers:
+        - name: gitea-operator
+          image: quay.io/mhildenb/gitea-operator-minikube
+          imagePullPolicy: "Always"
+          volumeMounts:
+          - mountPath: /tmp/ansible-operator/runner
+            name: runner
+          env:
+            - name: WATCH_NAMESPACE
+              value: ""
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: OPERATOR_NAME
+              value: "gitea-operator"
+            - name: ANSIBLE_GATHERING
+              value: explicit
+      volumes:
+        - name: runner
+          emptyDir: {}

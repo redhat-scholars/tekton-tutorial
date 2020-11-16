@@ -1,0 +1,13 @@
+apiVersion: gpte.opentlc.com/v1alpha1
+kind: Gitea
+metadata:
+  name: gitea-server
+spec:
+  postgresqlVolumeSize: 1Gi
+  giteaVolumeSize: 1Gi
+  giteaSsl: False
+  giteaSkipTlsVerify: True
+  giteaServiceName: gitea
+  giteaRoute: @GITEA_HOSTNAME@
+  postgresqlImage: quay.io/mhildenb/gitea-postgres-10-rhel7
+  postgresqlImageTag: latest 
