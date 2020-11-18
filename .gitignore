@@ -14,6 +14,9 @@ buildNumber.properties
 
 .cache
 
+# ignore macos custom attributes files
+.DS_Store
+
 # Avoid ignoring Maven wrapper jar file (.jar files are usually ignored)
 !/.mvn/wrapper/maven-wrapper.jar
 .settings
@@ -47,3 +50,5 @@ staging-gh-pages
 triggers/tekton-greeter
 app.ini
 demo
+
+docker-secrets
