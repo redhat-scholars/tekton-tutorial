@@ -16,12 +16,36 @@
 
 	// Set *default* container specific settings.json values on container create.
 	"settings": { 
-		"terminal.integrated.shell.linux": "/bin/bash"
+		"terminal.integrated.shell.linux": "/bin/bash",
+		"vs-kubernetes": { 
+			"vs-kubernetes.namespace": "", 
+			"vs-kubernetes.kubectl-path": "/usr/local/bin/kubectl", 
+			"vs-kubernetes.helm-path": "", 
+			"vs-kubernetes.draft-path": "", 
+			"vs-kubernetes.minikube-path": "", 
+			"vs-kubernetes.kubectlVersioning": "user-provided", 
+			"vs-kubernetes.outputFormat": "yaml", 
+			"vs-kubernetes.kubeconfig": "/opt/app-root/.kube/config", 
+			"vs-kubernetes.autoCleanupOnDebugTerminate": false, 
+			"vs-kubernetes.nodejs-autodetect-remote-root": true, 
+			"vs-kubernetes.nodejs-remote-root": "", 
+			"vs-kubernetes.nodejs-debug-port": 9229, 
+			"checkForMinikubeUpgrade": true, 
+			"logsDisplay": "webview", 
+			"imageBuildTool": "Docker",
+			"vs-kubernetes.knownKubeconfigs": [],
+			"vs-kubernetes.kubectl-path.linux": "/usr/local/bin/kubectl",
+			"vs-kubernetes.helm-path.linux": "/opt/app-root/.vs-kubernetes/tools/helm/linux-amd64/helm",
+			"vs-kubernetes.minikube-path.linux": "",
+			"vs-kubernetes.draft-path.linux": ""
+		} 
 	},
 
 	// Add the IDs of extensions you want installed when the container is created.
 	"extensions": [
-		"dbaeumer.vscode-eslint"
+		"dbaeumer.vscode-eslint",
+		"ms-azuretools.vscode-docker",
+		"ms-kubernetes-tools.vscode-kubernetes-tools"
 	],
 	
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
