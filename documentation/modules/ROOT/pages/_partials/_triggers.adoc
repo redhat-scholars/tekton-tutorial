@@ -568,7 +568,7 @@ Quarkus::
 SpringBoot::
 +
 --
-- `springboot/src/main/java/com/redhat/developer/demos/GreetingController.java` to update the "Tekton 😺 rocks 🚀" to "Tekton 😺 Triggered" 
+- `springboot/src/main/java/com/redhat/developer/demos/GreetingController.java` to update the "Meeow!! from Tekton 😺🚀" to "Tekton 😺 Triggered" 
 
 - `springboot/src/test/java/com/redhat/developer/demos/GreetingControllerTest.java` to match "Tekton 😺 Triggered".
 
