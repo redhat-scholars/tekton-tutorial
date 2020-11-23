@@ -9,7 +9,7 @@ At the end of this chapter you will be able to :
 [#tkn-triggers-overview]
 == Overview
 
-Until now we have seen how to create Tasks and Pipelines. But whenever it comes to running the Tasks and Pipelines we always relied on doing it manually. In the Chapter we will be expoloring how to do it using Triggers, e.g. say you push a commit in to the source repository and it triggers a PipelineRun to deploy a new application or a TaskRun to push the image to container registry. Lets rock!
+Until now we have seen how to create Tasks and Pipelines. But whenever it comes to running the Tasks and Pipelines we always relied on doing it manually. In the Chapter we will be expoloring how to do it using Triggers, e.g. say you push a commit in to the source repository and it triggers a PipelineRun to deploy a new application or a TaskRun to push the image to container registry. Let's rock!
 
 include::partial$tekton-nav-to-folder.adoc[tags="folder-all,triggers"]
 
@@ -47,13 +47,13 @@ greeter-app-deploy   1 minute ago   ---        ---       ---        ---
 
 === Deploy Gitea
 
-Since we need to trigger a Pipeline with a git push, we will deploy a Git server to the local cluster. This will avoid us the need to expose the service to the public internet and also helps us to test things quickly with our local cluster setup.
+Since we need to trigger a Pipeline with a git push, we will deploy a Git server to the local cluster. This will avoid our neeting to expose the service to the public internet and also helps us to test things quickly with our local cluster setup.
 
-https://gitea.io/[Gitea] is super quick and easy to install i.e. self-hosted git service. Lets deploy that into the Kubernetes Cluster.
+https://gitea.io/[Gitea] is super quick and easy to install self-hosted git service. Let's deploy it into our Kubernetes cluster using an Operator.
 
 === Create Gitea Server
 
-We'll run a script that creates the gitea server for us locally passing in as a parameter to the script a minikube based hostname `GITEA_HOSTNAME` that will allow us to access the instance of gitea from our host machine
+We'll run a script that creates the Gitea server for us locally passing in as a parameter to the script a minikube based hostname `GITEA_HOSTNAME` that will allow us to access the instance of Gitea from our host machine
 
 [tabs]
 ====
@@ -437,7 +437,7 @@ yq w link:{github-repo}/{triggers-repo}/eventlistener-ingress.yaml[+$TUTORIAL_HO
 httpproxy.projectcontour.io/el-gitea-webhook-ingress created
 ----
 
-Lets verify if the ingress has been configured correctly:
+Let's verify if the ingress has been configured correctly:
 
 [.console-input]
 [source,bash,subs="+macros,+attributes"]
@@ -513,7 +513,7 @@ image::gitea_webhook_settings.png[]
 
 === Terminal 1 
 
-As we expect the triggers to start a Pipeline, lets open a new terminal and watch the running Pipelines:
+As we expect the triggers to start a Pipeline, let's open a new terminal and watch the running Pipelines:
 
 [.console-input]
 [source,bash,subs="+macros,+attributes"]
