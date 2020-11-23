@@ -26,6 +26,12 @@ spec:
             value: '$(params.gitrepositoryurl)'
           - name: github-repo-revision
             value: '$(params.gitrevision)'
+          - name: context-dir
+            # must be either 'quarkus' or 'springboot'
+            value: quarkus
+          - name: image-name
+            # For OpenShift builds, this should be patched to point to a suitable image stream for the project
+            value: example.com/tekton-tutorial/greeter
         workspaces:
           - name: maven-settings
             configmap:
