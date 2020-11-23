@@ -19,7 +19,7 @@ EOF
 
 is_openshift() {
   # if we get back a line then it's installed
-  return "$(kubectl api-resources | grep "route.openshift.io" 2>/dev/null)"
+  [ -n "$(kubectl api-resources | grep "route.openshift.io" 2>/dev/null)" ]
 }
 
 while getopts ':og:' option; do
@@ -32,8 +32,7 @@ while getopts ':og:' option; do
 done
 shift "$((OPTIND - 1))"
 
-
-if [[ is_openshift ]]; then
+if is_openshift ; then
   echo "Targeting an OpenShift cluster."
   OPERATOR_IMAGE="quay.io/mhildenb/gitea-operator:0.1"
 fi
