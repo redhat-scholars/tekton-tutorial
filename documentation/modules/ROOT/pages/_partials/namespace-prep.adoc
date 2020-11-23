@@ -152,8 +152,6 @@ end::ws-deploy-nexus[]
 
 tag::ws-deploy-knative[]
 
-Before we create our pipeline ensure that the kubernetes cluster has a default storage class defined:
-
 [#ws-deploy-knative]
 ifndef::openshift[]
 === Deploy Knative Serving
@@ -197,6 +195,8 @@ end::ws-deploy-knative[]
 tag::ws-create-pvc[]
 [#ws-check-sc]
 === Check Default Storage Class
+
+Before we create our pipeline ensure that the kubernetes cluster has a default storage class defined:
 
 [.console-input]
 [source,bash,subs="+macros,+attributes"]
