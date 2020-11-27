@@ -23,7 +23,6 @@ jobs:
         with:
           deploy_key: "${{ secrets.TKN_STAGING_SITE_DEPLOY }}"
           publish_dir: "${{ env.SITE_DIR }}"
-          publish_branch: "gh-pages"
-          external_repository: redhat-developer-demos/tekton-tutorial-staging
+          publish_branch: "gh-pages"          
           full_commit_message: "[CI]${{ github.event.head_commit.message }}"
      
