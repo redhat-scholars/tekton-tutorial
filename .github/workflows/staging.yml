@@ -19,11 +19,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Generate Site
-        uses: kameshsampath/antora-site-action@0.2.4
+        uses: kameshsampath/antora-site-action@v0.2.4
         with:
           antora_playbook: "${{ env.STAGING_SITE_PLAYBOOK }}"
       - name: Save Generated Site
-        uses: actions/upload-artifact@v1.0.0
+        uses: actions/upload-artifact@v2
         with:
           name: site
           path: "${{ github.workspace }}/${{ env.SITE_DIR }}"
@@ -38,7 +38,7 @@ jobs:
           repository: "${{ env.STAGING_REPO }}"
           path: tekton-tutorial-staging
       - name: Download generated site
-        uses: actions/download-artifact@v1
+        uses: actions/download-artifact@v2
         with:
           name: site
           path: "${{ github.workspace }}/tekton-tutorial-staging/${{ env.SITE_DIR }}"
