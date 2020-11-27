@@ -2,10 +2,10 @@
 apiVersion: triggers.tekton.dev/v1alpha1
 kind: TriggerBinding
 metadata:
-  name: github-triggerbinding
+  name: gitea-triggerbinding
 spec:
   params:
     - name: gitrevision
-      value: $(body.head_commit.id)
+      value: $(body.after)
     - name: gitrepositoryurl
-      value: $(body.repository.url)
+      value: $(body.repository.clone_url)

@@ -3,7 +3,7 @@
 
 tag::ws-context-setting[]
 
-All exercises of this chapter will be done a namesapace `{chapter-namespace}`, lets create and switch to the `{chapter-namespace}` namespace.
+All exercises of this chapter will be done a namespace `{chapter-namespace}`, let's create and switch to the `{chapter-namespace}` namespace.
 
 [.console-input]
 [source,bash,subs="+macros,+attributes"]
@@ -89,7 +89,13 @@ NAME                 TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)          
 service/nexus        NodePort    10.100.205.22   <none>        8081:31743/TCP   3m25s
 ----
 
+
 ifndef::openshift[]
+[tabs]
+====
+Minikube::
++
+--
 The nexus maven repository could be opened using the url:
 
 [.console-input]
@@ -97,17 +103,21 @@ The nexus maven repository could be opened using the url:
 ----
 $(minikube service nexus -n {chapter-namespace})
 ----
+--
+OpenShift::
++
+--
 endif::[]
-
-[NOTE.optional,caption=OPTIONAL]
-=====
-In OpenShift,we can use routes to expose the service if we need to access it from outside,by:
+In OpenShift we can use routes to expose the service if we need to access it from outside the cluster by:
 [.console-input]
 [source,bash,subs="+macros,+attributes"]
 ----
 {cli} expose svc -n {chapter-namespace} nexus
 ----
-=====
+ifndef::openshift[]
+--
+====
+endif::[]
 
 [#ws-create-maven-settings-cm]
 === Create maven-settings ConfigMap
@@ -142,8 +152,6 @@ end::ws-deploy-nexus[]
 
 tag::ws-deploy-knative[]
 
-Before we create our pipeline ensure that the kubernetes cluster has a default storage class defined:
-
 [#ws-deploy-knative]
 ifndef::openshift[]
 === Deploy Knative Serving
@@ -175,7 +183,9 @@ OpenShift::
 +
 --
 endif::[]
-OpenShift users can install Knative i.e https://docs.openshift.com/container-platform/4.1/serverless/installing-openshift-serverless.html[OpenShift Serverless] using its Operators.
+OpenShift users can install Knative by following the instructions https://docs.openshift.com/container-platform/4.6/serverless/installing_serverless/installing-openshift-serverless.html[here] for installing OpenShift Serverless.
+
+Follow the instructions for installing the Serverless Operator on the cluster and then follow link:https://docs.openshift.com/container-platform/4.6/serverless/installing_serverless/installing-knative-serving.html#installing-knative-serving[the instructions for creating Knative Serving].
 ifndef::openshift[]
 --
 ====
@@ -185,6 +195,8 @@ end::ws-deploy-knative[]
 tag::ws-create-pvc[]
 [#ws-check-sc]
 === Check Default Storage Class
+
+Before we create our pipeline ensure that the kubernetes cluster has a default storage class defined:
 
 [.console-input]
 [source,bash,subs="+macros,+attributes"]

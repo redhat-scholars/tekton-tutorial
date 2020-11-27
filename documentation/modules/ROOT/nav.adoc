@@ -71,10 +71,10 @@
 ** xref:private_reg_repos.adoc#tekton-auth-cleanup[Cleanup]
 
 * xref:triggers.adoc[Triggers]
-** xref:triggers.adoc#install-tekton-triggers[Instal Tekton Triggers]
 ** xref:triggers.adoc#tkn-triggers-prepare[Prepare Namespace]
+** xref:triggers.adoc#tkn-create-sa[ Pipeline Service Account]
 ** xref:triggers.adoc#tkn-triggers-init-repo[Initialize Source Repository]
-** xref:triggers.adoc#tkn-triggers-create-sa[ Pipeline Service Account]
+** xref:triggers.adoc#install-tekton-triggers[Install Tekton Triggers]
 ** xref:triggers.adoc#tkn-triggers-template[Trigger Template]
 ** xref:triggers.adoc#tkn-triggers-bindings[Trigger Bindings]
 ** xref:triggers.adoc#tkn-triggers-eventlistener[Trigger Event Listener]

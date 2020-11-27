@@ -1,0 +1,70 @@
+apiVersion: tekton.dev/v1beta1
+kind: TaskRun
+metadata:
+  generateName: init-gitea-
+spec:
+  serviceAccountName: pipeline
+  taskSpec:
+    params:
+      - name: GITEA_USER
+        type: string
+        description: Gitea admin username
+        default: gitea
+      - name: GITEA_PASSWORD
+        type: string
+        description: Gitea admin password
+        default: gitea
+      - name: REPO_URL
+        type: string
+        description: The GitHub Repository to use
+        default: 'https://github.com/redhat-scholars/tekton-tutorial-greeter'
+    stepTemplate:
+      env:
+        - name: NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+    steps:
+      - name: create-gitea-admin
+        image: quay.io/openshift/origin-cli:latest
+        script: |
+          #!/usr/bin/env bash
+
+          set -Eeuo pipefail
+
+          # use the gitea cli on the gitea pods to create a user with admin rights per parameters passed in
+          # NOTE: This command is spammy so we pipe the output to /dev/null
+          kubectl exec svc/gitea > /dev/null -- /home/gitea/gitea -w /home/gitea/ -c /home/gitea/conf/app.ini admin create-user --username $(params.GITEA_USER) --password $(params.GITEA_PASSWORD) --email $(params.GITEA_USER)@gitea.com \
+            --must-change-password=false 
+
+          printf "Created Gitea admin user %s:%s" $(params.GITEA_USER) $(params.GITEA_PASSWORD)
+
+      - name: init-gitea
+        #TODO #19 #18 update to official tekton oc python image
+        image: quay.io/siamaksade/python-oc
+        script: |
+          #!/usr/bin/env python3
+
+          import os
+          import requests
+          import json 
+
+          gitea_user = "$(params.GITEA_USER)"
+          gitea_pass = "$(params.GITEA_PASSWORD)"
+          giteaURL = "http://" + gitea_user + ":" + gitea_pass + "@"+ os.popen('oc get svc gitea  -o template --template="{{.spec.clusterIP}}"').read() + ":3000"
+          
+          # debugging
+          # print("Gitea service url is: " + giteaURL )
+
+          # create git repo tekton-tutorial-greeter
+          data_repo = '{"clone_addr": "$(params.REPO_URL)", "uid": 1, "repo_name": "tekton-tutorial-greeter"}'
+          headers = {'Content-Type': 'application/json'}
+          resp = requests.post(url = giteaURL + "/api/v1/repos/migrate", headers = headers, data = data_repo)  
+
+          if resp.status_code != 200 and resp.status_code != 201:
+            print("Error creating git repo (status code: {})".format(resp.status_code))
+            print(resp.content)
+          else:
+            print("Created git repo tekton-tutorial-greeter")
+            repoInfo = json.loads(str(resp.content,"utf8"))            
+            print("Repository Clone url {0}".format(repoInfo['clone_url']))

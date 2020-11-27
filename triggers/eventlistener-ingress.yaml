@@ -2,7 +2,7 @@
 apiVersion: projectcontour.io/v1
 kind: HTTPProxy
 metadata:
-  name: el-gogs-webhook-ingress
+  name: el-gitea-webhook-ingress
 spec:
   virtualhost:
     fqdn: will be replaced

@@ -9,15 +9,193 @@ At the end of this chapter you will be able to :
 [#tkn-triggers-overview]
 == Overview
 
-Until now we have seen how to create Tasks and Pipelines. But whenever it comes to running the Tasks and Pipelines we always relied on doing it manually. In the Chapter we will be expoloring how to do it using Triggers, e.g. say you push a commit in to the source repository and it triggers a PipelineRun to deploy a new application or a TaskRun to push the image to container registry. Lets rock!
+Until now we have seen how to create Tasks and Pipelines. But whenever it comes to running the Tasks and Pipelines we always relied on doing it manually. In the Chapter we will be expoloring how to do it using Triggers, e.g. say you push a commit in to the source repository and it triggers a PipelineRun to deploy a new application or a TaskRun to push the image to container registry. Let's rock!
 
 include::partial$tekton-nav-to-folder.adoc[tags="folder-all,triggers"]
+
+[#tkn-triggers-prepare]
+== Prepare namespace
+
+include::ROOT:partial$namespace-prep.adoc[tags="*"]
+
+[#tkn-triggers-create-pipeline]
+=== Create Pipeline
+
+As part of the Trigger exercise we will be running the greeter-app-deploy pipeline, let's deploy the pipeline to be used later:
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+kubectl apply -n {chapter-namespace} \
+  -f link:{github-repo}/{workspaces-repo}/greeter-app-deploy.yaml[$TUTORIAL_HOME/{workspaces-repo}/greeter-app-deploy.yaml^]
+----
+
+Verify the available pipelines:
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+tkn pipeline -n {chapter-namespace} ls
+----
+
+[.console-output]
+[source,bash]
+----
+NAME                    AGE            LAST RUN   STARTED   DURATION   STATUS
+greeter-app-deploy   1 minute ago   ---        ---       ---        ---
+----
+
+=== Deploy Gitea
+
+Since we need to trigger a Pipeline with a git push, we will deploy a Git server to the local cluster. This will avoid our neeting to expose the service to the public internet and also helps us to test things quickly with our local cluster setup.
+
+https://gitea.io/[Gitea] is super quick and easy to install self-hosted git service. Let's deploy it into our Kubernetes cluster using an Operator.
+
+=== Create Gitea Server
+
+We'll run a script that creates the Gitea server for us locally passing in as a parameter to the script a minikube based hostname `GITEA_HOSTNAME` that will allow us to access the instance of Gitea from our host machine
+
+[tabs]
+====
+Minikube::
++
+--
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+export GITEA_HOSTNAME="gitea.$(minikube ip).nip.io"
+$TUTORIAL_HOME/bin/link:{github-repo}/bin/create-gitea.sh[create-gitea.sh^] -g $GITEA_HOSTNAME
+----
+--
+OpenShift::
++
+--
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+$TUTORIAL_HOME/bin/link:{github-repo}/bin/create-gitea.sh[create-gitea.sh^]
+export GITEA_HOSTNAME=$(kubectl get route gitea -n {chapter-namespace} -o jsonpath='{.spec.host}')
+----
+--
+====
+
+In a separate shell you can follow the installation progress by tailing the logs of the gitea operator that was installed into your minikube cluster.
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+stern gitea -n gitea-operator
+----
+
+When the script finishes, your gitea deployment should be completed.  A successful deployment will report:
+[.console-output]
+[source,bash]
+----
+Gitea server installed and running
+----
+
+If you want, you can confirm this by running this command
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+kubectl get pods,svc -lapp=gitea
+----
+
+Which should yield output that looks something like the following
+
+[.console-output]
+[source,bash]
+----
+NAME                        READY   STATUS    RESTARTS   AGE
+pod/gitea-dc5699668-xnzm9   1/1     Running   0          69m
+
+NAME            TYPE       CLUSTER-IP       EXTERNAL-IP   PORT(S)          AGE
+service/gitea   NodePort   10.107.208.196   <none>        3000:31850/TCP   69m
+----
+
+You can access the gitea service using ingress url:
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+open http://$GITEA_HOSTNAME
+----
+
+.Gitea Home
+image::gitea_home.png[]
+
+[#tkn-create-sa]
+== Create ServiceAccount, Roles and Role Bindings
+
+We need to query Kubernetes objects, create Triggers and finally deploy the Knative Service as part of this chapter's exercies. Let's create a Kubernetes Service Account and add the required roles/permissions:
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+kubectl apply -k link:{github-repo}/{triggers-repo}/rbac[+$TUTORIAL_HOME+/{triggers-repo}/rbac]
+----
+
+[.console-output]
+[source,bash]
+----
+serviceaccount/pipeline created
+role.rbac.authorization.k8s.io/app-deployer-role created
+role.rbac.authorization.k8s.io/tekton-triggers-admin created
+role.rbac.authorization.k8s.io/tekton-triggers-createwebhook created
+rolebinding.rbac.authorization.k8s.io/app-deployer-binding created
+rolebinding.rbac.authorization.k8s.io/tekton-triggers-admin-binding created
+rolebinding.rbac.authorization.k8s.io/tekton-triggers-createwebhook-binding created
+----
+
+NOTE: In OpenShift you might not need the *pipeline* SA, as the OpenShift Pipelines creates it by default
+
+[#tkn-triggers-init-repo]
+== Initialize Source Repository
+
+To run the exercises of this chapter we need the following setup in Git(gitea):
+
+- A Git user, for the demo we will create user called *gitea* with password *gitea*
+- A Git Repository named `tekton-greeter`, we will use https://github.com/redhat-scholars/tekton-tutorial-greeter
+
+We will run the following Task to perform the necessary intializations listed above:
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+kubectl create -n {chapter-namespace} \
+  -f link:{github-repo}/{triggers-repo}/gitea-init-taskrun.yaml[+$TUTORIAL_HOME+/{triggers-repo}/gitea-init-taskrun.yaml^]
+----
+
+[.console-output]
+[source,bash]
+----
+taskrun.tekton.dev/init-gitea-qkf84 created
+----
+
+include::ROOT:partial$logs-view.adoc[tags='tr']
+
+A successfull initializations should show an output like:
+
+[.console-output]
+[source,bash]
+----
+[create-gitea-admin] Created Gitea admin user gitea:gitea
+
+[init-gitea] Created git repo tekton-tutorial-greeter
+[init-gitea] Repository Clone url http://gitea.192.168.64.7.nip.io/gitea/tekton-tutorial-greeter.git
+----
+
+You should now be able to open the *Repository Clone url* from the output above and view the repository content.
 
 [#install-tekton-triggers]
 == Install Triggers
 
-NOTE: In OpenShfit, the OpenShift pipelines operator installs Tekton Pipelines and Tekton Triggers in openshift-pipelines namespace. Its not needed install Tekton Triggers.
-
+[tabs]
+====
+Minikube::
++
+--
 [.console-input]
 [source,bash,subs="+macros,+attributes"]
 ----
@@ -43,188 +221,13 @@ tekton-pipelines-webhook-75bc7666c-9crwq       1/1     Running   1          3d3h
 #tekton-triggers-controller-697c9b844d-9lz4x    1/1     Running   0          15h#
 #tekton-triggers-webhook-6bcb96f965-gqrbh       1/1     Running   0          15h#
 ----
-
-[#tkn-triggers-prepare]
-== Prepare namespace
-
-include::ROOT:partial$namespace-prep.adoc[tags="*"]
-
-[#tkn-triggers-create-pipeline]
-=== Create Pipeline
-
-As part of the Trigger exercise we will be runing the greeter-app-deploy pipeline, lets deploy the pipeline to be used later:
-
-[.console-input]
-[source,bash,subs="+macros,+attributes"]
-----
-kubectl apply -n {chapter-namespace} \
-  -f link:{github-repo}/{workspaces-repo}/greeter-app-deploy.yaml[$TUTORIAL_HOME/{workspaces-repo}/greeter-app-deploy.yaml^]
-----
-
-Verify the available pipelines:
-
-[.console-input]
-[source,bash,subs="+macros,+attributes"]
-----
-tkn pipeline -n {chapter-namespace} ls
-----
-
-[.console-output]
-[source,bash]
-----
-NAME                    AGE            LAST RUN   STARTED   DURATION   STATUS
-greeter-app-deploy   1 minute ago   ---        ---       ---        ---
-----
-
-=== Deploy Gogs
-
-Since we need to trigger a Pipeline with a git push, we will deploy a Git server to the local cluster. This will avoid us the need to expose the service to the public internet and also helps us to test things quickly with our local cluster setup.
-
-https://gogs.io/[Gogs] is super quick and easy to install i.e. self-hosted git service. Lets deploy that into the Kubernetes Cluster.
-
-=== Create Gogs Ingress
-
-Create the gogs ingress so that we can access the application from host machine using http:
-
-[.console-input]
-[source,bash,subs="+macros,+attributes"]
-----
-export GOGS_HOSTNAME="gogs.$(minikube ip).nip.io"
-----
-
-[.console-input]
-[source,bash,subs="+macros,+attributes"]
-----
-yq w link:{github-repo}/install/git/gogs-ingress.yaml[+$TUTORIAL_HOME+/install/git/gogs-ingress.yaml] \
-  spec.virtualhost.fqdn $GOGS_HOSTNAME |\
-  kubectl apply -n {chapter-namespace} -f -
-----
-
-Create gogs config file `app.ini` from the template and add that to gogs ConfigMap:
-
-[.console-input]
-[source,bash,subs="+macros,+attributes"]
-----
-sed "s/@GOGS_HOSTNAME@/$GOGS_HOSTNAME/g" link:{github-repo}/install/git/app.ini.template[+$TUTORIAL_HOME+/install/git/app.ini.template] \
-  | tee +$TUTORIAL_HOME+/install/git/app.ini
-----
-
-[.console-input]
-[source,bash,subs="+macros,+attributes"]
-----
-kubectl apply -n {chapter-namespace} \
-  -k link:{github-repo}/install/git[+$TUTORIAL_HOME+/install/git/]
-----
-
-NOTE: We use https://kubernetes-sigs.github.io/kustomize/[kustomize] that allows us to do some customizations on the Kubenetes manifests before we apply them. Kustomize is built into kubectl and can be used with `-k` option.
-
-[.console-output]
-[source,bash]
-----
-configmap/gogs-config created
-service/gogs-postgresql created
-service/gogs created
-deployment.apps/gogs-postgresql created
-deployment.apps/gogs created
-persistentvolumeclaim/gogs-data created
-persistentvolumeclaim/pgdata-pvc created
-persistentvolumeclaim/pgwal-pvc created
-----
-
-Wait for the `gogs-postgresql` and `gogs` pods to come up, watch the status using :
-
-[.console-input]
-[source,bash,subs="+macros,+attributes"]
-----
-watch kubectl get pods,svc -lapp=gogs
-----
-
-A suceesfull deployment should show:
-
-[.console-output]
-[source,bash]
-----
-NAME                                  READY   STATUS    RESTARTS   AGE
-pod/gogs-854766b6d7-nsmsp             1/1     Running   0          64s
-pod/gogs-postgresql-745dfd5cb-spc46   1/1     Running   0          64s
-
-NAME                      TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)          AGE
-service/gogs              NodePort    10.106.116.15    <none>        3000:31550/TCP   64s
-service/gogs-postgresql   ClusterIP   10.105.150.118   <none>        5432/TCP         64s
-----
-
-You can access the gogs service using ingress url:
-
-[.console-input]
-[source,bash,subs="+macros,+attributes"]
-----
-open http://$GOGS_HOSTNAME
-----
-
-.Gogs Home
-image::gogs_home.png[]
-
-[#tkn-create-sa]
-== Create ServiceAccount, Roles and Role Bindins
-
-We need to query Kubernetes objects, create Triggers and finally deploy the Knative Service as part of this chapter' exercies. Lets create a Kubernetes Service Account and add the required roles/permissions:
-
-[.console-input]
-[source,bash,subs="+macros,+attributes"]
-----
-kubectl apply -k link:{github-repo}/{triggers-repo}/rbac[+$TUTORIAL_HOME+/{triggers-repo}/rbac]
-----
-
-[.console-output]
-[source,bash]
-----
-serviceaccount/pipeline created
-role.rbac.authorization.k8s.io/app-deployer-role created
-role.rbac.authorization.k8s.io/tekton-triggers-admin created
-role.rbac.authorization.k8s.io/tekton-triggers-createwebhook created
-rolebinding.rbac.authorization.k8s.io/app-deployer-binding created
-rolebinding.rbac.authorization.k8s.io/tekton-triggers-admin-binding created
-rolebinding.rbac.authorization.k8s.io/tekton-triggers-createwebhook-binding created
-----
-
-NOTE: In OpenShift you might no need the *pipeline* SA, as the OpenShift Pipelines creates it by default
-
-[#tkn-triggers-init-repo]
-== Initialize Source Repository
-
-To run the exercises of this chapter we need the following setup in Git(gogs):
-
-- A Git user, for the demo we will create user called *gogs* with password *gogs*
-- A Git Repository named `tekton-greeter`, we will use https://github.com/redhat-scholars/tekton-tutorial-greeter
-
-We will run the following Task to perform the necessary intializations listed above:
-
-[.console-input]
-[source,bash,subs="+macros,+attributes"]
-----
-kubectl create -n {chapter-namespace} \
-  -f link:{github-repo}/{triggers-repo}/gogs-init-taskrun.yaml[gogs-init-taskrun.yaml^]
-----
-
-[.console-output]
-[source,bash]
-----
-taskrun.tekton.dev/init-gogs-qkf84 created
-----
-
-include::ROOT:partial$logs-view.adoc[tags='tr']
-
-A successfull initializations should show an output like:
-
-[.console-output]
-[source,bash]
-----
-[init-gogs] Created admin user gogs:gogs
-[init-gogs] Created git repo tekton-tutorial-greeter
-[init-gogs] Repository Clone url http://gogs.192.168.64.5.nip.io/gogs/https://github.com/redhat-scholars/tekton-tutorial-greeter.git
-----
-
-You should now be able to open the *Repository Clone url* from the output above and view the respository content.
+--
+OpenShift::
++
+--
+NOTE: In OpenShift, the OpenShift pipelines operator installs Tekton Pipelines and Tekton Triggers in openshift-pipelines namespace. It's not needed install Tekton Triggers.
+--
+====
 
 [#tkn-triggers-template]
 == Trigger Template
@@ -238,7 +241,7 @@ TriggerTemplate is responsible to create the Tekton Resources when it receives t
 [source,bash,subs="+macros,+attributes"]
 ----
 kubectl create -n {chapter-namespace} \
-  -f link:{github-repo}/{triggers-repo}/greeter-trigger-template.yaml[greeter-trigger-template.yaml^]
+  -f link:{github-repo}/{triggers-repo}/greeter-trigger-template.yaml[+$TUTORIAL_HOME+/{triggers-repo}/greeter-trigger-template.yaml^]
 ----
 
 [.console-output]
@@ -264,17 +267,41 @@ NAME                                 AGE
 tekton-greeter-trigger-template   1 minute ago
 ----
 
+[#tkn-triggers-adjust-template-image]
+==== Adjust Trigger Template Image
+
+[tabs]
+====
+Minikube::
++
+--
+NOTE: by default the greeter pipeline's default image tag that it builds to is the example.com addon registry for minikube.  Hence, no further updates to the TriggerTemplate is necessary
+--
+OpenShift::
++
+--
+When using OpenShift, we want to adjust the image tag that the pipeline builds.  We'll do this by patching the image tag parameter of the trigger template to point to a local image stream: 
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+kubectl patch tt/tekton-greeter-trigger-template -n {chapter-namespace} --type='json' -p='[{"op": "replace", "path": "/spec/resourcetemplates/0/spec/params/3/value", "value":"image-registry.openshift-image-registry.svc:5000/triggers-demo/greeter"}]'
+----
+
+--
+====
+
 [#tkn-triggers-bindings]
 == Trigger Bindings
 
-TriggerBinding is responsible to bind the Event payload with Template Parameters. In this case it will bind the gogs event playload to TriggerTemplate parameters, inputs, outputs and workspaces.
+TriggerBinding is responsible to bind the Event payload with Template Parameters. In this case it will bind the gitea event playload to TriggerTemplate parameters, inputs, outputs and workspaces.
 
-Let us see a sample webhook payload that Git events from Gogs might look like:
+Let us see a sample webhook payload that Git events from Gitea might look like:
 
-.Gogs Payload sample
+.Gitea Payload sample
 [source,json,subs="+quotes"]
 ----
-include::ROOT:example$gogs-payload.json[]
+include::ROOT:example$gitea-payload.json[]
 ----
 
 We can use any attribute/data from the JSON payload and bind them as the value in TriggerBindings. For this chapter exercise we are interested in two attributes namely:
@@ -282,29 +309,29 @@ We can use any attribute/data from the JSON payload and bind them as the value i
 - *after*: the commit hash after our push is merged into the master
 - *repository.clone_url*: The Git Repo clone url
 
-The HTTP Body and Headers of the eventt payload are available as `body` and `header` JSONPath variables. We can retrieve the values using JSONPath expressions. Check the https://github.com/tektoncd/triggers/blob/master/docs/triggerbindings.md#event-variable-interpolation[Event Variable Interpolation] for more details.
+The HTTP Body and Headers of the event payload are available as `body` and `header` JSONPath variables. We can retrieve the values using JSONPath expressions. Check the https://github.com/tektoncd/triggers/blob/master/docs/triggerbindings.md#event-variable-interpolation[Event Variable Interpolation] for more details.
 
-To retreieve the `after` and `repository.clone_url` we will the JSONPath expressions `$(body.after)` and `$(body.repoistory.clone_url)` respectively. 
+To retrieve the `after` and `repository.clone_url` we use will the JSONPath expressions `$(body.after)` and `$(body.repoistory.clone_url)` respectively. 
 
 [#tkn-triggers-create-bindings]
 === Create Trigger Bindings
 
-.link:{github-repo}/{triggers-repo}/gogs-triggerbindings.yaml[gogs-triggerbindings.yaml^]
+.link:{github-repo}/{triggers-repo}/gitea-triggerbindings.yaml[gitea-triggerbindings.yaml^]
 [source,yaml,subs="+quotes"]
 ----
-include::ROOT:example$gogs-triggerbindings.yaml[]
+include::ROOT:example$gitea-triggerbindings.yaml[]
 ----
 
 [.console-input]
 [source,bash,subs="+macros,+attributes"]
 ----
-kubectl create -n {chapter-namespace} -f gogs-triggerbindings.yaml
+kubectl create -n {chapter-namespace} -f link:{github-repo}/{triggers-repo}/gitea-triggerbindings.yaml[+$TUTORIAL_HOME+/{triggers-repo}/gitea-triggerbindings.yaml^]
 ----
 
 [.console-output]
 [source,bash]
 ----
-triggerbinding.triggers.tekton.dev/gogs-triggerbinding created
+triggerbinding.triggers.tekton.dev/gitea-triggerbinding created
 ----
 
 List the available TriggerBindings:
@@ -321,7 +348,7 @@ It should show an output like:
 [source,bash]
 ----
 NAME                  AGE
-gogs-triggerbinding   7 seconds ago
+gitea-triggerbinding   7 seconds ago
 ----
 
 [#tkn-triggers-eventlistener]
@@ -335,13 +362,13 @@ Event Listener is primary interace for external sources to send events, that wil
 [.console-input]
 [source,bash,subs="+macros,+attributes"]
 ----
-kubectl apply -n {chapter-namespace} -f link:{github-repo}/{triggers-repo}/gogs-eventlistener.yaml[gogs-eventlistener.yaml]
+kubectl apply -n {chapter-namespace} -f link:{github-repo}/{triggers-repo}/gitea-eventlistener.yaml[+$TUTORIAL_HOME+/{triggers-repo}/gitea-eventlistener.yaml^]
 ----
 
 [.console-output]
 [source,bash]
 ----
-eventlistener.triggers.tekton.dev/gogs-webhook created
+eventlistener.triggers.tekton.dev/gitea-webhook created
 ----
 
 List the available EventListeners:
@@ -358,7 +385,7 @@ It should show an output like:
 [source,bash]
 ----
 NAME           AGE
-gogs-webhook   4 seconds ago
+gitea-webhook   4 seconds ago
 ----
 
 Each EventListener will have a service named `el-<EventListener Name>` exposed automatically for sources to send events to Triggers.
@@ -366,19 +393,19 @@ Each EventListener will have a service named `el-<EventListener Name>` exposed a
 [.console-input]
 [source,bash,subs="+macros,+attributes"]
 ----
-kubectl get svc -n {chapter-namespace} -leventlistener=gogs-webhook
+kubectl get svc -n {chapter-namespace} -leventlistener=gitea-webhook
 ----
 
 [.console-output]
 [source,bash,subs="+quotes"]
 ----
 NAME              TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)          AGE
-#el-gogs-webhook   ClusterIP   10.97.199.207    <none>        8080/TCP         51s#
+#el-gitea-webhook   ClusterIP   10.97.199.207    <none>        8080/TCP         51s#
 ----
 
 === Create Event Listener Ingress
 
-If you need the EventListner service to be available outside of the cluster thereby you can use them as part of the webhook, the service `el-gogs-webhook` needs to be exposed via Ingress:
+If you need the EventListner service to be available outside of the cluster thereby you can use them as part of the webhook, the service `el-gitea-webhook` needs to be exposed via Ingress:
 
 [tabs]
 ====
@@ -388,18 +415,18 @@ Minikube::
 [.console-input]
 [source,bash,subs="+macros,+attributes"]
 ----
-export EL_WEBHOOK_URL="$(kubectl get svc -n {chapter-namespace} el-gogs-webhook -o yaml \
+export EL_WEBHOOK_HOST="$(kubectl get svc -n {chapter-namespace} el-gitea-webhook -o yaml \
   | yq r - 'metadata.name').$(minikube ip).nip.io"
-export EL_WEBHOOK_LISTENER_PORT="$(kubectl get svc -n {chapter-namespace} el-gogs-webhook -o yaml \
+export EL_WEBHOOK_LISTENER_PORT="$(kubectl get svc -n {chapter-namespace} el-gitea-webhook -o yaml \
   | yq r - 'spec.ports.(name==http-listener).port')"
 ----
 
 [.console-input]
 [source,bash,subs="+macros,+attributes"]
 ----
-yq w link:{github-repo}/{triggers-repo}/eventlistener-ingress.yaml[eventlistener-ingress.yaml] \
-  spec.virtualhost.fqdn $EL_WEBHOOK_URL \
-  | yq w - 'spec.routes[0].services[0].name' el-gogs-webhook \
+yq w link:{github-repo}/{triggers-repo}/eventlistener-ingress.yaml[+$TUTORIAL_HOME+/{triggers-repo}/eventlistener-ingress.yaml^] \
+  spec.virtualhost.fqdn $EL_WEBHOOK_HOST \
+  | yq w - 'spec.routes[0].services[0].name' el-gitea-webhook \
   | yq w - 'spec.routes[0].services[0].port' $EL_WEBHOOK_LISTENER_PORT \
   | kubectl apply -n {chapter-namespace} -f  -
 ----
@@ -407,15 +434,15 @@ yq w link:{github-repo}/{triggers-repo}/eventlistener-ingress.yaml[eventlistener
 [.console-output]
 [source,bash]
 ----
-httpproxy.projectcontour.io/el-gogs-webhook-ingress 
+httpproxy.projectcontour.io/el-gitea-webhook-ingress created
 ----
 
-Lets verify if the ingress has been configured correctly:
+Let's verify if the ingress has been configured correctly:
 
 [.console-input]
 [source,bash,subs="+macros,+attributes"]
 ----
-kubectl get httpproxy -n {chapter-namespace} el-gogs-webhook-ingress -o yaml
+kubectl get httpproxy -n {chapter-namespace} el-gitea-webhook-ingress -o yaml
 ----
 
 The command should the following output (trimmed for brevity):
@@ -426,24 +453,25 @@ The command should the following output (trimmed for brevity):
 apiVersion: projectcontour.io/v1
 kind: HTTPProxy
 metadata:
-  name: el-gogs-webhook-ingress
+  name: el-gitea-webhook-ingress
   namespace: triggers-demo
 spec:
   routes:
   - services:
-    - name: #el-gogs-webhook#
+    - name: #el-gitea-webhook#
       port: #8080#
   virtualhost:
-    fqdn: #el-gogs-webhook.192.168.64.5.nip.io#
+    fqdn: #el-gitea-webhook.192.168.64.7.nip.io#
 ----
 --
 OpenShift::
 +
 --
 [.console-input]
-[source,bash,subs="macros+,+attributes"]
+[source,bash,subs="+macros,+attributes"]
 ----
-oc expose svc -n {chapter-namespace} el-gogs-webhook --targetPort=http-listener
+oc expose svc -n {chapter-namespace} el-gitea-webhook
+export EL_WEBHOOK_HOST=$(oc get route el-gitea-webhook -n {chapter-namespace} -ojsonpath='{.spec.host}')
 ----
 --
 ====
@@ -451,41 +479,41 @@ oc expose svc -n {chapter-namespace} el-gogs-webhook --targetPort=http-listener
 [#tkn-triggers-configure-webhook]
 == Configure Webhook
 
-For the GitHub Triggers to work, we need to have the https://gogs.io/docs/features/webhook[Webhook] configured for the Git Repository `tekton-greeter` to point to the `el-gogs-webhook-ingress`:
+For the GitHub Triggers to work, we need to have the https://docs.gitea.io/en-us/webhooks/[Webhook] configured for the Git Repository `tekton-greeter` to point to the exposed host of our webhook service.  For this we will use the `tkn` cli:
 
 [.console-input]
 [source,bash,subs="+macros,+attributes"]
 ----
-kubectl create -n {chapter-namespace} \
-  -f link:{github-repo}/{triggers-repo}/gogs-webhook-taskrun.yaml[gogs-webhook-taskrun.yaml^]
+kubectl apply -n {chapter-namespace} -f link:{github-repo}/{triggers-repo}/gitea-webhook-task.yaml[+$TUTORIAL_HOME+/{triggers-repo}/gitea-webhook-task.yaml^]
+tkn task start gitea-create-webhook -n {chapter-namespace} -s pipeline -p WEBHOOK_HOST="$EL_WEBHOOK_HOST"
 ----
 
 [.console-output]
 [source,bash]
 ----
-taskrun.tekton.dev/webhook-gogs-lwkjt created
+TaskRun started: gitea-create-webhook-run-l2dxl
 ----
 
 include::ROOT:partial$logs-view.adoc[tags='tr']
 
-A successfull initializations should show an output like:
+A successful initializations should show an output like:
 
 [.console-output]
 [source,bash]
 ----
-[webhook-gogs] Configured webhook: http://el-gogs-webhook.192.168.64.5.nip.io
+[webhook-gitea] Configured webhook: http://el-gitea-webhook.192.168.64.7.nip.io
 ----
 
-As you note now the `tekton-greeter` Git repository in Gogs is configured with the webhook to send Git events to EventListener.
+As you note now the `tekton-greeter` Git repository in Gitea is configured with the webhook to send Git events to EventListener.
 
-image::gogs_webhook_settings.png[]
+image::gitea_webhook_settings.png[]
 
 [#tekton-triggers-in-action]
 == Triggers in Action
 
 === Terminal 1 
 
-As we expect the triggers to start a Pipeline, lets open a new terminal and watch the running Pipelines:
+As we expect the triggers to start a Pipeline, let's open a new terminal and watch the running Pipelines:
 
 [.console-input]
 [source,bash,subs="+macros,+attributes"]
@@ -502,28 +530,28 @@ Open a new terminal and watch the logs the event listener to see the incoming ev
 [.console-input]
 [source,bash,subs="+macros,+attributes"]
 ----
-stern -n {chapter-namespace} gogs-webhook
+stern -n {chapter-namespace} gitea-webhook
 ----
 
-Once the event playload is received from the gogs, you should see output(trimmed for brevity) as shown below:
+Once the event playload is received from the gitea server, you should see output(trimmed for brevity) as shown below:
 
 [.console-output]
 [source,bash]
 ----
 ...
-el-gogs-webhook-88bc89db-ld6jz event-listener {"level":"info","logger":"eventlistener","caller":"resources/create.go:93","msg":"Generating resource: kind: &APIResource{Name:pipelineruns,Namespaced:true,Kind:PipelineRun,Verbs:[delete deletecollection get list patch create update watch],ShortNames:[pr prs],SingularName:pipelinerun,Categories:[tekton tekton-pipelines],Group:tekton.dev,Version:v1beta1,StorageVersionHash:4xDTCrDXyFg=,}, name: greeter-app-","knative.dev/controller":"eventlistener"}
-el-gogs-webhook-88bc89db-ld6jz event-listener {"level":"info","logger":"eventlistener","caller":"resources/create.go:101","msg":"For event ID \"rrgcn\" creating resource tekton.dev/v1beta1, Resource=pipelineruns","knative.dev/controller":"eventlistener"}
+el-gitea-webhook-88bc89db-ld6jz event-listener {"level":"info","logger":"eventlistener","caller":"resources/create.go:93","msg":"Generating resource: kind: &APIResource{Name:pipelineruns,Namespaced:true,Kind:PipelineRun,Verbs:[delete deletecollection get list patch create update watch],ShortNames:[pr prs],SingularName:pipelinerun,Categories:[tekton tekton-pipelines],Group:tekton.dev,Version:v1beta1,StorageVersionHash:4xDTCrDXyFg=,}, name: greeter-app-","knative.dev/controller":"eventlistener"}
+el-gitea-webhook-88bc89db-ld6jz event-listener {"level":"info","logger":"eventlistener","caller":"resources/create.go:101","msg":"For event ID \"rrgcn\" creating resource tekton.dev/v1beta1, Resource=pipelineruns","knative.dev/controller":"eventlistener"}
 ...
 ----
 
 === Clone and Edit the source
 
-Using your favorite IDE clone the repo `tekton-greeter` from Gogs using the <<tkn-triggers-init-repo,clone url>>. 
+Using your favorite IDE clone the repo `tekton-greeter` from Gitea using the <<tkn-triggers-init-repo,clone url>>. 
 
 [.console-input]
 [source,bash,subs="+macros,+attributes"]
 ----
-git clone <your gogs tekton-greeter clone url>
+git clone <your gitea tekton-greeter clone url>
 ----
 
 Open the `tekton-tutorial-greeter` in your IDE and edit the Java file:
@@ -533,22 +561,31 @@ Open the `tekton-tutorial-greeter` in your IDE and edit the Java file:
 Quarkus::
 +
 --
-- `src/main/java/com/redhat/developers/GreetingResource.java` to update the "Meeow!! from Tekton 😺🚀" to "😺 Tekton Rocks!" 
+- `quarkus/src/main/java/com/redhat/developers/GreetingResource.java` to update the "Tekton 😺 rocks 🚀" to "Tekton 😺 Triggered" 
 
-- `src/test/java/com/redhat/developers/GreetingResourceTest.java` to match "😺 Tekton Rocks!".
+- `quarkus/src/test/java/com/redhat/developers/GreetingResourceTest.java` to match "Tekton 😺 Triggered".
 --
 SpringBoot::
 +
 --
-- `src/main/java/com/redhat/developer/demos/GreetingController.java` to update the "Meeow!! from Tekton 😺🚀" to "😺 Tekton Rocks!" 
+- `springboot/src/main/java/com/redhat/developer/demos/GreetingController.java` to update the "Meeow!! from Tekton 😺🚀" to "Tekton 😺 Triggered" 
 
-- `src/test/java/com/redhat/developer/demos/GreetingControllerTest.java` to match "😺 Tekton Rocks!".
+- `springboot/src/test/java/com/redhat/developer/demos/GreetingControllerTest.java` to match "Tekton 😺 Triggered".
+
+NOTE: To ensure the pipeline builds the SpringBoot version of the repo, you must first update the link:{github-repo}/{triggers-repo}/greeter-trigger-template.yaml[greeter-trigger-template^] to pass in 'springboot' as the 'context-dir' parameter to the link:{github-repo}/{workspaces-repo}/greeter-app-deploy.yaml[greeter-app-deploy^] pipeline.  You can edit the trigger template or you can patch it using this command:
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+kubectl patch tt/tekton-greeter-trigger-template -n {chapter-namespace} --type='json' -p='[{"op": "replace", "path": "/spec/resourcetemplates/0/spec/params/2/value", "value":"springboot"}]'
+----
 --
 ====
 
+
 Commit and push to see the 😺 Pipeline `greeter-app-deploy` running 🚀.
 
-NOTE: Use the username `gogs` and password `gogs` when prompted during Git push to repository.
+NOTE: Use the username `gitea` and password `gitea` when prompted during Git push to repository.
 
 include::ROOT:partial$logs-view.adoc[tags='pr']
 
@@ -557,7 +594,7 @@ Once the Pipeline succeeds, verify the Knative Service `greeter`:
 [.console-input]
 [source,bash,subs="+macros,+attributes"]
 ----
-http --body (kn service describe greeter -o url)/hello
+http --body $(kn service describe greeter -o url)/
 ----
 
 The command should shown output like:
@@ -565,7 +602,7 @@ The command should shown output like:
 [.console-output]
 [source,bash]
 ----
-😺 Tekton Rocks!
+Tekton 😺 Triggered
 ----
 
 Expriment with updating the sources to your taste and see the pipeline triggers.
@@ -575,10 +612,10 @@ Expriment with updating the sources to your taste and see the pipeline triggers.
 
 To use Tekton Triggers we need:
 
-- A Kubernetes Service Account with required premissions assigned
-- A TriggerTemplate which defines what Tekton Resources to create for a events
-- A TriggerBinding which allows to extract the data from the event payload and bind them to Tekton Parameters of Task/Pipeline
-- A EventListener that will listen for the  events and trigger the executuion of Tekton Resources as part of the Trigger Template
+- A Kubernetes Service Account with required permissions assigned
+- A TriggerTemplate which defines which Tekton Resources to create for a given event
+- A TriggerBinding which allows to extract the data from an event payload and bind them to the Parameters of a Tekton Task/Pipeline
+- An EventListener that will listen for the events and trigger the execution of Tekton Resources as part of the Trigger Template
 
 [#tkn-triggers-cleanup]
 == Cleanup
@@ -589,4 +626,12 @@ If you no longer going to use the {chapter-namespace}, you can do:
 [source,bash,subs="+macros,attributes+"]
 ----
 kubectl delete ns {chapter-namespace}
+----
+
+If you no longer wish to have the Gitea operator installed, you can run:
+
+[.console-input]
+[source,bash,subs="+macros,attributes+"]
+----
+kubectl delete ns gitea-operator
 ----
