@@ -17,6 +17,12 @@ asciidoc:
     kubernetes-version: v1.18.2
     release-version: master
     page-pagination: true
+    tekton-version: v0.14.3
+    triggers-version: v0.6.1
+    kn-version: v0.16.0
+    tekton-cli-version: 0.12.0
+    cli: kubectl
+    openshift-version: 4.6
   extensions:
     - ./lib/remote-include-processor.js
     - ./lib/tab-block.js
