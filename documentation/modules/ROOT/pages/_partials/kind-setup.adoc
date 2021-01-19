@@ -1,0 +1,106 @@
+[#start-kind]
+**Configure and Start KinD**
+
+Before installing Tekton and its components, we need to create a Kubernetes Cluster. Download https://kind.sigs.k8s.io/docs/user/quick-start/[KinD] and add it to your path.
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+$TUTORIAL_HOME/bin/start-kind.sh
+----
+
+.KinD starting
+[.console-output]
+[source,bash,subs="+macros,+attributes"]
+----
+::group:: Install KinD
+Creating cluster "tektontutorial" ...
+ ✓ Ensuring node image (kindest/node:v1.19.1) 🖼
+ ✓ Preparing nodes 📦 📦
+ ✓ Writing configuration 📜
+ ✓ Starting control-plane 🕹️
+ ✓ Installing CNI 🔌
+ ✓ Installing StorageClass 💾
+ ✓ Joining worker nodes 🚜
+Set kubectl context to "kind-tektontutorial"
+You can now use your cluster with:
+
+kubectl cluster-info --context kind-tektontutorial
+
+Have a nice day! 👋
+node/tektontutorial-control-plane annotated
+node/tektontutorial-worker annotated
+node/tektontutorial-worker labeled
+::endgroup::
+::group:: Setup container registry
+65a9f0d33f8c896da5fcbdeca928a4bf63362c1b49b887c426e62997fc2c9d9f
+::endgroup::
+::group:: Install Contour Ingress
+namespace/projectcontour created
+serviceaccount/contour created
+serviceaccount/envoy created
+configmap/contour created
+customresourcedefinition.apiextensions.k8s.io/extensionservices.projectcontour.io created
+customresourcedefinition.apiextensions.k8s.io/httpproxies.projectcontour.io created
+customresourcedefinition.apiextensions.k8s.io/tlscertificatedelegations.projectcontour.io created
+serviceaccount/contour-certgen created
+rolebinding.rbac.authorization.k8s.io/contour created
+role.rbac.authorization.k8s.io/contour-certgen created
+job.batch/contour-certgen-v1.11.0 created
+clusterrolebinding.rbac.authorization.k8s.io/contour created
+clusterrole.rbac.authorization.k8s.io/contour created
+service/contour created
+service/envoy created
+deployment.apps/contour created
+daemonset.apps/envoy created
+daemon set "envoy" successfully rolled out
+::endgroup::
+----
+
+[#deploy-tekton]
+*Deploy Tekton Pipelines*
+
+To deploy the Tekton pipelines:
+
+[.console-input]
+[source,bash,subs="+macros,attributes+"]
+----
+kubectl apply --filename \
+https://github.com/tektoncd/pipeline/releases/download/{tekton-version}/release.notags.yaml
+----
+
+[NOTE]
+======
+It will take few mins for the Tekton pipeline components to be installed, you an watch the status using the command:
+
+[.console-input]
+[source,bash,subs="+macros,attributes+"]
+----
+watch kubectl get pods -n tekton-pipelines
+----
+
+You can use kbd:[Ctrl+c] to terminate the watch
+======
+
+A successful deployment of Tekton pipelines will show the following pods:
+
+[.console-output]
+[source,bash]
+-----
+NAME                                           READY   STATUS    AGE
+tekton-pipelines-controller-849ccccd7f-gc6dp   1/1     Running   85s
+tekton-pipelines-webhook-75bc7666c-9crwq       1/1     Running   85s
+-----
+
+include::partial$tekton-cli.adoc[]
+**Configuring Kubernetes namespace**
+
+All the tutorial exercises will be deployed in namespace called `{tutorial-namespace}`:
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+kubectl create namespace {tutorial-namespace} &&\
+kubectl config set-context --current --namespace={tutorial-namespace}
+----
+

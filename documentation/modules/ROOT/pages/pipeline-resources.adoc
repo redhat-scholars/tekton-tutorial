@@ -4,4 +4,3 @@ include::master@tekton-tutorial:ROOT:partial$_attributes.adoc[]
 :chapter-namespace: tektontutorial
 
 include::master@tekton-tutorial:ROOT:partial$_pipeline_resources.adoc[]
-

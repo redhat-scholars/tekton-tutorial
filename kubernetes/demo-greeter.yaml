@@ -1,0 +1,44 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: demo-greeter
+spec:
+  selector:
+    app: demo-greeter
+  ports:
+  - port: 8080
+    targetPort: 8080
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: demo-greeter
+spec:
+  selector:
+    matchLabels:
+      app: demo-greeter
+  template:
+    metadata:
+      labels:
+        app: demo-greeter
+    spec:
+      containers:
+      - name: demo-greeter
+        image: registry.local:5000/rhdevelopers/tekton-tutorial-greeter
+        ports:
+        - containerPort: 8080
+---
+apiVersion: projectcontour.io/v1
+kind: HTTPProxy
+metadata:
+  name: demo-greeter
+spec:
+  virtualhost:
+    fqdn: demo-greeter.127.0.0.1.nip.io
+  routes:
+    - conditions:
+      - prefix: /
+      services:
+        - name: demo-greeter
+          port: 8080

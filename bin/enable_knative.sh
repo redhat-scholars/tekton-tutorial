@@ -6,14 +6,6 @@ set -o pipefail
 knative_version=${KNATIVE_VERSION:-v0.16.0}
 knative_serving_version=${KNATIVE_SERVING_VERSION:-v0.16.0}
 
-###################################
-# Ingress 
-###################################
-
-kubectl apply -f https://projectcontour.io/quickstart/contour.yaml
-
-kubectl rollout status ds envoy -n projectcontour
-
 ######################################
 ## Knative Serving
 ######################################

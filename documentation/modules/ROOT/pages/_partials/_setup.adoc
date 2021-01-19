@@ -76,10 +76,10 @@ Knative can be installed only on Kubernetes cluster. The following section shows
 
 [tabs]
 ====
-Minikube::
+KinD::
 +
 --
-include::partial$minikube-setup.adoc[]
+include::partial$kind-setup.adoc[]
 --
 OpenShift::
 +

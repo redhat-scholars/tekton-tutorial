@@ -17,6 +17,7 @@ conditions                       tekton.dev   true         Condition
 pipelineresources                tekton.dev   true         PipelineResource
 pipelineruns        pr,prs       tekton.dev   true         PipelineRun
 pipelines                        tekton.dev   true         Pipeline
+runs                             tekton.dev   true         Run
 taskruns            tr,trs       tekton.dev   true         TaskRun
 tasks                            tekton.dev   true         Task
 ----

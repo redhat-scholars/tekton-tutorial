@@ -18,7 +18,7 @@ spec:
   type: image
   params:
     - name: url
-      # use internal registry
-      value: example.com/rhdevelopers/tekton-tutorial-greeter
-      # if you are on OpenShift uncomment the line below
+      # use KinD internal registry
+      value: registry.local:5000/rhdevelopers/tekton-tutorial-greeter
+      # if you are on OpenShift, use OpenShift interal registry
       #value: "image-registry.openshift-image-registry.svc:5000/tektontutorial/greeter"

@@ -18,7 +18,7 @@ $TUTORIAL_HOME/bin/start-minikube.sh
 ❌  profile "{tutorial-namespace}" not found
 ✅  Created a new profile : {tutorial-namespace}
 ✅  minikube profile was successfully set to {tutorial-namespace}
-😄  [{tutorial-namespace}] minikube v1.12.1 on Darwin 10.15.6
+😄  [{tutorial-namespace}] minikube {minikube-version} on Darwin 10.15.6
 ✨  Automatically selected the hyperkit driver
 👍  Starting control plane node {tutorial-namespace} in cluster {tutorial-namespace}
 🔥  Creating hyperkit VM (CPUs=4, Memory=8192MB, Disk=51200MB) ...
@@ -78,7 +78,7 @@ To deploy the Tekton pipelines:
 [source,bash,subs="+macros,attributes+"]
 ----
 kubectl apply --filename \
-https://github.com/tektoncd/pipeline/releases/download/{tekton-version}/release.yaml
+https://github.com/tektoncd/pipeline/releases/download/{tekton-version}/release.notags.yaml
 ----
 
 [NOTE]
