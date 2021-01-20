@@ -26,6 +26,7 @@ asciidoc:
     cli: kubectl
     openshift-version: 4.6
     minikube-version: v1.16.0
+    tutorial-apps-revision: master
   extensions:
     - ./lib/remote-include-processor.js
     - ./lib/tab-block.js

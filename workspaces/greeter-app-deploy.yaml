@@ -7,8 +7,8 @@ spec:
     The Pipline to buld and deploy the Hello World Java App https://github.com/redhat-scholars/tekton-tutorial-greeter as Knative Service.
   params:
     - name: image-name #<.>
-      description: The fully qualified image name e.g example.com/tekton-tutorial/greeter
-      default: example.com/tekton-tutorial/greeter
+      description: The fully qualified image name e.g registry.local:5000/tekton-tutorial/greeter
+      default: registry.local:5000/tekton-tutorial/greeter
     - name: context-dir
       description: >-
         The application framework to use, value can be either quarkus or springboot

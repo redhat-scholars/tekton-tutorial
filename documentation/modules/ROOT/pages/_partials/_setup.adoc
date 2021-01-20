@@ -27,10 +27,10 @@ The following CLI tools are required for running the exercises in this tutorial.
 | https://github.com/wercker/stern/releases/download/1.6.0/stern_linux_amd64[Download]
 | https://github.com/wercker/stern/releases/download/1.11.0/stern_windows_amd64.exe[Download]
 
-| https://github.com/mikefarah/yq[yq]
-| brew install yq
-| brew install yq
-| choco install yq
+| https://github.com/mikefarah/yq[yqv3.x]
+| brew install yq@3
+| brew install yq@3
+| choco install yq@3
 
 | https://httpie.org/[httpie]
 | `brew install httpie`

@@ -3,8 +3,8 @@
 set -eu
 set -o pipefail
 
-knative_version=${KNATIVE_VERSION:-v0.16.0}
-knative_serving_version=${KNATIVE_SERVING_VERSION:-v0.16.0}
+knative_version=${KNATIVE_VERSION:-v0.17.0}
+knative_serving_version=${KNATIVE_SERVING_VERSION:-v0.17.0}
 
 ######################################
 ## Knative Serving
@@ -24,7 +24,7 @@ kubectl apply \
   --filename \
     https://github.com/knative/net-kourier/releases/download/$knative_version/kourier.yaml
   
-kubectl rollout status deploy 3scale-kourier-control -n kourier-system 
+kubectl rollout status deploy 3scale-kourier-control -n knative-serving 
 kubectl rollout status deploy 3scale-kourier-gateway -n kourier-system
 
 kubectl patch configmap/config-network \
@@ -33,7 +33,7 @@ kubectl patch configmap/config-network \
   -p '{"data":{"ingress.class":"kourier.ingress.networking.knative.dev"}}'
 
 cat <<EOF | kubectl apply -n kourier-system -f -
-apiVersion: networking.k8s.io/v1beta1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: kourier-ingress
@@ -48,7 +48,7 @@ EOF
 kubectl patch configmap/config-deployment \
     -n knative-serving \
     --type merge \
-    -p '{"data":{"registriesSkippingTagResolving": "ko.local,dev.local,example.com,example.org,test.com,test.org,localhost:5000"}}'
+    -p '{"data":{"registriesSkippingTagResolving": "ko.local,dev.local,example.com,example.org,test.com,test.org,localhost:5000,registry.local:5000"}}'
 
 # set nip.io resolution 
 minikube_nip_domain="\"data\":{\"127.0.0.1.nip.io\": \"\"}"
