@@ -22,34 +22,21 @@ $TUTORIAL_HOME/bin/start-minikube.sh
 ✨  Automatically selected the hyperkit driver
 👍  Starting control plane node {tutorial-namespace} in cluster {tutorial-namespace}
 🔥  Creating hyperkit VM (CPUs=4, Memory=8192MB, Disk=51200MB) ...
-🐳  Preparing Kubernetes v1.18.3 on Docker 19.03.12 ...
+🐳  Preparing Kubernetes `kubernetes-version` on Docker 20.10.0 ...
 🔎  Verifying Kubernetes components...
 🌟  Enabled addons: default-storageclass, storage-provisioner
-🏄  Done! kubectl is now configured to use "{tutorial-namespace}"
-----
-
-Switch to the new minikube profile *{tutorial-namespace}*, so that all your commands gets executed in the right context:
-
-[.console-input]
-[source,bash,subs="+macros,+attributes"]
-----
-minikube profile {tutorial-namespace}
-----
-
-[.console-output]
-[source,bash,subs="+macros,+attributes"]
-----
+🏄  Done! kubectl is now configured to use "{tutorial-namespace} and "default" namespace by default"
 ✅  minikube profile was successfully set to {tutorial-namespace}
 ----
 
-**Deploy Registry Helper**
+**Enable Internal Container Registry and Registry Aliases**
 
-To enable pushing and pulling container images from local internal minikube registry, we will deploy the minikube https://github.com/kubernetes/minikube/tree/master/deploy/addons/registry-aliases[registry-aliases] addon:
+To enable pushing and pulling container images from local internal minikube registry, we will deploy the minikube https://github.com/kubernetes/minikube/tree/master/deploy/addons/registry[registry] addon:
 
 [.console-input]
 [source,bash,subs="+macros,+attributes"]
 ----
-minikube addons enable registry && minikube addons enable registry-aliases
+minikube addons enable registry
 ----
 
 [.console-output]
@@ -57,9 +44,19 @@ minikube addons enable registry && minikube addons enable registry-aliases
 ----
 🔎  Verifying registry addon...
 🌟  The 'registry' addon is enabled
-🌟  The 'registry-aliases' addon is enabled
 ----
 
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+minikube addons enable registry-aliases
+----
+
+[.console-output]
+[source,bash,subs="+macros,+attributes"]
+----
+🌟  The 'registry-aliases' addon is enabled
+----
 The registry-aliases addon should allow you to build local container images with names like:
 
 - example.com/foo/bar

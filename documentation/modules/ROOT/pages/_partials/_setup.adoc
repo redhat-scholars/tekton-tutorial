@@ -17,6 +17,11 @@ The following CLI tools are required for running the exercises in this tutorial.
 | `dnf install docker`
 | https://docs.docker.com/docker-for-windows/install[Docker for Windows]
 
+| `Minikube`
+| https://minikube.sigs.k8s.io/docs/start/
+| https://minikube.sigs.k8s.io/docs/start/
+| https://minikube.sigs.k8s.io/docs/start/
+
 | `kubectl`
 | https://kubernetes.io/docs/tasks/tools/install-kubectl/[Install]
 | https://kubernetes.io/docs/tasks/tools/install-kubectl/[Install]
@@ -76,10 +81,10 @@ Knative can be installed only on Kubernetes cluster. The following section shows
 
 [tabs]
 ====
-KinD::
+Minikube::
 +
 --
-include::partial$kind-setup.adoc[]
+include::partial$minikube-setup.adoc[]
 --
 OpenShift::
 +

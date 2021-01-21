@@ -36,9 +36,9 @@ The command should show a output like:
 [.console-output]
 [source,bash]
 ----
-NAME                    DESCRIPTION              AGE
-build-and-list-target                            15 hours ago
-build-app                                        15 hours ago
+NAME            DESCRIPTION   AGE
+build-app                     20 minutes ago
+source-lister                 22 minutes ago
 ----
 
 If you don't see the output as above please ensure you have completed all the exercises of xref::pipeline-resources.adoc[Chapter 2] and xref::tasks.adoc[Chapter 3] before proceeding further.
@@ -73,10 +73,10 @@ The Task list should now list the following two Tasks:
 [.console-output]
 [source,bash,subs="+macros,attributes+"]
 ----
-NAME                    DESCRIPTION              AGE
-build-and-list-target                            15 hours ago
-build-app                                        15 hours ago
-openshift-client        This task runs comm...   6 seconds ago
+NAME               DESCRIPTION              AGE
+build-app                                   21 minutes ago
+openshift-client   This task runs comm...   6 seconds ago
+source-lister                               23 minutes ago
 ----
 
 [#tekton-pipeline-create]
@@ -227,27 +227,14 @@ Get the service URL,
 
 [tabs]
 ====
-KinD::
+Minikube::
 +
 --
-Create the HTTPProxy to access the service:
-[.console-input]
-[source,bash,subs="+macros,attributes+"]
-----
-kubectl apply -n {tutorial-namespace} -f $TUTORIAL_HOME/kubernetes/http-proxy.yaml
-----
-
-[.console-output]
-[source,bash]
-----
-httpproxy.projectcontour.io/greeter created
-----
 
 [.console-input]
 [source,bash,subs="+macros,attributes+"]
 ----
-SVC_URL=$(kubectl get httpproxy greeter -n tektontutorial -o=jso
-npath='{.spec.virtualhost.fqdn}')
+SVC_URL=$(minikube -p {tutorial-namespace} -n {chapter-namespace} greeter --url)
 ----
 --
 OpenShift::

@@ -3,7 +3,7 @@ The following checks ensure that each chapter exercises are done with the right 
 
 [tabs]
 ====
-KinD::
+Minikube::
 +
 --
 * Kubernetes should be v1.19+
@@ -45,7 +45,7 @@ Server Version: {openshift-version}
 Kubernetes Version: {kubernetes-version}
 ----
 
-* Make sure to be on `tektontutorial` OpenShift project
+* Make sure to be on `{tutorial-namespace}` OpenShift project
 
 [.console-input]
 [source,bash,subs="+macros,+attributes"]

@@ -25,6 +25,7 @@ asciidoc:
     tekton-cli-version: 0.15.0
     cli: kubectl
     openshift-version: 4.6
+    kind-version: v0.9.0
     minikube-version: v1.16.0
     tutorial-apps-revision: master
   extensions:

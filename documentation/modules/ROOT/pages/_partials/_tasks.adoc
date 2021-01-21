@@ -744,7 +744,7 @@ Lets try running the image build using the `build-app` task:
 
 [tabs]
 ====
-KinD::
+Minikube::
 +
 --
 [.console-input]
@@ -766,7 +766,7 @@ Lets try checking the application:
 [.console-input]
 [source,bash,subs="+macros,attributes+"]
 ----
-SVC_URL="http://demo-greeter.127.0.0.1.nip.io"
+SVC_URL=$(minikube -p {tutorial-namespace} -n {tutorial-namespace} service demo-greeter --url)
 ----
 --
 OpenShift::

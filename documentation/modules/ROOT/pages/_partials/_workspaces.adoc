@@ -577,11 +577,11 @@ The command should show an output like :
 Name:       greeter
 Namespace:  {chapter-namespace}
 Age:        21s
-#URL:        http://greeter.{chapter-namespace}.127.0.0.1.nip.io#
+#URL:        http://greeter.{chapter-namespace}.192.168.64.7.nip.io#
 
 Revisions:
   100%  @latest (greeter-ttyqz-1) [1] (21s)
-        Image:  kind-registry:5000/rhdevelopers/tekton-tutorial-greeter@sha256:79b8a50a6ef29dbc0df5220de5aea13b8b38b7c4cd407ad074968de8cfbd41b6 (at 79b8a5)
+        Image:  example.com/tekton-tutorial/greeter@sha256:79b8a50a6ef29dbc0df5220de5aea13b8b38b7c4cd407ad074968de8cfbd41b6 (at 79b8a5)
 
 Conditions:
   OK TYPE                   AGE REASON

@@ -93,7 +93,7 @@ service/nexus        NodePort    10.100.205.22   <none>        8081:31743/TCP   
 ifndef::openshift[]
 [tabs]
 ====
-KinD::
+Minikube::
 +
 --
 The nexus maven repository could be opened using the url:
@@ -101,13 +101,13 @@ The nexus maven repository could be opened using the url:
 [.console-input]
 [source,bash,subs="+macros,+attributes"]
 ----
-kubectl get httpproxy nexus -n {chapter-namespace} -o=jsonpath='{.spec.virtualhost.fqdn}'
+minikube -p {tutorial-namespace} service nexus -n {chapter-namespace} --url
 ----
 
 [.console-output]
 [source,bash]
 ----
-nexus.127.0.0.1.nip.io
+http://192.168.64.27:30102
 ----
 --
 OpenShift::
@@ -171,7 +171,7 @@ As we will be deploying a https://knative.dev[Knative] serverless application as
 ifndef::openshift[]
 [tabs]
 ====
-KinD::
+Minikube::
 +
 --
 IMPORTANT: Do it only once per cluster
@@ -213,16 +213,16 @@ Before we create our pipeline ensure that the kubernetes cluster has a default s
 ifndef::openshift[]
 [tabs]
 ====
-KinD::
+Minikube::
 +
 --
-In KinD cluster it should show an output like:
+In minikube cluster it should show an output like:
 
 [.console-output]
 [source,subs="+quotes"]
 -----
-NAME                 PROVISIONER             RECLAIMPOLICY   VOLUMEBINDINGMODE      ALLOWVOLUMEEXPANSION   AGE
-standard (default)   rancher.io/local-path   Delete          WaitForFirstConsumer   false                  18h
+NAME                 PROVISIONER                RECLAIMPOLICY   VOLUMEBINDINGMODE   ALLOWVOLUMEEXPANSION   AGE
+standard (default)   k8s.io/minikube-hostpath   Delete          Immediate           false                  44m
 -----
 --
 OpenShift::

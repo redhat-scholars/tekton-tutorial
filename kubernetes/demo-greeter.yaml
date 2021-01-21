@@ -9,6 +9,7 @@ spec:
   ports:
   - port: 8080
     targetPort: 8080
+  type: NodePort
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -25,20 +26,6 @@ spec:
     spec:
       containers:
       - name: demo-greeter
-        image: registry.local:5000/rhdevelopers/tekton-tutorial-greeter
+        image: example.com/rhdevelopers/tekton-tutorial-greeter
         ports:
         - containerPort: 8080
----
-apiVersion: projectcontour.io/v1
-kind: HTTPProxy
-metadata:
-  name: demo-greeter
-spec:
-  virtualhost:
-    fqdn: demo-greeter.127.0.0.1.nip.io
-  routes:
-    - conditions:
-      - prefix: /
-      services:
-        - name: demo-greeter
-          port: 8080

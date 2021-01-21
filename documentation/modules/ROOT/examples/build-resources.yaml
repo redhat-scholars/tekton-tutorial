@@ -18,4 +18,4 @@ spec:
   type: image
   params:
     - name: url
-      value: registry.local:5000/rhdevelopers/tekton-tutorial-greeter
+      value: example.com/rhdevelopers/tekton-tutorial-greeter
