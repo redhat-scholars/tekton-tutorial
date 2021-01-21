@@ -3,10 +3,7 @@
 :branch: master
 :github-repo: https://github.com/redhat-scholars/tekton-tutorial/blob/{branch}
 :tutorial-apps-repo: https://github.com/redhat-scholars/tekton-tutorial-greeter
-:tutorial-apps-revision: staging
 :experimental:
-:minikube-version: v1.12.1+
-:openshift-version: v4.5+
 
 :tekton-repo: https://github.com/tektoncd/pipeline/releases/download
 :pipelines-repo: pipelines

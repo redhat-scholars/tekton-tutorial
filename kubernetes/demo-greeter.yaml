@@ -1,0 +1,31 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: demo-greeter
+spec:
+  selector:
+    app: demo-greeter
+  ports:
+  - port: 8080
+    targetPort: 8080
+  type: NodePort
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: demo-greeter
+spec:
+  selector:
+    matchLabels:
+      app: demo-greeter
+  template:
+    metadata:
+      labels:
+        app: demo-greeter
+    spec:
+      containers:
+      - name: demo-greeter
+        image: example.com/rhdevelopers/tekton-tutorial-greeter
+        ports:
+        - containerPort: 8080

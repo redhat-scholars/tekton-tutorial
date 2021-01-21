@@ -95,6 +95,7 @@ tkn task start git-clone \
   --namespace={chapter-namespace} \
   --param url={tutorial-apps-repo} \
   --param revision={tutorial-apps-revision} \
+  --param deleteExisting=true \
   --workspace name=output,claimName=tekton-tutorial-sources \
   --use-param-defaults \#<.>
   --showlog
@@ -126,8 +127,6 @@ kubectl create -n {chapter-namespace} -f git-clone-taskrun.yaml
 --
 ====
 
-include::ROOT:partial$logs-view.adoc[tags='tr']
-
 It will take few minutes for the TaskRun to start.
 
 [NOTE]
@@ -139,6 +138,8 @@ Watch the status of the Task run using:
 ----
 tkn tr ls
 ----
+
+include::ROOT:partial$logs-view.adoc[tags='tr']
 ====
 
 You can also check the PVC is bound, as the git-clone-task output workspace is bound to it:
@@ -498,7 +499,7 @@ We need to create the Service Account(SA) that is authorized to Knative Service 
 [source,bash,subs="+macros,+attributes"]
 ----
 curl -sSL \
-  https://raw.githubusercontent.com/tektoncd/catalog/master/task/kn/0.1/kn-deployer.yaml \
+  https://raw.githubusercontent.com/tektoncd/catalog/master/task/kn/0.1/support/kn-deployer.yaml \
   | yq w - -d0 metadata.namespace {chapter-namespace} \
   | yq w - -d2 subjects.[0].namespace {chapter-namespace} \
   | kubectl apply -f -
@@ -543,8 +544,6 @@ kubectl::
 ----
 include::ROOT:example$greeter-app-deploy-run.yaml[]
 ----
-<.> The service account to be used with the PipelineRun
-<.> The Pipeline workspaces mapping
 
 [.console-input]
 [source,bash,subs="+macros,+attributes"]
@@ -578,11 +577,11 @@ The command should show an output like :
 Name:       greeter
 Namespace:  {chapter-namespace}
 Age:        21s
-#URL:        http://greeter.{chapter-namespace}.127.0.0.1.nip.io#
+#URL:        http://greeter.{chapter-namespace}.192.168.64.7.nip.io#
 
 Revisions:
   100%  @latest (greeter-ttyqz-1) [1] (21s)
-        Image:  kind-registry:5000/rhdevelopers/tekton-tutorial-greeter@sha256:79b8a50a6ef29dbc0df5220de5aea13b8b38b7c4cd407ad074968de8cfbd41b6 (at 79b8a5)
+        Image:  example.com/tekton-tutorial/greeter@sha256:79b8a50a6ef29dbc0df5220de5aea13b8b38b7c4cd407ad074968de8cfbd41b6 (at 79b8a5)
 
 Conditions:
   OK TYPE                   AGE REASON
@@ -615,18 +614,17 @@ A successfull pipeline deployment should show an output like:
 [.console-output]
 [source,text,subs="+quotes"]
 ----
-*Meeow from Tekton 😺 !! 🚀*
+*Tekton 😺 rocks 🚀*
 ----
 
 [#tekton-ws-cleanup]
 == Cleanup
 
+IMPORTANT: Leave the namespace, nexus, pvc, confimaps created as part of this chapter, as we will be reusing them in next chapter.
+
 [.console-input]
 [source,bash,subs="+macros,attributes+"]
 ----
-kubectl delete -n {chapter-namespace} pipeline --all
-kubectl delete -n {chapter-namespace} pr --all
-kubectl delete -n {chapter-namespace} tr --all
+$TUTORIAL_HOME/bin/cleanup.sh {chapter-namespace}
 ----
 
-IMPORTANT: Leave the namespace, nexus, pvc, confimaps created as part of this chapter, as we will be reusing them in next chapter.

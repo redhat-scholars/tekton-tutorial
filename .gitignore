@@ -50,5 +50,9 @@ staging-gh-pages
 triggers/tekton-greeter
 app.ini
 demo
+work
+temp
+tmp
 
 docker-secrets
+bin/knative.installed

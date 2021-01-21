@@ -36,9 +36,9 @@ The command should show a output like:
 [.console-output]
 [source,bash]
 ----
-NAME            AGE
-build-app       2 hours ago
-source-lister   7 seconds ago
+NAME            DESCRIPTION   AGE
+build-app                     20 minutes ago
+source-lister                 22 minutes ago
 ----
 
 If you don't see the output as above please ensure you have completed all the exercises of xref::pipeline-resources.adoc[Chapter 2] and xref::tasks.adoc[Chapter 3] before proceeding further.
@@ -73,10 +73,10 @@ The Task list should now list the following two Tasks:
 [.console-output]
 [source,bash,subs="+macros,attributes+"]
 ----
-NAME               AGE
-build-app          2 hours ago
-openshift-client   3 seconds ago
-source-lister      10 minutes ago
+NAME               DESCRIPTION              AGE
+build-app                                   21 minutes ago
+openshift-client   This task runs comm...   6 seconds ago
+source-lister                               23 minutes ago
 ----
 
 [#tekton-pipeline-create]
@@ -194,8 +194,6 @@ It will take few seconds for the PipelineRun to show status as `Running` as it n
 * Use `pr` as shorcut for pipelinerun commands e.g to list pipelinerun run the command `tkn pr ls`
 ====
 
-include::master@tekton-tutorial:ROOT:partial$logs-view.adoc[tags="pr"]
-
 If you see the PipelineRun status as `Failed` or `Error` use the following command to check the reason for error:
 
 [.console-input]
@@ -204,19 +202,44 @@ If you see the PipelineRun status as `Failed` or `Error` use the following comma
 tkn pipelinerun describe <pipelinerun-name>
 ----
 
+The successful `Pipeline` run would have created a Kubernetes deployment and service called `greeter`:
+
+[.console-input]
+[source,bash,subs="+macros,attributes+"]
+----
+kubectl get deploy,svc -n {tutorial-namespace} -l=app=greeter
+----
+
+[.console-output]
+[source,bash]
+----
+NAME                      READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/greeter   1/1     1            1           9m31s
+
+NAME              TYPE       CLUSTER-IP      EXTERNAL-IP   PORT(S)          AGE
+service/greeter   NodePort   10.96.251.232   <none>        8080:31918/TCP   9m31s
+----
+
 [#tekton-test-pipeline]
 == Invoke Service
 
 Get the service URL,
 
+[tabs]
+====
+Minikube::
++
+--
+
 [.console-input]
 [source,bash,subs="+macros,attributes+"]
 ----
-SVC_URL=$(minikube -p {tutorial-namespace} -n {tutorial-namespace} service greeter --url)
+SVC_URL=$(minikube -p {tutorial-namespace} -n {chapter-namespace} greeter --url)
 ----
-
-[NOTE]
-====
+--
+OpenShift::
++
+--
 In OpenShift you can use the routes like:
 [.console-input]
 [source,bash,subs="+macros,attributes+"]
@@ -224,6 +247,7 @@ In OpenShift you can use the routes like:
 oc expose svc greeter
 SVC_URL=$(oc get routes greeter -o yaml | yq r - 'spec.url.host' )
 ----
+--
 ====
 
 Run the service,
@@ -239,7 +263,7 @@ The `http` command should return a response containing a line similar to **Meeow
 [#tekton-pipeline-cleanup]
 == Cleanup
 
-Delete the pipeline service account and its related permissions:
+Clean the completed/failed Task and Pipeline run pods
 
 [.console-input]
 [source,bash,subs="+macros,attributes+"]

@@ -28,7 +28,6 @@ ifndef::openshift[]
 ----
 Client version: {tekton-cli-version}
 Pipeline version: {tekton-version}
-Triggers version: unknown
 ----
 
 NOTE: Since Tekton Triggers is not installed, the version is shown as unknown

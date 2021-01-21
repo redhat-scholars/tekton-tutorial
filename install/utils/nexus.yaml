@@ -52,3 +52,17 @@ spec:
       volumes:
         - name: nexus-data
           emptyDir: {}
+# ---
+# apiVersion: projectcontour.io/v1
+# kind: HTTPProxy
+# metadata:
+#   name: nexus
+# spec:
+#   virtualhost:
+#     fqdn: nexus.127.0.0.1.nip.io
+#   routes:
+#     - conditions:
+#       - prefix: /
+#       services:
+#         - name: nexus
+#           port: 8081

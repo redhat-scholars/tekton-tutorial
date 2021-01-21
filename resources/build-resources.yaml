@@ -8,7 +8,7 @@ spec:
     - name: url
       value: https://github.com/redhat-scholars/tekton-tutorial-greeter
     - name: revision
-      value: staging
+      value: master
 ---
 apiVersion: tekton.dev/v1alpha1
 kind: PipelineResource
@@ -18,7 +18,7 @@ spec:
   type: image
   params:
     - name: url
-      # use internal registry
+      # use minikube internal registry
       value: example.com/rhdevelopers/tekton-tutorial-greeter
-      # if you are on OpenShift uncomment the line below
+      # if you are on OpenShift, use OpenShift interal registry
       #value: "image-registry.openshift-image-registry.svc:5000/tektontutorial/greeter"

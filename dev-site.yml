@@ -14,17 +14,20 @@ asciidoc:
   attributes:
     tutorial-namespace: tektontutorial
     workshop-domain: guru.devx.red
-    kubernetes-version: v1.18.0
+    kubernetes-version: v1.19.0
     release-version: master
     openshift-console-url: https://console-openshift-console.apps.example.com
     etherpad-url: http://example.com
     page-pagination: true
-    tekton-version: v0.14.3
-    triggers-version: v0.6.1
-    kn-version: v0.16.0
-    tekton-cli-version: 0.12.0
+    tekton-version: v0.19.0
+    triggers-version: v0.10.2
+    kn-version: v0.17.3
+    tekton-cli-version: 0.15.0
     cli: kubectl
-    openshift-version: 4.5
+    openshift-version: 4.6
+    kind-version: v0.9.0
+    minikube-version: v1.16.0
+    tutorial-apps-revision: master
   extensions:
     - ./lib/remote-include-processor.js
     - ./lib/tab-block.js

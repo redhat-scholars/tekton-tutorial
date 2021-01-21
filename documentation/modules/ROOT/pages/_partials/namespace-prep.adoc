@@ -101,7 +101,13 @@ The nexus maven repository could be opened using the url:
 [.console-input]
 [source,bash,subs="+macros,+attributes"]
 ----
-$(minikube service nexus -n {chapter-namespace})
+minikube -p {tutorial-namespace} service nexus -n {chapter-namespace} --url
+----
+
+[.console-output]
+[source,bash]
+----
+http://192.168.64.27:30102
 ----
 --
 OpenShift::
@@ -207,16 +213,16 @@ Before we create our pipeline ensure that the kubernetes cluster has a default s
 ifndef::openshift[]
 [tabs]
 ====
-Kubernetes::
+Minikube::
 +
 --
-In minkube cluster it should show an output like:
+In minikube cluster it should show an output like:
 
 [.console-output]
 [source,subs="+quotes"]
 -----
 NAME                 PROVISIONER                RECLAIMPOLICY   VOLUMEBINDINGMODE   ALLOWVOLUMEEXPANSION   AGE
-standard (#default#)   k8s.io/minikube-hostpath   Delete          Immediate           false                  9h
+standard (default)   k8s.io/minikube-hostpath   Delete          Immediate           false                  44m
 -----
 --
 OpenShift::

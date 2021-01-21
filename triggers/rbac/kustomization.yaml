@@ -8,7 +8,8 @@ resources:
   - serviceaccount.yaml
   # ROLES
   - app-deployer.yaml
-  - tekton-triggers-admin.yaml
+  - tekton-triggers-role-minimal.yaml
+  - tekton-triggers-clusterrole-minimal.yaml
   - tekton-triggers-webhook.yaml
   #ROLE Bindings
   - role-bindings.yaml

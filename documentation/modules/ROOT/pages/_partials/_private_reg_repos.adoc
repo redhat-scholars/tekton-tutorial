@@ -166,7 +166,7 @@ metadata:
   namespace: {chapter-namespace}
 secrets:
 #- name: github-pat-secret#
-- name: build-bot-token-8nl2v
+- name: github-bot-token-9p2wg
 ----
 
 [#tekton-create-clone-pipeline]
