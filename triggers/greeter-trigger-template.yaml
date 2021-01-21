@@ -23,15 +23,15 @@ spec:
           name: greeter-app-deploy
         params:
           - name: github-repo-url
-            value: '$(params.gitrepositoryurl)'
+            value: '$(tt.params.gitrepositoryurl)'
           - name: github-repo-revision
-            value: '$(params.gitrevision)'
+            value: '$(tt.params.gitrevision)'
           - name: context-dir
             # must be either 'quarkus' or 'springboot'
             value: quarkus
           - name: image-name
             # For OpenShift builds, this should be patched to point to a suitable image stream for the project
-            value: example.org/tekton-tutorial/greeter
+            value: example.com/tekton-tutorial/greeter
         workspaces:
           - name: maven-settings
             configmap:

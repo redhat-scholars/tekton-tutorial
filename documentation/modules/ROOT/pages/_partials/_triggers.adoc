@@ -186,7 +186,9 @@ A successfull initializations should show an output like:
 [init-gitea] Repository Clone url http://gitea.192.168.64.7.nip.io/gitea/tekton-tutorial-greeter.git
 ----
 
-You should now be able to open the *Repository Clone url* from the output above and view the repository content.
+You should now be able to open the http://$GITEA_HOME/tekton-tutorial-greeter.git and check the repository sources, that we will use as part of this chapter's exercises.
+
+NOTE: Gitea admin user is *gitea* and password *gitea*.
 
 [#install-tekton-triggers]
 == Install Triggers
@@ -275,7 +277,7 @@ tekton-greeter-trigger-template   1 minute ago
 Minikube::
 +
 --
-NOTE: by default the greeter pipeline's default image tag that it builds to is the example.com addon registry for minikube.  Hence, no further updates to the TriggerTemplate is necessary
+NOTE: by default the greeter pipeline's default image tag that it builds to is the `example.com/tekton-tutorial/greeter`.  Hence, no further updates to the TriggerTemplate is necessary
 --
 OpenShift::
 +
@@ -388,19 +390,22 @@ NAME           AGE
 gitea-webhook   4 seconds ago
 ----
 
-Each EventListener will have a service named `el-<EventListener Name>` exposed automatically for sources to send events to Triggers.
+Wait for the `gitea-webhook` event listener pod  to be running, each EventListener will have a service named `el-<EventListener Name>` exposed automatically for sources to send events to Triggers.
 
 [.console-input]
 [source,bash,subs="+macros,+attributes"]
 ----
-kubectl get svc -n {chapter-namespace} -leventlistener=gitea-webhook
+kubectl get pods,svc -n {chapter-namespace} -leventlistener=gitea-webhook
 ----
 
 [.console-output]
 [source,bash,subs="+quotes"]
 ----
-NAME              TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)          AGE
-#el-gitea-webhook   ClusterIP   10.97.199.207    <none>        8080/TCP         51s#
+NAME                                    READY   STATUS    RESTARTS   AGE
+pod/el-gitea-webhook-848875db8f-25r2r   1/1     Running   0          58s
+
+NAME                       TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)    AGE
+#service/el-gitea-webhook   ClusterIP   10.96.121.97   <none>        8080/TCP   58s#
 ----
 
 === Create Event Listener Ingress
@@ -418,7 +423,7 @@ Minikube::
 export EL_WEBHOOK_HOST="$(kubectl get svc -n {chapter-namespace} el-gitea-webhook -o yaml \
   | yq r - 'metadata.name').$(minikube ip).nip.io"
 export EL_WEBHOOK_LISTENER_PORT="$(kubectl get svc -n {chapter-namespace} el-gitea-webhook -o yaml \
-  | yq r - 'spec.ports.(name==http-listener).port')"
+  | yq r - 'spec.ports.(name==listener).port')"
 ----
 
 [.console-input]
@@ -546,12 +551,12 @@ el-gitea-webhook-88bc89db-ld6jz event-listener {"level":"info","logger":"eventli
 
 === Clone and Edit the source
 
-Using your favorite IDE clone the repo `tekton-greeter` from Gitea using the <<tkn-triggers-init-repo,clone url>>. 
+Using your favorite IDE clone the repo `tekton-greeter` from Gitea: 
 
 [.console-input]
 [source,bash,subs="+macros,+attributes"]
 ----
-git clone <your gitea tekton-greeter clone url>
+git clone http://gitea.$(minikube -p {tutorial-namespace} ip).nip.io/gitea/tekton-tutorial-greeter.git
 ----
 
 Open the `tekton-tutorial-greeter` in your IDE and edit the Java file:

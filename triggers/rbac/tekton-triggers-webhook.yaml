@@ -2,7 +2,7 @@
 kind: Role
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: tekton-triggers-createwebhook
+  name: tt-createwebhook
   namespace: tektontutorial
 rules:
   - apiGroups:
