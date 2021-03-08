@@ -35,4 +35,9 @@ jobs:
           publish_branch: "gh-pages"
           external_repository: redhat-developer-demos/tekton-tutorial-staging
           full_commit_message: ${{ github.event.head_commit.message }}
-     
+      - uses: GoogleCloudPlatform/release-please-action@v2.7.0
+        id: release
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          release-type: simple
+          bump-minor-pre-major: true

@@ -27,7 +27,7 @@ fi
 minikube start -p "$PROFILE_NAME" \
   --memory="$MEMORY" --cpus="$CPUS" \
   --disk-size=50g \
-  --kubernetes-version='v1.19.0' \
+  --kubernetes-version='v1.20.0' \
   --insecure-registry='10.0.0.0/24' \
     "${PLATFORM_SPECIFIC_OPTIONS[@]}"
   
