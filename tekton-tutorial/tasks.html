@@ -1,0 +1,1868 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Tasks :: Tekton Tutorial</title>
+    <link rel="canonical" href="https://redhat-scholars.github.io/tekton-tutorial/tekton-tutorial/tasks.html">
+    <link rel="prev" href="pipeline-resources.html">
+    <link rel="next" href="pipelines.html">
+    <meta name="generator" content="Antora 2.3.4">
+    <link rel="stylesheet" href="../_/css/site.css">
+  </head>
+  <body class="article">
+<header class="header">
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="https://developers.redhat.com" target="_blank"><img src="../_/img/NewRHDFullLogo_4-color_white-wordmark.png" height="40px" alt="Red Hat Developer Program"></a>
+      <a class="navbar-item" style="font-size: 24px; color: white" href="https://redhat-scholars.github.io/tekton-tutorial">Tekton Tutorial</a>
+      <button class="navbar-burger" data-target="topbar-nav">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+    <div id="topbar-nav" class="navbar-menu">
+      <div class="navbar-end">
+        <a class="navbar-item" href="https://developers.redhat.com/ebooks/" target="_blank">Books</a>
+        <a class="navbar-item" href="https://developers.redhat.com/cheatsheets/" target="_blank">Cheat Sheets</a>
+        <a class="navbar-item" href="https://developers.redhat.com/events/" target="_blank">Upcoming Events</a>
+        <div class="navbar-item has-dropdown is-hoverable">
+          <a class="navbar-link" href="#">More Tutorials</a>
+          <div class="navbar-dropdown">
+            <a class="navbar-item" href="https://redhat-developer-demos.github.io/kubernetes-tutorial/" target="_blank">Kubernetes</a>
+            <a class="navbar-item" href="https://redhat-developer-demos.github.io/istio-tutorial/" target="_blank">Istio</a>
+            <a class="navbar-item" href="https://redhat-developer-demos.github.io/quarkus-tutorial/" target="_blank">Quarkus</a>
+            <a class="navbar-item" href="https://redhat-developer-demos.github.io/knative-tutorial/" target="_blank">Knative</a>
+            <a class="navbar-item" href="https://redhat-developer-demos.github.io/tekton-tutorial/" target="_blank">Tekton</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+</header>
+<div class="body">
+<div class="nav-container" data-component="tekton-tutorial" data-version="master">
+  <aside class="nav">
+    <div class="panels">
+<div class="nav-panel-menu is-active" data-panel="menu">
+  <nav class="nav-menu">
+    <h3 class="title"><a href="index.html"></a></h3>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="setup.html">Setup</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="setup.html#tekton-prerequisites">Prerequisites</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="setup.html#download-tutorial-sources">Download Tutorial Sources</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="setup.html#kubernetes-cluster">Choose your Kubernetes Cluster</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="setup.html#deploy-tekton">Install Tekton</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="setup.html#install-tekton-cli">Install Tekton CLI</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="pipeline-resources.html">Pipeline Resources</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="pipeline-resources.html#tekton-res-prerequisite">Prerequisites</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="pipeline-resources.html#tekton-res-create">Create Pipeline Resource</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="pipeline-resources.html#tekton-res-deploy">Deploy Pipeline Resource</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="pipeline-resources.html#tkn-see-what-you-have-deployed">See what you have deployed</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item is-current-page" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="tasks.html">Tasks</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="#tekton-tasks]">Tasks</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="3">
+    <a class="nav-link" href="#tekton-task-clone">Clone Source Code</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="#tekton-task-list-ws">Know your Workspace</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="#tekton-task-clustertask">Cluster Task</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="#tekton-tasks-points-to-ponder">Points to Ponder</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="#tekton-task-build-sources">Build Cloud Native Application</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="3">
+    <a class="nav-link" href="#build-sources">Build Sources</a>
+  </li>
+  <li class="nav-item" data-depth="3">
+    <a class="nav-link" href="#build-linux-image">Build Image</a>
+  </li>
+  <li class="nav-item" data-depth="3">
+    <a class="nav-link" href="#push-linux-image">Push Image</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="#tekton-task-deploy">Deploy Task</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="#tekton-task-run">TaskRun</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="#tekton-test-task-output">Test Task Output</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="#tekton-task-step-template">Step Template</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="#tekton-task-cleanup">Clean</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="pipelines.html">Pipelines</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="pipelines.html#tekton-add-tasks">Add Tasks from Catalog</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="pipelines.html#tekton-pipeline-create">Create Pipeline</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="pipelines.html#tekton-pipeline-deploy">Deploy Pipeline</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="pipelines.html#tekton-pipeline-run">Run Pipeline</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="pipelines.html#tekton-test-pipeline">Test Pipeline</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="pipelines.html#tekton-pipeline-cleanup">Clean</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="workspaces.html">Workspaces</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="workspaces.html#ws-overview">Overview</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="workspaces.html#ws-prepare">Prepare for Using Workspaces</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="3">
+    <a class="nav-link" href="workspaces.html#ws-tasks-deploy">Deploy Tasks from Catalog</a>
+  </li>
+  <li class="nav-item" data-depth="3">
+    <a class="nav-link" href="workspaces.html#ws-deploy-nexus">Deploy Nexus</a>
+  </li>
+  <li class="nav-item" data-depth="3">
+    <a class="nav-link" href="workspaces.html#ws-create-maven-settings-cm">Create Maven Settings</a>
+  </li>
+  <li class="nav-item" data-depth="3">
+    <a class="nav-link" href="workspaces.html#ws-deploy-knative">Deploy Knative</a>
+  </li>
+  <li class="nav-item" data-depth="3">
+    <a class="nav-link" href="workspaces.html#ws-check-sc">Check Default Storage Class</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="workspaces.html#ws-pipeline-overview">Java Application Pipeline</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="workspaces.html#ws-use-pvc">Using Persistent Volumes as Workspace</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="3">
+    <a class="nav-link" href="workspaces.html#ws-use-pvc-git-clone">Git Clone TaskRun</a>
+  </li>
+  <li class="nav-item" data-depth="3">
+    <a class="nav-link" href="workspaces.html#ws-pvc-points-to-ponder">Points to Ponder</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="workspaces.html#ws-use-cm">Using ConfigMap as Workspace</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="3">
+    <a class="nav-link" href="workspaces.html#ws-use-cm-mvn-run">Run maven Task</a>
+  </li>
+  <li class="nav-item" data-depth="3">
+    <a class="nav-link" href="workspaces.html#use-cm-points-to-ponder">Points to Ponder</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="workspaces.html#ws-deploy-pipeline">Deploy Pipeline</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="3">
+    <a class="nav-link" href="workspaces.html#ws-create-pipeline">Create Pipeline</a>
+  </li>
+  <li class="nav-item" data-depth="3">
+    <a class="nav-link" href="workspaces.html#ws-run-pipeline">Run Pipeline</a>
+  </li>
+  <li class="nav-item" data-depth="3">
+    <a class="nav-link" href="workspaces.html#ws-verify-service">Verify Deployed Service</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="workspaces.html#tekton-ws-cleanup">Cleanup</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="private_reg_repos.html">Private Registries and Repositories</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="private_reg_repos.html#tkn-prr-overview">Overview</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="private_reg_repos.html#tekton-pull-from-remote-repo">Pulling from Private Source Repository</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="3">
+    <a class="nav-link" href="private_reg_repos.html#tekton-github-repo-secret">Create Github PAT Secret</a>
+  </li>
+  <li class="nav-item" data-depth="3">
+    <a class="nav-link" href="private_reg_repos.html#tekton-github-sa">Create Service Account</a>
+  </li>
+  <li class="nav-item" data-depth="3">
+    <a class="nav-link" href="private_reg_repos.html#tekton-create-clone-pipeline">Create And Run Pipeline</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="private_reg_repos.html#tekton-push-to-external-reg">Pushing To External Registry</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="3">
+    <a class="nav-link" href="private_reg_repos.html#tekton-push-registry-secret">Create Registry Secret</a>
+  </li>
+  <li class="nav-item" data-depth="3">
+    <a class="nav-link" href="private_reg_repos.html#tekton-build-sa">Create Service Account</a>
+  </li>
+  <li class="nav-item" data-depth="3">
+    <a class="nav-link" href="private_reg_repos.html#tekton-create-build-push-pipeline">Create And Run Pipeline</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="private_reg_repos.html#tekton-remote-ref-points">Points to Ponder</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="private_reg_repos.html#tekton-auth-cleanup">Cleanup</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="triggers.html">Triggers</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="triggers.html#tkn-triggers-prepare">Prepare Namespace</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="triggers.html#tkn-create-sa"> Pipeline Service Account</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="triggers.html#tkn-triggers-init-repo">Initialize Source Repository</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="triggers.html#install-tekton-triggers">Install Tekton Triggers</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="triggers.html#tkn-triggers-template">Trigger Template</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="triggers.html#tkn-triggers-bindings">Trigger Bindings</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="triggers.html#tkn-triggers-eventlistener">Trigger Event Listener</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="triggers.html#tekton-triggers-in-action">Triggers in Action</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="triggers.html#tekton-triggers-ptp">Points to Ponder</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="openshift/index.html">OpenShift Pipelines</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="openshift/setup.html">Setup</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="openshift/openshift_pipelines.html">Pipelines</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="3">
+    <a class="nav-link" href="openshift/openshift_pipelines.html#ocp-create-project">Create Project</a>
+  </li>
+  <li class="nav-item" data-depth="3">
+    <a class="nav-link" href="openshift/openshift_pipelines.html#openshift-pipelines-prep-app-deploy">Prepare Application Deployment</a>
+  </li>
+  <li class="nav-item" data-depth="3">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="openshift/openshift_pipelines.html#required-tasks">Required Cluster Tasks</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="4">
+    <a class="nav-link" href="openshift/openshift_pipelines.html#ocp-update-cluster-tasks">Update Cluster Tasks</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="3">
+    <a class="nav-link" href="openshift/openshift_pipelines.html#ocp-deploy-app-from-git">Deploy Application from GitHub</a>
+  </li>
+  <li class="nav-item" data-depth="3">
+    <a class="nav-link" href="openshift/openshift_pipelines.html#ocp-create-java-ksvc-pipeline-tpl">Pipeline Template for Java and Knative Service</a>
+  </li>
+  <li class="nav-item" data-depth="3">
+    <a class="nav-link" href="openshift/openshift_pipelines.html#odc-create-ksvc-java-app">Deploy Application with Pipeline</a>
+  </li>
+  <li class="nav-item" data-depth="3">
+    <a class="nav-link" href="openshift/openshift_pipelines.html#odc-view-pipelines">View Pipelines</a>
+  </li>
+  <li class="nav-item" data-depth="3">
+    <a class="nav-link" href="openshift/openshift_pipelines.html#odc-watch-pipelines">Watch Pipelines</a>
+  </li>
+  <li class="nav-item" data-depth="3">
+    <a class="nav-link" href="openshift/openshift_pipelines.html#odc-view-app">Application Topology</a>
+  </li>
+  <li class="nav-item" data-depth="3">
+    <a class="nav-link" href="openshift/openshift_pipelines.html#odc-pipeline-points">Points to Ponder</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+</ul>
+  </nav>
+</div>
+    </div>
+  </aside>
+</div>
+<main class="article">
+<div class="toolbar" role="navigation">
+<button class="nav-toggle"></button>
+  <a href="index.html" class="home-link"></a>
+<nav class="breadcrumbs" aria-label="breadcrumbs">
+  <ul>
+    <li><a href="index.html">Tekton Tutorial</a></li>
+    <li><a href="tasks.html">Tasks</a></li>
+  </ul>
+</nav>
+  <div class="edit-this-page"><a href="https://github.com/redhat-scholars/tekton-tutorial/blob/v1.3.0/documentation/modules/ROOT/pages/tasks.adoc">Edit this Page</a></div>
+  </div>
+  <div class="content">
+<article class="doc">
+<h1 class="page">Tasks</h1>
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>At the end of this chapter you will be able to :</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Understand what is a <a href="https://github.com/tektoncd/pipeline/blob/master/docs/tasks.md">Task</a> ?</p>
+</li>
+<li>
+<p>Understand how to clone your build resources using Task</p>
+</li>
+<li>
+<p>Understand where cloned sources reside i.e. Workspace</p>
+</li>
+<li>
+<p>Create a Task that can build the sources</p>
+</li>
+<li>
+<p>How to run a Task</p>
+</li>
+<li>
+<p>Use the pipeline resource with TaskRun</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>If you are not in tutorial chapter folder, then navigate to the folder:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">cd $TUTORIAL_HOME/tasks</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="tekton-tasks"><a class="anchor" href="#tekton-tasks"></a>Tekton Task</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Each Task has the following:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>name</strong> - the unique name using which the task can be referred</p>
+</li>
+<li>
+<p><strong>inputs</strong> - the inputs to the task</p>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>resources</strong> - the pipeline resources that will be used in the task e.g. git-source</p>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>name</strong> - the name of the input resource using which it can be referenced and bound via <a href="#tekton-task-run">TaskRun</a></p>
+</li>
+<li>
+<p><strong>type</strong> - the type of the input resource, typically the pipeline resource type</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p><strong>params</strong> - the parameters that will be used in the task steps. Each parameter has</p>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>name</strong> - the name of the parameter</p>
+</li>
+<li>
+<p><strong>description</strong> - the description of the parameter</p>
+</li>
+<li>
+<p><strong>default</strong> - the default value of parameter</p>
+</li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+The <a href="#tekton-task-run">TaskRun</a> could override the parameter values, if no parameter value is passed then the <strong>default</strong> value will be used.
+</td>
+</tr>
+</table>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>outputs</strong> the pipeline resource that will end artifact of the task. In the above example the build will produce a container image artifact.</p>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>resources</strong> - the pipeline resources that will be used in the task e.g. builtImage</p>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>name</strong> - the name of the input resource using which it can be referenced and bound via <a href="#tekton-task-run">TaskRun</a></p>
+</li>
+<li>
+<p><strong>type</strong> - the type of the input resource, typically the pipeline resource type</p>
+</li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p><strong>steps</strong> - One or more sub-tasks that will be executed in the defined order. The step has all the attributes like a <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.14/#pod-v1-core">Pod spec</a></p>
+</li>
+<li>
+<p><strong>volumes</strong> - the task can also mount external volumes using the <strong>volumes</strong> attribute.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>The parameters that were part of the <span class="menuseq"><b class="menu">spec</b>&#160;<i class="fa fa-angle-right caret"></i> <b class="submenu">inputs</b>&#160;<i class="fa fa-angle-right caret"></i> <b class="menuitem">params</b></span> can be used in the steps using the notation <code>$(&lt;variable-name&gt;)</code>.</p>
+</div>
+<div class="sect2">
+<h3 id="tekton-task-clone"><a class="anchor" href="#tekton-task-clone"></a>Clone Source Code</h3>
+<div class="paragraph">
+<p>The following listing shows a simple Task that clones the sources using git command and lists the sources:</p>
+</div>
+<div class="listingblock">
+<div class="title">List application source code</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">---
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: source-lister
+spec:
+  params:
+    - name: contextDir
+      description: "The context directory within the repository for sources"
+      default: quarkus
+  resources:
+    inputs:
+      - name: source
+        type: git
+  steps:
+    - name: ls-build-sources
+      image: busybox
+      command: ["ls", "-ltr", "/workspace/source/$(inputs.params.contextDir)"]</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The sources are usually cloned to a standard path called <code>/workspace/&lt;input.resource.name&gt;</code>, in this example the input source name is <code>source</code> and hence the git clone will be done to a path called <code>/workspace/source</code>.</p>
+</div>
+<div class="paragraph">
+<p>You can create the Task using the command as shown in the following listing:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl apply -n tektontutorial -f source-lister.yaml</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Verify that your task was created:</p>
+</div>
+<div class="listingblock console-input">
+<div class="title">Verify task</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">tkn task ls</code></pre>
+</div>
+</div>
+<div class="listingblock console-output">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">NAME            AGE
+source-lister   37 seconds ago</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Lets describe the <code>task</code> resource:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">tkn task describe source-lister</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The command above will shown an output like:</p>
+</div>
+<div id="localtask-source-lister" class="listingblock console-output">
+<div class="title">source-lister Task</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">Name:        source-lister
+Namespace:   tektontutorial
+
+📨 Input Resources
+
+ NAME       TYPE
+ ∙ source   git
+
+📡 Output Resources
+
+ No output resources
+
+⚓ Params
+
+ NAME           TYPE     DESCRIPTION              DEFAULT VALUE
+ ∙ contextDir   string   The context directo...   quarkus
+
+📝 Results
+
+ No results
+
+📂 Workspaces
+
+ No workspaces
+
+🦶 Steps
+
+ ∙ ls-build-sources
+
+🗂  Taskruns
+
+ No taskruns</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Since we have not run the Task yet, the command shows <strong>No taskruns</strong>. You can use the <code>tkn</code> CLI tool to run the Task, pass parameters and input sources.</p>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>Use the <code>help</code> command option to know what are the possible options for the start command:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">tkn task start --help</code></pre>
+</div>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Since we just have to pass the GitHub repo for the source-lister, run the following command to start the <code>TaskRun</code>:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">tkn task start source-lister \
+  --showlog \<i class="conum" data-value="1"></i><b>(1)</b>
+  --inputresource='source=git-source'<i class="conum" data-value="2"></i><b>(2)</b></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Show the logs while running the Task</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>You are mapping the git-source from the Pipeline resource to be the input source for the Task.</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>The command might ask your to confirm any default values, in this task we have a parameter called <code>contextDir</code> which has a default value <code>quarkus</code>, so when starting the command the Tekton CLI will ask you confirm the same, like:</p>
+</div>
+<div class="listingblock console-output">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">? Value for param `contextDir` of type `string`? (Default is `quarkus`)</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Be sure press <kbd>Enter</kbd> to start the TaskRun after providing inputs to the prompts.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>The command should show an output like:</p>
+</div>
+<div class="listingblock console-output">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">? Value for param `contextDir` of type `string`? (Default is `quarkus`)
+TaskRun started: source-lister-run-nbpvz
+Waiting for logs to be available...
+[git-source-git-source-qtp5j] {"level":"info","ts":1595743350.5350783,"caller":"git/git.go:105","msg":"Successfully cloned https://github.com/redhat-scholars/tekton-tutorial @ master in path /workspace/source"}
+[git-source-git-source-qtp5j] {"level":"warn","ts":1595743350.5351503,"caller":"git/git.go:152","msg":"Unexpected error: creating symlink: symlink /tekton/home/.ssh /root/.ssh: file exists"}
+[git-source-git-source-qtp5j] {"level":"info","ts":1595743350.5708065,"caller":"git/git.go:133","msg":"Successfully initialized and updated submodules in path /workspace/source"}
+
+[ls-build-sources] total 36
+[ls-build-sources] drwxr-xr-x    4 root     root          4096 Jul 26 06:02 src
+[ls-build-sources] -rw-r--r--    1 root     root          4005 Jul 26 06:02 pom.xml
+[ls-build-sources] -rwxr-xr-x    1 root     root          6607 Jul 26 06:02 mvnw.cmd
+[ls-build-sources] -rwxr-xr-x    1 root     root         10069 Jul 26 06:02 mvnw
+[ls-build-sources] drwxr-xr-x    2 root     root          4096 Jul 26 06:02 k8s
+[ls-build-sources] -rw-r--r--    1 root     root           154 Jul 26 06:02 Dockerfile</code></pre>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>The container images used by the steps need to be downloaded therefore the first execution of the task will take some time before it starts logging the output to the terminal.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Remember a Task is running as a pod therefore you can watch your pod to see task lifecycle: Init, PodInitializing, Running, and finally Completed as seen in the following listing:</p>
+</div>
+<div class="paragraph">
+<p>While the task is running open a new terminal and run:</p>
+</div>
+<div class="listingblock console-input">
+<div class="title">Watch the pods</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">watch kubectl get pods</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The command should show an output like:</p>
+</div>
+<div class="listingblock console-output">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">NAME                                 READY   STATUS       AGE
+source-lister-run-6xpgx-pod-c7dc67   0/2     Init:0/2     9s
+...
+NAME                                 READY   STATUS       AGE
+source-lister-run-6kt8d-pod-67b326   0/2     Completed    41s</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="tekton-watch-logs"><a class="anchor" href="#tekton-watch-logs"></a>Watching logs</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>If the Task ran successfully you will notice the following logs in your terminal (lines truncated for brevity):</p>
+</div>
+<div class="listingblock console-output">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">Taskrun started: source-lister-run-96qc4
+Waiting for logs to be available...
+...
+[git-source-git-source-rdr2k] {"level":"info","ts":1585065123.3817806,"logger":"fallback-logger","caller":"logging/config.go:69","msg":"Fetch GitHub commit ID from kodata failed: open /var/run/ko/refs/heads/master: no such file or directory"}
+[git-source-git-source-rdr2k] {"level":"info","ts":1585065133.3997571,"logger":"fallback-logger","caller":"logging/config.go:69","msg":"Fetch GitHub commit ID from kodata failed: open /var/run/ko/refs/heads/master: no such file or directory"}
+[git-source-git-source-rdr2k] {"level":"info","ts":1585065138.9021251,"logger":"fallback-logger","caller":"git/git.go:102","msg":"Successfully cloned https://github.com/redhat-scholars/tekton-tutorial @ master in path /workspace/source"}
+[git-source-git-source-rdr2k] {"level":"warn","ts":1585065138.902316,"logger":"fallback-logger","caller":"git/git.go:149","msg":"Unexpected error: creating symlink: symlink /tekton/home/.ssh /root/.ssh: file exists"}
+[git-source-git-source-rdr2k] {"level":"info","ts":1585065138.9946759,"logger":"fallback-logger","caller":"git/git.go:130","msg":"Successfully initialized and updated submodules in path /workspace/source"}
+
+[ls-build-sources] {"level":"info","ts":1585065132.8109465,"logger":"fallback-logger","caller":"logging/config.go:69","msg":"Fetch GitHub commit ID from kodata failed: \"KO_DATA_PATH\" does not exist or is empty"}
+[ls-build-sources] total 36
+[ls-build-sources] drwxr-xr-x    3 root     root          4096 Mar 24 15:52 src
+[ls-build-sources] -rw-r--r--    1 root     root          3472 Mar 24 15:52 pom.xml
+[ls-build-sources] -rw-r--r--    1 root     root          6609 Mar 24 15:52 mvnw.cmd
+[ls-build-sources] -rwxr-xr-x    1 root     root         10078 Mar 24 15:52 mvnw
+[ls-build-sources] -rw-r--r--    1 root     root           671 Mar 24 15:52 Dockerfile.jvm
+[ls-build-sources] -rw-r--r--    1 root     root           188 Mar 24 15:52 Dockerfile</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The logs are the consolidated logs from all the Task step containers. You can identify the source of the log i.e the step that has generated the logs using the text within the square brackets <code>[]</code> of each log line.</p>
+</div>
+<div class="paragraph">
+<p>e.g.</p>
+</div>
+<div class="paragraph">
+<p>Logs starting with <strong>[ls-build-sources]</strong> are from the container that is responsible for running the Task step i.e. <code>ls-build-sources</code>.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="tekton-task-list-ws"><a class="anchor" href="#tekton-task-list-ws"></a>Know the workspace directory</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>In the example above, there is a log which shows the <code>git clone</code> command that cloned the application sources to the <code>/workspace/source</code> directory. The <strong>workspace</strong> directory is where your Task/Pipeline sources/build artifacts will be cloned and generated. The <code>source</code> is a sub-path, under which Tekton cloned the application sources. It is usually the name of the resources &#8594; inputs &#8594; Resource of type <strong>Git</strong>.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="tekton-task-clustertask"><a class="anchor" href="#tekton-task-clustertask"></a>Cluster Task</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The tasks are by default tied to namespace i.e their visibility is restricted to the namespace where they were created. E.g. the <code>source-lister</code> that we created and ran earlier is tied to tektontutorial.</p>
+</div>
+<div class="paragraph">
+<p>To check lets create a new namespace called <code>clustertask-demo</code>:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl create namespace clustertask-demo
+kubectl config set-context --current --namespace clustertask-demo</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Listing the tasks in the <code>clustertask-demo</code> will not show any Tasks as shown in the command output below.</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">tkn task ls</code></pre>
+</div>
+</div>
+<div class="listingblock console-output">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">No Tasks found</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The reason that there are no Tasks found us that, we have not created any <code>ClusterTask</code> yet. If the <code>Task</code> is not of a <code>ClusterTask</code> type then we will not be able to run the Task in namespaces other than where it was deployed. Try running our <code>source-lister</code> task  from within <code>clustertask-demo</code>:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">tkn task start source-lister --showlog --inputresource='source=git-source'</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The command should fail with following output:</p>
+</div>
+<div class="listingblock console-output">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">Error: Task name source-lister does not exist in namespace clustertask-demo</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Let us now create a very simple ClusterTask called echoer as shown in the below listing:</p>
+</div>
+<div class="listingblock">
+<div class="title">List echoer ClusterTask</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">apiVersion: tekton.dev/v1beta1
+kind: ClusterTask <i class="conum" data-value="1"></i><b>(1)</b>
+metadata:
+  name: echoer
+spec:
+  steps:
+    - image: alpine
+      script: | <i class="conum" data-value="2"></i><b>(2)</b>
+        #!/bin/sh
+        echo 'Meeow!! from Tekton 😺🚀'</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>The kind ClusterTask makes the task available in all namespaces.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>The step can also be shell script 😄</td>
+</tr>
+</table>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl apply -n clustertask-demo -f echoer.yaml</code></pre>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_list_and_describe_clustertasks"><a class="anchor" href="#_list_and_describe_clustertasks"></a>List and Describe ClusterTasks</h3>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">tkn clustertask ls</code></pre>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+You have to use <code>clustertask</code> command to list all cluster tasks
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>The comand should return an output like, with one ClusterTask <code>echoer</code>:</p>
+</div>
+<div class="listingblock console-output">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">NAME     DESCRIPTION   AGE
+echoer                 18 minutes ago</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Let us decribe ClusterTask <code>echoer</code>:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">tkn clustertask describe echoer</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The comand should return an output like:</p>
+</div>
+<div class="listingblock console-output">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">Name:   echoer
+
+📨 Input Resources
+
+ No input resources
+
+📡 Output Resources
+
+ No output resources
+
+⚓ Params
+
+ No params
+
+📝 Results
+
+ No results
+
+📂 Workspaces
+
+ No workspaces
+
+🦶 Steps
+
+ ∙ unnamed-0
+
+🗂  Taskruns
+
+ No taskruns</code></pre>
+</div>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>If you compare the output above with <a href="#localtask-source-lister">source-lister Task</a>, the one big difference with respect to definition is the missing <code>Namespace</code> for the <code>echoer</code> Task.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_run_clustertask_echoer"><a class="anchor" href="#_run_clustertask_echoer"></a>Run ClusterTask <code>echoer</code></h3>
+<div class="paragraph">
+<p>Lets run the task in the current namesapce <code>clustertask-demo</code>:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">tkn clustertask start echoer --showlog</code></pre>
+</div>
+</div>
+<div id="tekton-rocks-output" class="listingblock console-output">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">TaskRun started: echoer-run-75n6g
+Waiting for logs to be available...
+[unnamed-0] Meeow!! from Tekton 😺🚀</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_run_clustertask_echoer_in_other_namespaces"><a class="anchor" href="#_run_clustertask_echoer_in_other_namespaces"></a>Run ClusterTask <code>echoer</code> in other namespace(s)</h3>
+<div class="paragraph">
+<p>Let us now shift back to <code>tektontutorial</code> and run the <code>echoer</code> task again:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl config set-context --current --namespace=tektontutorial</code></pre>
+</div>
+</div>
+<div class="listingblock console-output">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">Context "tektontutorial" modified.</code></pre>
+</div>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">tkn clustertask start echoer --showlog</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The command should produce an identical output as shown in <a href="#tekton-rocks-output">above</a>.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="tekton-tasks-points-to-ponder"><a class="anchor" href="#tekton-tasks-points-to-ponder"></a>Points to Ponder</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p>Tasks are namespace bound i.e. available only in namespace(s) where they were created</p>
+</li>
+<li>
+<p>Tasks resources are interacted using <code>tkn task</code> command and its options</p>
+</li>
+<li>
+<p>ClusterTasks are available across the cluster i.e. in any namesapce(s) of the cluster</p>
+</li>
+<li>
+<p>ClusterTasks resources are interacted using <code>tkn clustertask</code> command and its options</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="tekton-task-build-sources"><a class="anchor" href="#tekton-task-build-sources"></a>Build Cloud Native Application</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>All the Tekton Tasks that we created and ran so far had only one <code>Step</code>, but the Tekton Tasks can have more than one <code>Step</code>.</p>
+</div>
+<div class="paragraph">
+<p>Lets take an example of buildaing a Cloud Native Java Application, at minimum the <code>Task</code> need to do the following:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Building the Application from sources using build tool like <a href="https://maven.apache.org">Apache Maven</a> or <a href="https://gradle.org">Gradle</a></p>
+</li>
+<li>
+<p>Building the linux container image from the build artifacts</p>
+</li>
+<li>
+<p>Pushing the built container image to remote container registry like <a href="https://quay.io">Quay.io</a> or <a href="https://hub.docker.com">Docker Hub</a></p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>The task <code>build-app</code> is used to build the <a href="https://github.com/redhat-scholars/tekton-tutorial/tree/master/apps/greeter/java/quarkus">Java application</a> that is part of the tutorial. The Task can be split into following three <code>Steps</code>:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>As a step one(<code>build-sources</code>) the application will be built using <a href="https://apache.maven.org">Apache Maven</a></p>
+</li>
+<li>
+<p>then the step two (<code>build-image</code>) the application artifacts a <strong>jar</strong> in this case will be used to built the linux container image using <a href="https://buildah.io">buildah</a>, the <a href="https://github.com/redhat-scholars/tekton-tutorial/tree/master/apps/greeter/java/quarkus/Dockerfile.jvm">Dockerfile</a> in the sources will be used as base to build the linux container image</p>
+</li>
+<li>
+<p>As part of the last step(<code>build-push</code>) the built linux container image will be pushed to the container registry.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>The following section explains the three Task <code>Steps</code>. The <a href="#tekton-task-deploy">Deploy a task</a> will finally deploy all these three steps together as one single <code>build-app</code> task.</p>
+</div>
+<div class="sect2">
+<h3 id="task-parameters"><a class="anchor" href="#task-parameters"></a>Task Inputs and Outputs</h3>
+<div class="listingblock">
+<div class="title"><a href="https://github.com/redhat-scholars/tekton-tutorial/blob/master/tasks/build-app-task.yaml" target="_blank" rel="noopener">task inputs and outputs</a></div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">inputs:
+    resources: <i class="conum" data-value="1"></i><b>(1)</b>
+      - name: source
+        type: git
+    params:
+      - name: contextDir <i class="conum" data-value="2"></i><b>(2)</b>
+        description: the context dir within source
+        default: springboot
+      - name: destinationImage <i class="conum" data-value="3"></i><b>(3)</b>
+        description: the fully qualified image name
+        default: "$(outputs.resources.builtImage.url)"
+      - name: dockerFile <i class="conum" data-value="4"></i><b>(4)</b>
+        description: the docker file to used for building the application
+        default: Dockerfile
+      - name: tlsVerify <i class="conum" data-value="5"></i><b>(5)</b>
+        description: tls verify
+        type: string
+        default: "false"
+outputs:
+  resources: <i class="conum" data-value="6"></i><b>(6)</b>
+    - name: builtImage
+      type: image</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>The input referred via <code>source</code>, which will be of type <code>git</code>. Having a input resource of type <code>git</code> will cause the TektonPipelines to add implict git clone step to download the sources to <code>workspace/source</code> directory</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td><code>contextDir</code> - specifies the directory under the sources, which will be the context for the Task</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td><code>destinationImage</code> - the linux container image name that will be built as part of this Task. Defaults to the <code>outputs.resources.builtImage.url</code></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td><code>dockerFile</code> - the Dockerfile that will be used to build the image</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td><code>tlsVerify</code> - enable or disable TLS when pushing the image to remote registry</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="6"></i><b>6</b></td>
+<td>The output specifices the final output of the Task, in this case the built linux container image referred via <code>builtImage</code></td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>For Task inputs and outputs - we will use the <a href="pipeline-resources.html#tkn-see-what-you-have-deployed" class="page">PipelineResources</a> that was created in previous chapter.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="build-sources"><a class="anchor" href="#build-sources"></a>Step#1 - Build Application Sources</h3>
+<div class="listingblock">
+<div class="title"><a href="https://github.com/redhat-scholars/tekton-tutorial/blob/master/tasks/build-app-task.yaml#L32-L43" target="_blank" rel="noopener">step-build-sources</a></div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">- name: build-sources
+  image: docker.io/maven:3.6.3-jdk-8-slim
+  workingDir: "/workspace/source/$(inputs.params.contextDir)" <i class="conum" data-value="1"></i><b>(1)</b>
+  command: <i class="conum" data-value="2"></i><b>(2)</b>
+    - mvn
+  args: <i class="conum" data-value="3"></i><b>(3)</b>
+    - -DskipTests
+    - -pl
+    - $(inputs.params.contextDir)
+    - clean
+    - package
+  env: <i class="conum" data-value="4"></i><b>(4)</b>
+    - name: user.home
+      value: /home/tekton</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>the working dir or the context directory within the sources from where the build command(s) will be run</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>the build command to run</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>the maven build command arguments</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>The environment variables that will be set within the step container</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="build-linux-image"><a class="anchor" href="#build-linux-image"></a>Step#2 - Build Application Linux Container Image</h3>
+<div class="listingblock">
+<div class="title"><a href="https://github.com/redhat-scholars/tekton-tutorial/blob/master/tasks/build-app-task.yaml#L44-L62" target="_blank" rel="noopener">step-build-image</a></div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">- name: build-image
+  image: quay.io/buildah/stable
+  workingDir: "/workspace/source/$(inputs.params.contextDir)"
+  command:
+    - "buildah"
+  args:
+    - "bud"
+    - "--layers"
+    - "-f"
+    - "$(inputs.params.dockerFile)"
+    - "-t"
+    - "$(inputs.params.destinationImage)"
+    - "."
+  securityContext: <i class="conum" data-value="1"></i><b>(1)</b>
+    runAsUser: 0
+  volumeMounts: <i class="conum" data-value="2"></i><b>(2)</b>
+    - name: varlibc
+      mountPath: /var/lib/containers</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Running buildah inside container needs to be run as root user and needs privilege esclation. These are set as part of security context.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>The buildah tool saves the built linux container layers in the local file system at <code>/var/lib/containers</code>, which can then be used in other <a href="#push-linux-image">steps</a> or to push the image to remote registry.</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="push-linux-image"><a class="anchor" href="#push-linux-image"></a>Step#3 - Push Application Linux Container Image</h3>
+<div class="listingblock">
+<div class="title"><a href="https://github.com/redhat-scholars/tekton-tutorial/blob/master/tasks/build-app-task.yaml#L63-L78" target="_blank" rel="noopener">step-build-image</a></div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">- name: push-image
+  image: quay.io/buildah/stable
+  workingDir: "/workspace/source/$(inputs.params.contextDir)"
+  command:
+    - "buildah"
+  args:
+    - "push"
+    - "--tls-verify=$(inputs.params.tlsVerify)"
+    - $(inputs.params.destinationImage)
+    - "docker://$(inputs.params.destinationImage)"
+  securityContext:
+    runAsUser: 0
+  volumeMounts:
+    - name: varlibc
+      mountPath: /var/lib/containers</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Having see the three individual steps of the <code>build-app</code> task, the following snippet shows all three chained together:</p>
+</div>
+<div class="listingblock">
+<div class="title"><a href="https://github.com/redhat-scholars/tekton-tutorial/blob/master/tasks/build-app-task.yaml" target="_blank" rel="noopener">build-app-task.yaml</a></div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">---
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: build-app
+spec:
+  params:
+    - name: contextDir
+      description: the context dir within source
+      default: .
+    - name: mavenMirrorUrl
+      description: the maven mirrror url
+      default: <a href="https://repo.maven.apache.org/maven2/" class="bare">https://repo.maven.apache.org/maven2/</a>
+    - name: destinationImage
+      description: the fully qualified image name
+      default: "$(outputs.resources.builtImage.url)"
+    - name: dockerFile
+      description: the docker file to used for building the application
+      default: Dockerfile
+    - name: tlsVerify
+      description: tls verify
+      type: string
+      default: "false"
+  resources:
+    inputs:
+      - name: source
+        type: git
+    outputs:
+      - name: builtImage
+        type: image
+  steps:
+    - name: build-sources
+      image: docker.io/maven:3.6.3-openjdk-11-slim
+      workingDir: "/workspace/source/$(inputs.params.contextDir)"
+      command:
+        - mvn
+      args:
+        - -DskipTests
+        - clean
+        - package
+      env:
+        - name: user.home
+          value: /home/tekton
+    - name: build-image
+      image: quay.io/buildah/stable
+      workingDir: "/workspace/source/$(inputs.params.contextDir)"
+      command:
+        - "buildah"
+      args:
+        - "bud"
+        - "--layers"
+        - "-f"
+        - "$(inputs.params.dockerFile)"
+        - "-t"
+        - "$(inputs.params.destinationImage)"
+        - "."
+      securityContext:
+        privileged: true
+        runAsUser: 0
+      volumeMounts:
+        - name: varlibc
+          mountPath: /var/lib/containers
+    - name: push-image
+      image: quay.io/buildah/stable
+      workingDir: "/workspace/source/$(inputs.params.contextDir)"
+      command:
+        - "buildah"
+      args:
+        - "push"
+        - "--tls-verify=$(inputs.params.tlsVerify)"
+        - $(inputs.params.destinationImage)
+        - "docker://$(inputs.params.destinationImage)"
+      securityContext:
+        runAsUser: 0
+        privileged: true
+      volumeMounts:
+        - name: varlibc
+          mountPath: /var/lib/containers
+  volumes:
+    - name: varlibc
+      emptyDir: {}</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="tekton-task-deploy"><a class="anchor" href="#tekton-task-deploy"></a>Deploy a task</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Make sure we are in the <code>tektontutorial</code>:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl config view --minify | grep namespace</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Output should be like:</p>
+</div>
+<div class="listingblock console-output">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">namespace: tektontutorial</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The application build task could be created using the command:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl apply -n tektontutorial -f <a href="https://github.com/redhat-scholars/tekton-tutorial/blob/master/tasks/build-app-task.yaml">build-app-task.yaml</a></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>We will use the Tekton cli to inspect the created resources</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">tkn task ls</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The above command should list one Task as shown below:</p>
+</div>
+<div class="listingblock console-output">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">NAME        AGE
+build-app   12 seconds ago
+source-lister   7 minutes ago</code></pre>
+</div>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+<div class="ulist">
+<ul>
+<li>
+<p>Use the command <strong>help</strong> <code>tkn task --help</code></p>
+</li>
+</ul>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="tekton-task-run"><a class="anchor" href="#tekton-task-run"></a>TaskRun</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The <a href="https://github.com/tektoncd/pipeline/blob/master/docs/taskruns.md">TaskRun</a> is used to run a specific task independently. In the following section we will run the <code>build-app</code> task created in the previous step.</p>
+</div>
+<div class="paragraph">
+<p>The application build task(<code>build-app</code>) could be run using the command:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">tkn task start -n tektontutorial build-app \<i class="conum" data-value="1"></i><b>(1)</b>
+  --inputresource='source=git-source' \<i class="conum" data-value="2"></i><b>(2)</b>
+  --outputresource='builtImage=tekton-tutorial-greeter-image' \<i class="conum" data-value="3"></i><b>(3)</b>
+  --param contextDir='springboot' \<i class="conum" data-value="4"></i><b>(4)</b>
+  --showlog<i class="conum" data-value="5"></i><b>(5)</b></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>The task that need to be run, in this case <code>build-app</code></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>The input resource mapping, i.e. mapping  input <code>source</code> to PipelineResource <code>git-source</code> of type <code>git</code></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>The output resource mapping, i.e. mapping output <code>builtImage</code> to PipelineResource <code>built-image</code> of type <code>image</code></td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>It will take few seconds for the TaskRun to show status as <code>Running</code> as it needs to download the container images.</p>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+<div class="ulist">
+<ul>
+<li>
+<p>Use the command <strong>help</strong> via <code>tkn taskrun --help</code></p>
+</li>
+<li>
+<p>Use <code>tr</code> as shorcut for taskrun commands e.g to list taskruns run the command <code>tkn tr ls</code></p>
+</li>
+</ul>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="sect2">
+<h3 id="tekton-tr-logs"><a class="anchor" href="#tekton-tr-logs"></a>Watch TaskRun logs</h3>
+<div class="paragraph">
+<p>To check the status of the TaskRun use the <code>logs</code> command of taskrun like:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">tkn tr ls</code></pre>
+</div>
+</div>
+<div class="listingblock console-output">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">NAME                      STARTED          DURATION     STATUS
+build-app-run-tsqrf       2 minutes ago    ---          Running
+echoer-run-gx6wp          40 minutes ago   15 seconds   Succeeded
+source-lister-run-6t2mj   1 hour ago       14 seconds   Succeeded
+source-lister-run-nbpvz   1 hour ago       28 seconds   Succeeded</code></pre>
+</div>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash"># use one task run for which you need the log from list above
+tkn tr logs -f -a build-app-run-tsqrf <i class="conum" data-value="1"></i><b>(1)</b></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>The <code>-f</code> or <code>-a</code> allows to tail the logs from all the containers of the task. For more options run <code>tkn tr --help</code></td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_taskrun_containers"><a class="anchor" href="#_taskrun_containers"></a>TaskRun Containers</h3>
+<div class="paragraph">
+<p>Each task step will be run within a container of its own. You can list the containers of the build pod like:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl get pods --selector=tekton.dev/task=build-app</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>e.g. For a build-app TaskRun pod <code>build-app-run-lj7sm-pod-s74bp</code></p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl get pod build-app-run-lj7sm-pod-s74bp \
+  -o jsonpath="{range .spec.containers[*] }{.name}{'\n'}{end}"</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The command should show an output like:</p>
+</div>
+<div class="listingblock console-output">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">step-create-dir-builtimage-hn654
+step-git-source-git-source-2lqtx
+step-build-sources
+step-build-image
+step-push-image
+step-image-digest-exporter-52lh6</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>As noted from the output each container will be prefixed by <code>step-</code> followed by the step-name from that of the Task definition.</p>
+</div>
+<div class="paragraph">
+<p>Apart from your step pods there will also be other Tekton pods that will be added to each TaskRun based on the input and output resources. e.g step-git-source-git-source-2lqtx, step-image-digest-exporter-52lh6</p>
+</div>
+<div class="paragraph">
+<p>If you see the TaskRun status as <code>Failed</code> or <code>Error</code> use the following command to check the reason for error:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">tkn taskrun describe &lt;taskrun-name&gt;</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="tekton-test-task-output"><a class="anchor" href="#tekton-test-task-output"></a>Test Task output</h3>
+<div class="paragraph">
+<p>Lets try running the image build using the <code>build-app</code> task:</p>
+</div>
+<div class="tabset is-loading">
+<div class="ulist tabs">
+<ul>
+<li>
+<p><a id="tabset1_minikube"></a>Minikube</p>
+</li>
+<li>
+<p><a id="tabset1_openshift"></a>OpenShift</p>
+</li>
+</ul>
+</div>
+<div class="content">
+<div class="tab-pane" aria-labelledby="tabset1_minikube">
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl apply -n tektontutorial -f $TUTORIAL_HOME/kubernetes/demo-greeter.yaml</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Wait for the <code>demo-greeter</code> to be up and running:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">watch kubectl get pods -n tektontutorial</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Lets try checking the application:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">SVC_URL=$(minikube -p tektontutorial -n tektontutorial service demo-greeter --url)</code></pre>
+</div>
+</div>
+</div>
+<div class="tab-pane" aria-labelledby="tabset1_openshift">
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc expose svc -n tektontutorial demo-greeter</code></pre>
+</div>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">SVC_URL=$(oc get routes -o yaml | yq r - 'spec.url.host' )</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">http --body $SVC_URL</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The above command should show an output like <strong>Meeow!! from Tekton 😺🚀</strong></p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="tekton-task-step-template"><a class="anchor" href="#tekton-task-step-template"></a>Step Template</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>When there is a need to have similar container configuration across all steps of a Task, we can have them defined in the stepTemplate. The Task steps will then inherit them implicitly in all steps. In the example above we define the resources and securityContext for all the steps using the stepTemplate.  Also if you notice in the example above we can also override the stepTemplate at the step level. That gives a unique flexibility to tweak the settings at step level.</p>
+</div>
+<div class="paragraph">
+<p>With the current <code>build-app</code> task, we see the following configurations are repeated in <code>build-image</code> and <code>push-image</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">securityContext:
+  privileged: true
+  runAsUser: 0
+volumeMounts:
+  - name: varlibc
+    mountPath: /var/lib/containers</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>We can move the the above step configuration into a stepTemplate as shown in the following updated <code>build-app</code> task:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">---
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: build-app
+spec:
+  stepTemplate:
+    securityContext:
+      runAsUser: 0
+      privileged: true
+    volumeMounts:
+      - name: varlibc
+        mountPath: /var/lib/containers
+  params:
+    - name: contextDir
+      description: the context dir within source
+      default: .
+    - name: mavenMirrorUrl
+      description: the maven mirrror url
+      default: https://repo.maven.apache.org/maven2/
+    - name: destinationImage
+      description: the fully qualified image name
+      default: "$(outputs.resources.builtImage.url)"
+    - name: dockerFile
+      description: the docker file to used for building the application
+      default: Dockerfile
+    - name: tlsVerify
+      description: tls verify
+      type: string
+      default: "false"
+  resources:
+    inputs:
+      - name: source
+        type: git
+    outputs:
+      - name: builtImage
+        type: image
+  steps:
+    - name: build-sources
+      image: docker.io/maven:3.6.3-openjdk-11-slim
+      command:
+        - mvn
+      args:
+        - -DskipTests
+        - clean
+        - package
+      env:
+        - name: user.home
+          value: /home/tekton
+      workingDir: "/workspace/source/$(inputs.params.contextDir)"
+    - name: build-image
+      image: quay.io/buildah/stable
+      command:
+        - "buildah"
+      args:
+        - "bud"
+        - "--layers"
+        - "-f"
+        - "$(inputs.params.dockerFile)"
+        - "-t"
+        - "$(inputs.params.destinationImage)"
+        - "."
+      workingDir: "/workspace/source/$(inputs.params.contextDir)"
+    - name: push-image
+      image: quay.io/buildah/stable
+      command:
+        - "buildah"
+      args:
+        - "push"
+        - "--tls-verify=$(inputs.params.tlsVerify)"
+        - $(inputs.params.destinationImage)
+        - "docker://$(inputs.params.destinationImage)"
+      workingDir: "/workspace/source/$(inputs.params.contextDir)"
+  volumes:
+    - name: varlibc
+      emptyDir: {}</code></pre>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_apply_new_task_updates"><a class="anchor" href="#_apply_new_task_updates"></a>Apply new Task updates</h3>
+<div class="paragraph">
+<p>Now you can apply the task as shown:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl apply -n tektontutorial -f build-app-task-step-template.yaml</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now try running <code>build-app</code> Task again:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">tkn task start -n tektontutorial build-app \
+  --inputresource='source=git-source' \
+  --outputresource='builtImage=tekton-tutorial-greeter-image' \
+  --param contextDir='springboot' \
+  --showlog</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>When you examine the TaskRun pods should notice <code>stepTemplate</code> added to all the step containers including <code>build-sources</code>.</p>
+</div>
+<div class="paragraph">
+<p>List the pods that were part of the TaskRun for Task <code>build-app</code>:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl get pods --selector=tekton.dev/task=build-app</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_check_securitycontext"><a class="anchor" href="#_check_securitycontext"></a>Check <code>securityContext</code></h3>
+<div class="paragraph">
+<p>Assuming the build-app-run pod to be <code>build-app-run-dnbwp-pod-4hcvr</code>:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl get pod -n tektontutorial build-app-run-dnbwp-pod-4hcvr \
+-o=jsonpath="{range .spec.containers[*]}{.name}{'\n'}\
+  {'\t'}{'Privileged: '}{.securityContext.privileged}{'\t'}{'User: '}{.securityContext.runAsUser}{'\n'}{end}"</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The command should an output like :</p>
+</div>
+<div class="listingblock console-output">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">step-create-dir-builtimage-mqg45
+        Privileged: true        User: 0
+step-git-source-git-source-t5xcb
+        Privileged: true        User: 0
+step-build-sources
+        Privileged: true        User: 0
+step-build-image
+        Privileged: true        User: 0
+step-push-image
+        Privileged: true        User: 0
+step-image-digest-exporter-tr4mf
+        Privileged: true        User: 0</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>As you noticed that all steps have inherited the <code>securityContext</code> from the <code>StepTemplate</code>, making the step container to run in <code>privileged</code> mode with user <code>0</code></p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_check_volumemounts"><a class="anchor" href="#_check_volumemounts"></a>Check <code>volumeMounts</code></h3>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl get pod -n tektontutorial build-app-run-dnbwp-pod-4hcvr \
+-o=jsonpath="{range .spec.containers[*]}{.name}{'\n'}{'\t'}{'Mount Path: '}{.volumeMounts[?(@.name=='varlibc')].mountPath} {'\n'}{end}"</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The command should an output like :</p>
+</div>
+<div class="listingblock console-output">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">step-create-dir-builtimage-mqg45
+        Mount Path: /var/lib/containers
+step-git-source-git-source-t5xcb
+        Mount Path: /var/lib/containers
+step-build-sources
+        Mount Path: /var/lib/containers
+step-build-image
+        Mount Path: /var/lib/containers
+step-push-image
+        Mount Path: /var/lib/containers
+step-image-digest-exporter-tr4mf
+        Mount Path: /var/lib/containers</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>As you noticed that all steps have inherited the <code>mountPath</code> from the <code>StepTemplate</code>.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+The Task steps can override the stepTemplate values.
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="tekton-task-cleanup"><a class="anchor" href="#tekton-task-cleanup"></a>Cleanup</h2>
+<div class="sectionbody">
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl delete -n tektontutorial -f $TUTORIAL_HOME/kubernetes/demo-greeter.yaml</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Clean all completed and failed pods</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$TUTORIAL_HOME/bin/clean_completed.sh</code></pre>
+</div>
+</div>
+</div>
+</div>
+<nav class="pagination">
+  <span class="prev"><a href="pipeline-resources.html">Pipeline Resources</a></span>
+  <span class="next"><a href="pipelines.html">Pipelines</a></span>
+</nav>
+</article>
+<aside class="toc sidebar" data-title="Contents" data-levels="2">
+  <div class="toc-menu"></div>
+</aside>
+  </div>
+</main>
+</div>
+<footer class="footer">
+  <a class="rhd-logo" href="https://developers.redhat.com" target="_blank"></div>
+</footer>
+<script src="../_/js/vendor/clipboard.js"></script>
+<script src="../_/js/site.js"></script>
+<script async src="../_/js/vendor/highlight.js"></script>
+  </body>
+</html>
