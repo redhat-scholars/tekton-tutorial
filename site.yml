@@ -8,7 +8,7 @@ site:
 content:
   sources:
     - url: git@github.com:redhat-scholars/tekton-tutorial.git
-      tags: v.3.0
+      tags: v1.3.0
       branches: []
       start_path: documentation
 asciidoc:
