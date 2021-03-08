@@ -7,7 +7,7 @@
     <link rel="canonical" href="https://redhat-scholars.github.io/tekton-tutorial/tekton-tutorial/workspaces.html">
     <link rel="prev" href="pipelines.html">
     <link rel="next" href="private_reg_repos.html">
-    <meta name="generator" content="Antora 2.3.3">
+    <meta name="generator" content="Antora 2.3.4">
     <link rel="stylesheet" href="../_/css/site.css">
   </head>
   <body class="article">
@@ -818,7 +818,7 @@ spec:
     - name: url
       value: https://github.com/redhat-scholars/tekton-tutorial-greeter
     - name: revision
-      value: staging
+      value: master
   workspaces: <i class="conum" data-value="4"></i><b>(4)</b>
     - name: output
       persistentVolumeClaim:
@@ -863,7 +863,7 @@ spec:
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">tkn task start git-clone \
   --namespace=workspace-auth-demo \
   --param url=https://github.com/redhat-scholars/tekton-tutorial-greeter \
-  --param revision=staging \
+  --param revision=master \
   --workspace name=output,claimName=tekton-tutorial-sources \
   --use-param-defaults \<i class="conum" data-value="1"></i><b>(1)</b>
   --showlog</code></pre>
@@ -983,8 +983,8 @@ tekton-tutorial-sources   Bound    pvc-48aa86ae-ec20-4f0c-a2d0-65d906d41bed   1G
 [clone] + test -z
 [clone] + test -z
 [clone] + test -z
-[clone] + /ko-app/git-init -url https://github.com/redhat-scholars/tekton-tutorial-greeter -revision staging -refspec  -path /workspace/output/ '-sslVerify=true' '-submodules=true' -depth 1
-[clone] {"level":"info","ts":1595778607.616774,"caller":"git/git.go:139","msg":"Successfully cloned https://github.com/redhat-scholars/tekton-tutorial-greeter @ 2e3336657cc1bbf22e3db183a517dcb0a62207b9 (grafted, HEAD, origin/staging) in path /workspace/output/"}
+[clone] + /ko-app/git-init -url https://github.com/redhat-scholars/tekton-tutorial-greeter -revision master -refspec  -path /workspace/output/ '-sslVerify=true' '-submodules=true' -depth 1
+[clone] {"level":"info","ts":1595778607.616774,"caller":"git/git.go:139","msg":"Successfully cloned https://github.com/redhat-scholars/tekton-tutorial-greeter @ 2e3336657cc1bbf22e3db183a517dcb0a62207b9 (grafted, HEAD, origin/master) in path /workspace/output/"}
 [clone] {"level":"info","ts":1595778607.6473103,"caller":"git/git.go:180","msg":"Successfully initialized and updated submodules in path /workspace/output/"}
 [clone] + cd /workspace/output/
 [clone] + git rev-parse+ tr -d '\n'
