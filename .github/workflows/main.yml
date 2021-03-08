@@ -2,8 +2,11 @@ name: Tekton Tutorial
 
 on:
   push:
-    tags:
-      - "v0.14.*"
+    paths:
+      - '**'
+      - '!.github/workflows/**'
+      - '.github/workflows/main.yml'
+      - '.github/workflows/site.yml'
 env:
   SITE_DIR: "gh-pages"
 jobs:
