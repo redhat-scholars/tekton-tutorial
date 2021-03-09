@@ -27,7 +27,7 @@ The following CLI tools are required for running the exercises in this tutorial.
 | https://kubernetes.io/docs/tasks/tools/install-kubectl/[Install]
 | https://kubernetes.io/docs/tasks/tools/install-kubectl/[Install]
 
-| https://github.com/wercker/stern[stern]
+| https://github.com/stern/stern[stern]
 | `brew install stern`
 | https://github.com/wercker/stern/releases/download/1.6.0/stern_linux_amd64[Download]
 | https://github.com/wercker/stern/releases/download/1.11.0/stern_windows_amd64.exe[Download]
