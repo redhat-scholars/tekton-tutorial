@@ -7,14 +7,14 @@ WARNING: This chapter build is in progress, expect to change and not working as 
 
 At the end of this chapter you will be able to :
 
-* Tekton Authentication Secrets
-* How to push linux contianer image to external registry
+* Use Tekton Authentication Secrets
+* How to push linux container image to external registry
 * How to clone from a private Github respository
 
 [#tkn-prr-overview]
 == Overview
 
-In many parctical usecase you might need to pull from private Git repsoitories or might need to push to external container registry such as https://quay.io[Quay.io]. In both the cases the access requires you to authenticate. With Tekton this is achieved using the Kubernetes Service Account(SA) and Kubernetes Secret.
+In many practical usecases you might need to pull from private Git repsoitories or might need to push to an external container registry such as https://quay.io[Quay.io]. In both cases the access requires you to authenticate. With Tekton this is achieved using the Kubernetes Service Account(SA) and Kubernetes Secret.
 
 include::partial$tekton-nav-to-folder.adoc[tags="folder-all,auth"]
 
@@ -22,15 +22,15 @@ Let us create a new namespace called `{chapter-namespace}` and switch to that na
 
 [NOTE.assumptions,caption=ASSUMPTIONS]
 ====
-* It is assumed that you have completed xref:workspaces.adoc[Workspaces] and the reusing the same namespace that was xref:workspaces.adoc#ws-prepare[prepared] in that chapter.
-* You have container registry account with https://quay.io[Quay.io] or https://hub.docker.com[Docker Hub]
-* You have GitHub account and a private repository
+* It is assumed that you have completed xref:workspaces.adoc[Workspaces] and reusing the same namespace that was xref:workspaces.adoc#ws-prepare[prepared] in that chapter.
+* You have a container registry account with https://quay.io[Quay.io] or https://hub.docker.com[Docker Hub]
+* You have a GitHub account and a private repository
 ====
 
 [#tekton-pull-from-remote-repo]
 == Pulling from Private Source Repository
 
-In this exercise we will see how to pull i.e. clone the source code from the private source reporsitory. For this example we will use the GitHub as the remote source repository. 
+In this exercise we will see how to pull i.e. clone the source code from the private source reporsitory. For this example we will use GitHub as the remote source repository. 
 
 To be able to run this exercise you need:
 
@@ -85,7 +85,7 @@ kubectl annotate -n {chapter-namespace} secret github-pat-secret \
 secret/github-pat-secret annotated
 ----
 
-Verify the github-pat-secret as right type, annoations and credential values:
+Verify the github-pat-secret as the right type, annotations and credential values:
 
 [.console-input]
 [source,bash,subs="+macros,+attributes"]
@@ -93,7 +93,7 @@ Verify the github-pat-secret as right type, annoations and credential values:
 kubectl get -n {chapter-namespace} secret github-pat-secret -o yaml 
 ----
 
-The command should show an output(trimmed for brevity) as shown in the following listing, with your GitHub.com username and PAT. 
+The command should show an output (trimmed for brevity) as shown in the following listing, with your GitHub.com username and PAT. 
 
 [.console-output]
 [source,bash,subs="+quotes"]
@@ -114,7 +114,7 @@ metadata:
 [#tekton-github-sa]
 === Create Service Account
 
-Let us create a Kubernetes ServiceAccount that could be used pull from the private GitHub repository:
+Let us create a Kubernetes ServiceAccount that could be used to pull from the private GitHub repository:
 
 [.console-input]
 [source,bash,subs="+macros,+attributes"]
@@ -154,7 +154,7 @@ Lets verify if the service account has the secret added:
 kubectl get sa -n {chapter-namespace} github-bot -o yaml
 ----
 
-The command should show an output(trimmed for brevity) like:
+The command should show an output (trimmed for brevity) like:
 
 [.console-output]
 [source,yaml,subs="+quotes,+attributes"]
@@ -232,7 +232,7 @@ include::ROOT:partial$logs-view.adoc[tags='pr']
 --
 ====
 
-A successful clone from private repo will show the following output ( trimmed brevity):
+A successful clone from private repo will show the following output (trimmed brevity):
 
 [.console-output]
 [source,bash,subs="+quotes"]
@@ -282,7 +282,7 @@ A successful clone from private repo will show the following output ( trimmed br
 [#tekton-push-to-external-reg]
 == Pushing to external registry
 
-To able push to external container registry, its requried that the Pipline is run with a ServiceAccount that has container registry credentials configured via ServiceAccount secrets.  Kubernetes provider a Secret type called `docker-registry`, that can be used to configure the container registry credentials.
+To able push to an external container registry, its requried that the Pipline is run with a ServiceAccount that has container registry credentials configured via ServiceAccount secrets.  Kubernetes provider a Secret type called `docker-registry`, that can be used to configure the container registry credentials.
 
 Set the requried environment variables to be used when creating the container-registry-secret:
 
@@ -456,24 +456,24 @@ A successful build and push will show the following output ( trimmed brevity):
 [build-java-app-image : digest-to-results] #sha256:0e9e267a96f1ea48fe00642cd82ef689e44c7d467d6db3a3a543fa5b42fe53dc#
 ----
 
-A successful pipeline should have pushed the image to the external container registry. The following screen shot shows the image pushed to *rhdevelopers* Quay.io container registry repo:
+A successful pipeline should have pushed the image to the external container registry. The following screenshot shows the image pushed to *rhdevelopers* Quay.io container registry repo:
 
 image::pushed_image.png[]
 
 [NOTE]
 ====
-If you noticed the highlighted *sha256* from the log above, is same as that of the *sha256* listed in the contianer registry repository.
+If you noticed the highlighted *sha256* from the log above, is same as that of the *sha256* listed in the container registry repository.
 ====
 
 [#tekton-remote-ref-points]
 == Points to Ponder
 
-When need to pull from remote source repository or push to external container registry:
+When you need to pull from remote source repository or push to external container registry you need:
 
 * A Kubernetes Secret to hold the container registry credentials
-* A Kubenretes Service Account, with the container registry Secret added to it
-* Use the Service Account as `serviceAccountName` in PipelineRuns/TaskRuns
-* Annotate Secerts to map which Secret to be used with source repository
+* A Kubernetes Service Account, with the container registry Secret added to it
+* To use the Service Account as `serviceAccountName` in PipelineRuns/TaskRuns
+* To annotate Secrets to map which Secret to be used with source repository
 
 You can find more details about using Authentication with Tekton https://tekton.dev/docs/pipelines/auth/[here].
 
