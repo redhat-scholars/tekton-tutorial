@@ -649,12 +649,16 @@ tkn task start -n {tutorial-namespace} build-app \#<.>
   --inputresource='source=git-source' \#<.>
   --outputresource='builtImage=tekton-tutorial-greeter-image' \#<.>
   --param contextDir='springboot' \#<.>
+  --param destinationImage='image-registry.openshift-image-registry.svc:5000/tektontutorial/tekton-tutorial-greeter-image' \#<.>
   --showlog#<.>
 ----
 
 <.> The task that need to be run, in this case `build-app`
 <.> The input resource mapping, i.e. mapping  input `source` to PipelineResource `git-source` of type `git`
 <.> The output resource mapping, i.e. mapping output `builtImage` to PipelineResource `built-image` of type `image`
+<.> The directory inside repository where to do the build
+<.> The image repository URL where we want to push the image into.
+<.> Keep following the build logs
 
 It will take few seconds for the TaskRun to show status as `Running` as it needs to download the container images.
 
