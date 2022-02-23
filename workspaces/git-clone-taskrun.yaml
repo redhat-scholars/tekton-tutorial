@@ -9,9 +9,11 @@ spec:
     name: git-clone
   params:
     - name: url
-      value: https://github.com/redhat-scholars/tekton-greeter
+      value: https://github.com/redhat-scholars/tekton-tutorial-greeter
     - name: revision
       value: master
+    - name: deleteExisting
+      value: 'true'
   workspaces:
     - name: output
       persistentVolumeClaim:
