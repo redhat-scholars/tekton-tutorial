@@ -471,6 +471,7 @@ Let us now apply what we learned with workspace to build and deploy the applicat
 ----
 include::ROOT:example$greeter-app-deploy.yaml[]
 ----
+
 <.> The parameters for the Pipeline
 <.> A workpace named `source`, we will map it to the PVC`tekton-tutorial-sources`  in PipelineRun in upcoming section
 <.> A workapce named `maven-settings`, we will map it to ConfigMap `maven-settings` in the PipelineRun in upcming section
@@ -501,7 +502,6 @@ We need to create the Service Account(SA) that is authorized to Knative Service 
 curl -sSL \
   https://raw.githubusercontent.com/tektoncd/catalog/master/task/kn/0.1/support/kn-deployer.yaml \
   | yq '.metadata.namespace="{chapter-namespace}"' \
-  | yq '.subjects.[0].namespace="{chapter-namespace}"' \
   | kubectl apply -f -
 ----
 
