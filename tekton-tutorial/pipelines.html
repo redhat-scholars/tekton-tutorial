@@ -524,7 +524,6 @@ spec:
           value: $(params.destinationImage)
     - name: deploy-kubernetes-service
       taskRef:
-        kind: ClusterTask
         name: openshift-client
       runAfter:
         - build-java-app

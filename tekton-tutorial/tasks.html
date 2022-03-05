@@ -1140,10 +1140,10 @@ The resulted linux container image will be pushed to the container registry.</p>
     - name: destinationImage <i class="conum" data-value="3"></i><b>(3)</b>
       description: the fully qualified image name
       default: ""
-    - name: dockerFile
+    - name: dockerFile<i class="conum" data-value="4"></i><b>(4)</b>
       description: the docker file to used for building the application
       default: Dockerfile
-    - name: tlsVerify
+    - name: tlsVerify <i class="conum" data-value="5"></i><b>(5)</b>
       description: tls verify
       type: string
       default: "false"
@@ -1153,7 +1153,7 @@ The resulted linux container image will be pushed to the container registry.</p>
       default: master
     - name: subdirectory
       default: ""
-    - name: sslVerify <i class="conum" data-value="4"></i><b>(4)</b>
+    - name: sslVerify
       description: defines if http.sslVerify should be set to true or false in the global git config
       type: string
       default: "false"</code></pre>
