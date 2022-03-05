@@ -1,6 +1,3 @@
-
-WARNING: This chapter build is in progress, expect to change and not working as expected
-
 At the end of this chapter you will be able to :
 
 * What are Tekton Triggers

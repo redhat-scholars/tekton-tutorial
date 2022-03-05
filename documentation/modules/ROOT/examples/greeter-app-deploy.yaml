@@ -4,11 +4,12 @@ metadata:
   name: greeter-app-deploy
 spec:
   description: >-
-    The Pipline to buld and deploy the Hello World Java App https://github.com/redhat-scholars/tekton-tutorial-greeter as Knative Service.
+    The Pipeline to build and deploy the Hello World Java App https://github.com/redhat-scholars/tekton-tutorial-greeter as Knative Service.
   params:
-    - name: image-name #<.>
-      description: The fully qualified image name e.g example.com/tekton-tutorial/greeter
-      default: example.com/tekton-tutorial/greeter
+    - name: IMAGE_NAME #<.>
+      description: >-
+        The fully qualified image name. If you are running on Minikube please use example.com/tekton-tutorial/greeter
+        On OpenShift, use image-registry.openshift-image-registry.svc:5000/workspace-auth-demo/tekton-tutorial-greeter
     - name: context-dir
       description: >-
         The application framework to use, value can be either quarkus or springboot
@@ -62,12 +63,12 @@ spec:
         - name: GOALS
           value:
             [
-              '-pl',
-              '$(params.context-dir)',
-              '-B',
-              '-DskipTests',
-              'clean',
-              'package',
+                '-pl',
+                '$(params.context-dir)',
+                '-B',
+                '-DskipTests',
+                'clean',
+                'package',
             ]
       workspaces:
         - name: maven-settings
@@ -83,7 +84,9 @@ spec:
         - name: CONTEXT
           value: '$(params.context-dir)'
         - name: IMAGE
-          value: '$(params.image-name)'
+          value: '$(params.IMAGE_NAME)'
+        - name: STORAGE_DRIVER
+          value: vfs
         # since pushing to internal registry we skip TLS verify
         - name: TLSVERIFY
           value: 'false'
@@ -102,4 +105,4 @@ spec:
             - 'create'
             - '$(params.kn-service-name)'
             - '--force'
-            - '--image=$(params.image-name)@$(tasks.build-java-app-image.results.IMAGE_DIGEST)' #<.>
+            - '--image=$(params.IMAGE_NAME)@$(tasks.build-java-app-image.results.IMAGE_DIGEST)'#<.>

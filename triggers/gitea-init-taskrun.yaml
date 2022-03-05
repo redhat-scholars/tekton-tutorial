@@ -34,7 +34,7 @@ spec:
 
           # use the gitea cli on the gitea pods to create a user with admin rights per parameters passed in
           # NOTE: This command is spammy so we pipe the output to /dev/null
-          kubectl exec svc/gitea > /dev/null -- /home/gitea/gitea -w /home/gitea/ -c /home/gitea/conf/app.ini admin create-user --username $(params.GITEA_USER) --password $(params.GITEA_PASSWORD) --email $(params.GITEA_USER)@gitea.com \
+          kubectl exec svc/gitea > /dev/null -- /home/gitea/gitea -w /home/gitea/ -c /home/gitea/conf/app.ini admin user create --username $(params.GITEA_USER) --password $(params.GITEA_PASSWORD) --email $(params.GITEA_USER)@gitea.com \
             --must-change-password=false 
 
           printf "Created Gitea admin user %s:%s" $(params.GITEA_USER) $(params.GITEA_PASSWORD)

@@ -10,4 +10,4 @@ spec:
       bindings:
         - ref: gitea-triggerbinding
       template:
-        name: tekton-greeter-trigger-template
+        ref: tekton-greeter-trigger-template

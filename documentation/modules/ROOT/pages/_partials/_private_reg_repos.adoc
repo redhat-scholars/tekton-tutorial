@@ -1,9 +1,5 @@
-== Using Private Repositories and Registries
-
 include::_attributes.adoc[]
 :chapter-namespace: workspace-auth-demo
-
-WARNING: This chapter build is in progress, expect to change and not working as expected
 
 At the end of this chapter you will be able to :
 
@@ -54,11 +50,10 @@ Create the Kubernetes secret that can hold your GitHub.com credentials:
 [.console-input]
 [source,bash,subs="+macros,+attributes"]
 ----
-kubectl create secret -n {chapter-namespace} generic github-pat-secret --dry-run=client -o yaml \
-  | yq w - type kubernetes.io/basic-auth \
-  | yq w - stringData.username $GITHUB_USERNAME \
-  | yq w - stringData.password $TEKTON_TUTORIAL_GITHUB_PAT \
-  | kubectl apply -f - 
+kubectl create secret -n workspace-auth-demo generic github-pat-secret \
+    --type kubernetes.io/basic-auth \
+    --from-literal username=$GITHUB_USERNAME \
+    --from-literal password=$TEKTON_TUTORIAL_GITHUB_PAT
 ----
 
 [.console-output]
@@ -328,6 +323,7 @@ kubectl create sa -n {chapter-namespace} build-bot
 serviceaccount/build-bot created
 ----
 
+
 [#tekton-patch-build-sa]
 === Patch Service Account 
 
@@ -373,6 +369,20 @@ secrets:
 - name: build-bot-token-8nl2v
 ----
 
+[IMPORTANT]
+.Running Tasks with privileged access on OpenShift
+====
+Sometimes, Tekton Tasks or ClusterTasks require privileged access to create certain Kubernetes resources.
+Using a service account and adding it to a security policy is the safe way to run those kind of Tasks or ClusterTasks.
+
+For our example, we should run the following command:
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+oc adm policy add-scc-to-user anyuid -z build-bot -n workspace-auth-demo
+----
+====
+
 [#tekton-create-build-push-pipeline]
 === Create Pipeline
 
@@ -407,7 +417,7 @@ tkn pipeline start greeter-app-build \
   --serviceaccount=build-bot \
   --workspace name=maven-settings,config=maven-settings \
   --workspace name=source,claimName=tekton-tutorial-sources \
-  --use-param-defaults \
+  --param image-name=$CONTAINER_REGISTRY_SERVER/$CONTAINER_REGISTRY_USER/tekton-tutorial-greeter  \
   --showlog
 ----
 --

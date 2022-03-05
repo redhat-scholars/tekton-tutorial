@@ -21,13 +21,13 @@ unamestr=$(uname)
 
 if [ "${unamestr}" == "Darwin" ]; then
  # Add MacOS specific options for minikube
- PLATFORM_SPECIFIC_OPTIONS=("--driver=hyperkit" "--apiserver-names=docker.for.mac.localhost")
+ PLATFORM_SPECIFIC_OPTIONS=("--driver=hyperkit" "--container-runtime=crio")
 fi
 
 minikube start -p "$PROFILE_NAME" \
   --memory="$MEMORY" --cpus="$CPUS" \
   --disk-size=50g \
-  --kubernetes-version='v1.20.0' \
+  --kubernetes-version='v1.23.3' \
   --insecure-registry='10.0.0.0/24' \
     "${PLATFORM_SPECIFIC_OPTIONS[@]}"
   

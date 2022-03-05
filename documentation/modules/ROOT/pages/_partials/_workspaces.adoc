@@ -1,4 +1,4 @@
-WARNING: This chapter build is in progress, expect to change and not working as expected
+//WARNING: This chapter build is in progress, expect to change and not working as expected
 
 At the end of this chapter you will be able to :
 
@@ -61,7 +61,7 @@ Let us run the `git-clone` Task with the `TaskRun` definition as shown below:
 apiVersion: tekton.dev/v1beta1
 kind: TaskRun
 metadata:
-  genrateName: git-clone- #<.>
+  generateName: git-clone- #<.>
   labels: #<.>
     tekton.dev/task: git-clone
 spec:
@@ -500,8 +500,8 @@ We need to create the Service Account(SA) that is authorized to Knative Service 
 ----
 curl -sSL \
   https://raw.githubusercontent.com/tektoncd/catalog/master/task/kn/0.1/support/kn-deployer.yaml \
-  | yq w - -d0 metadata.namespace {chapter-namespace} \
-  | yq w - -d2 subjects.[0].namespace {chapter-namespace} \
+  | yq '.metadata.namespace="{chapter-namespace}"' \
+  | yq '.subjects.[0].namespace="{chapter-namespace}"' \
   | kubectl apply -f -
 ----
 
@@ -561,7 +561,7 @@ include::ROOT:partial$logs-view.adoc[tags='pr']
 --
 ====
 
-A successfull Pipelinerun should have the `greeter` application up and running as shown:
+A successful Pipelinerun should have the `greeter` application up and running as shown:
 
 [.console-input]
 [source,bash,subs="+macros,+attributes"]
