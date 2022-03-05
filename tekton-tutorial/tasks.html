@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>Tasks :: Tekton Tutorial</title>
     <link rel="canonical" href="https://redhat-scholars.github.io/tekton-tutorial/tekton-tutorial/tasks.html">
-    <link rel="prev" href="pipeline-resources.html">
+    <link rel="prev" href="setup.html">
     <link rel="next" href="pipelines.html">
     <meta name="generator" content="Antora 2.3.4">
     <link rel="stylesheet" href="../_/css/site.css">
@@ -72,24 +72,10 @@
   </li>
 </ul>
   </li>
-  <li class="nav-item" data-depth="1">
-    <button class="nav-item-toggle"></button>
-    <a class="nav-link" href="pipeline-resources.html">Pipeline Resources</a>
-<ul class="nav-list">
-  <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="pipeline-resources.html#tekton-res-prerequisite">Prerequisites</a>
-  </li>
-  <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="pipeline-resources.html#tekton-res-create">Create Pipeline Resource</a>
-  </li>
-  <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="pipeline-resources.html#tekton-res-deploy">Deploy Pipeline Resource</a>
-  </li>
-  <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="pipeline-resources.html#tkn-see-what-you-have-deployed">See what you have deployed</a>
-  </li>
 </ul>
   </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
   <li class="nav-item is-current-page" data-depth="1">
     <button class="nav-item-toggle"></button>
     <a class="nav-link" href="tasks.html">Tasks</a>
@@ -394,7 +380,7 @@
     <li><a href="tasks.html">Tasks</a></li>
   </ul>
 </nav>
-  <div class="edit-this-page"><a href="https://github.com/redhat-scholars/tekton-tutorial/blob/v1.3.0/documentation/modules/ROOT/pages/tasks.adoc">Edit this Page</a></div>
+  <div class="edit-this-page"><a href="https://github.com/redhat-scholars/tekton-tutorial/edit/tekton-tutorial-v2.0.0/documentation/modules/ROOT/pages/tasks.adoc">Edit this Page</a></div>
   </div>
   <div class="content">
 <article class="doc">
@@ -440,26 +426,49 @@
 <h2 id="tekton-tasks"><a class="anchor" href="#tekton-tasks"></a>Tekton Task</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Each Task has the following:</p>
+<p>Each Task must have the following:</p>
 </div>
 <div class="ulist">
 <ul>
 <li>
-<p><strong>name</strong> - the unique name using which the task can be referred</p>
+<p><strong>apiVersion</strong>  - The API version used by the Tekton resource; for example, tekton.dev/v1beta1.</p>
 </li>
 <li>
-<p><strong>inputs</strong> - the inputs to the task</p>
+<p><strong>kind</strong> - Identifies this resource object as a Task object.</p>
+</li>
+<li>
+<p><strong>metadata</strong> - Metadata that uniquely identifies the Task resource object, like name.</p>
 <div class="ulist">
 <ul>
 <li>
-<p><strong>resources</strong> - the pipeline resources that will be used in the task e.g. git-source</p>
+<p><strong>name</strong>  - the unique name using which the task can be referred</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p><strong>spec</strong> - The configuration for a Task resource object.</p>
+</li>
+<li>
+<p><strong>steps</strong> - One or more sub-tasks that will be executed in the defined order. The step has all the attributes like a <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.14/#pod-v1-core">Pod spec</a></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>There are also a series of optional fields for a better control over the resource:</p>
+</div>
 <div class="ulist">
 <ul>
 <li>
-<p><strong>name</strong> - the name of the input resource using which it can be referenced and bound via <a href="#tekton-task-run">TaskRun</a></p>
+<p><strong>resources</strong> - the pipeline resources that will be used in the task e.g. git-source.
+This field is supported by the alpha version of Tekton API and should be avoided as is using the deprecated PipelineResource type.</p>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>inputs</strong> - the resources ingested by the task</p>
 </li>
 <li>
-<p><strong>type</strong> - the type of the input resource, typically the pipeline resource type</p>
+<p><strong>outputs</strong> - the resources produced by the task</p>
 </li>
 </ul>
 </div>
@@ -480,8 +489,14 @@
 </ul>
 </div>
 </li>
-</ul>
-</div>
+<li>
+<p><strong>results</strong> - The names under which Tasks write execution results.</p>
+</li>
+<li>
+<p><strong>workspaces</strong> - The paths to volumes needed by the Task.</p>
+</li>
+<li>
+<p><strong>volumes</strong> - the task can also mount external volumes using the <strong>volumes</strong> attribute.</p>
 </li>
 </ul>
 </div>
@@ -497,36 +512,6 @@ The <a href="#tekton-task-run">TaskRun</a> could override the parameter values, 
 </tr>
 </table>
 </div>
-<div class="ulist">
-<ul>
-<li>
-<p><strong>outputs</strong> the pipeline resource that will end artifact of the task. In the above example the build will produce a container image artifact.</p>
-<div class="ulist">
-<ul>
-<li>
-<p><strong>resources</strong> - the pipeline resources that will be used in the task e.g. builtImage</p>
-<div class="ulist">
-<ul>
-<li>
-<p><strong>name</strong> - the name of the input resource using which it can be referenced and bound via <a href="#tekton-task-run">TaskRun</a></p>
-</li>
-<li>
-<p><strong>type</strong> - the type of the input resource, typically the pipeline resource type</p>
-</li>
-</ul>
-</div>
-</li>
-</ul>
-</div>
-</li>
-<li>
-<p><strong>steps</strong> - One or more sub-tasks that will be executed in the defined order. The step has all the attributes like a <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.14/#pod-v1-core">Pod spec</a></p>
-</li>
-<li>
-<p><strong>volumes</strong> - the task can also mount external volumes using the <strong>volumes</strong> attribute.</p>
-</li>
-</ul>
-</div>
 <div class="paragraph">
 <p>The parameters that were part of the <span class="menuseq"><b class="menu">spec</b>&#160;<i class="fa fa-angle-right caret"></i> <b class="submenu">inputs</b>&#160;<i class="fa fa-angle-right caret"></i> <b class="menuitem">params</b></span> can be used in the steps using the notation <code>$(&lt;variable-name&gt;)</code>.</p>
 </div>
@@ -538,28 +523,78 @@ The <a href="#tekton-task-run">TaskRun</a> could override the parameter values, 
 <div class="listingblock">
 <div class="title">List application source code</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">---
-apiVersion: tekton.dev/v1beta1
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">apiVersion: tekton.dev/v1beta1
 kind: Task
 metadata:
   name: source-lister
+  namespace: tektontutorial
 spec:
   params:
-    - name: contextDir
-      description: "The context directory within the repository for sources"
-      default: quarkus
-  resources:
-    inputs:
-      - name: source
-        type: git
+    - default: 'https://github.com/redhat-scholars/tekton-tutorial-greeter'
+      name: url
+      type: string
+    - default: master
+      name: revision
+      type: string
+    - default: ''
+      name: subdirectory
+      type: string
+    - default: quarkus
+      description: The context directory within the repository for sources
+      name: contextDir
+      type: string
+    - default: 'false'
+      description: &gt;-
+        defines if http.sslVerify should be set to true or false in the global
+        git config
+      name: sslVerify
+      type: string
+  results:
+    - description: The precise commit SHA that was fetched by this Task.
+      name: commit
+    - description: The precise URL that was fetched by this Task.
+      name: url
   steps:
+    - image: 'gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/git-init:v0.15.2'
+      name: clone
+      resources: {}
+      script: |
+        CHECKOUT_DIR="$(workspaces.source.path)/$(params.subdirectory)"
+        cleandir() {
+          # Delete any existing contents of the repo directory if it exists.
+          #
+          # We don't just "rm -rf $CHECKOUT_DIR" because $CHECKOUT_DIR might be "/"
+          # or the root of a mounted volume.
+          if [[ -d "$CHECKOUT_DIR" ]] ; then
+            # Delete non-hidden files and directories
+            rm -rf "$CHECKOUT_DIR"/*
+            # Delete files and directories starting with . but excluding ..
+            rm -rf "$CHECKOUT_DIR"/.[!.]*
+            # Delete files and directories starting with .. plus any other character
+            rm -rf "$CHECKOUT_DIR"/..?*
+          fi
+        }
+        /ko-app/git-init \
+          -url "$(params.url)" \
+          -revision "$(params.revision)" \
+          -path "$CHECKOUT_DIR" \
+          -sslVerify="$(params.sslVerify)"
+        cd "$CHECKOUT_DIR"
+        RESULT_SHA="$(git rev-parse HEAD)"
+        printf "%s" "${RESULT_SHA}" &gt; "$(results.commit.path)"
+        printf "%s" "${PARAM_URL}" &gt; "$(results.url.path)"
     - name: ls-build-sources
+      command: ["ls", "-ltr", "/workspace/source/$(params.contextDir)"]
       image: busybox
-      command: ["ls", "-ltr", "/workspace/source/$(inputs.params.contextDir)"]</code></pre>
+      resources: {}
+      workingDir: /workspace/source/$(params.contextDir)
+  workspaces:
+    - description: The git repo will be cloned onto the volume backing this workspace
+      name: source</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>The sources are usually cloned to a standard path called <code>/workspace/&lt;input.resource.name&gt;</code>, in this example the input source name is <code>source</code> and hence the git clone will be done to a path called <code>/workspace/source</code>.</p>
+<p>The sources are usually cloned to a standard path called <code>/workspace/source/&lt;params.contextDir&gt;</code>, in this example the <code>contextDir</code> having <code>quarkus</code> as default value.</p>
 </div>
 <div class="paragraph">
 <p>You can create the Task using the command as shown in the following listing:</p>
@@ -603,8 +638,7 @@ Namespace:   tektontutorial
 
 📨 Input Resources
 
- NAME       TYPE
- ∙ source   git
+ No input resources
 
 📡 Output Resources
 
@@ -612,19 +646,27 @@ Namespace:   tektontutorial
 
 ⚓ Params
 
- NAME           TYPE     DESCRIPTION              DEFAULT VALUE
- ∙ contextDir   string   The context directo...   quarkus
+ NAME             TYPE     DESCRIPTION              DEFAULT VALUE
+ ∙ url            string                            &lt;a href="https://github.com/redhat-scholars/tekton-tutorial-greeter" class="bare"&gt;https://github.com/redhat-scholars/tekton-tutorial-greeter&lt;/a&gt;
+ ∙ revision       string                            master
+ ∙ subdirectory   string
+ ∙ contextDir     string   The context directo...   quarkus
+ ∙ sslVerify      string   defines if http.ssl...   false
 
 📝 Results
 
- No results
+ NAME       DESCRIPTION
+ ∙ commit   The precise commit ...
+ ∙ url      The precise URL tha...
 
 📂 Workspaces
 
- No workspaces
+ NAME       DESCRIPTION
+ ∙ source   The git repo will b...
 
 🦶 Steps
 
+ ∙ clone
  ∙ ls-build-sources
 
 🗂  Taskruns
@@ -659,22 +701,8 @@ Namespace:   tektontutorial
 </div>
 <div class="listingblock console-input">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">tkn task start source-lister \
-  --showlog \<i class="conum" data-value="1"></i><b>(1)</b>
-  --inputresource='source=git-source'<i class="conum" data-value="2"></i><b>(2)</b></code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">tkn task start source-lister --showlog #Show the logs while running the Task</code></pre>
 </div>
-</div>
-<div class="colist arabic">
-<table>
-<tr>
-<td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>Show the logs while running the Task</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>You are mapping the git-source from the Pipeline resource to be the input source for the Task.</td>
-</tr>
-</table>
 </div>
 <div class="admonitionblock note">
 <table>
@@ -703,20 +731,30 @@ Namespace:   tektontutorial
 </div>
 <div class="listingblock console-output">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">? Value for param `contextDir` of type `string`? (Default is `quarkus`)
-TaskRun started: source-lister-run-nbpvz
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">? Value for param `contextDir` of type `string`? (Default is `quarkus`) quarkus
+? Value for param `sslVerify` of type `string`? (Default is `false`) false
+Please give specifications for the workspace: source
+? Name for the workspace : source
+? Value of the Sub Path :
+? Type of the Workspace : emptyDir
+? Type of EmptyDir :
+TaskRun started: source-lister-run-pqx9r
 Waiting for logs to be available...
-[git-source-git-source-qtp5j] {"level":"info","ts":1595743350.5350783,"caller":"git/git.go:105","msg":"Successfully cloned https://github.com/redhat-scholars/tekton-tutorial @ master in path /workspace/source"}
-[git-source-git-source-qtp5j] {"level":"warn","ts":1595743350.5351503,"caller":"git/git.go:152","msg":"Unexpected error: creating symlink: symlink /tekton/home/.ssh /root/.ssh: file exists"}
-[git-source-git-source-qtp5j] {"level":"info","ts":1595743350.5708065,"caller":"git/git.go:133","msg":"Successfully initialized and updated submodules in path /workspace/source"}
+[clone] + CHECKOUT_DIR=/workspace/source/
+[clone] + /ko-app/git-init -url https://github.com/redhat-scholars/tekton-tutorial-greeter -revision master -path /workspace/source/ '-sslVerify=false'
+[clone] {"level":"info","ts":1646396392.4501123,"caller":"git/git.go:157","msg":"Successfully cloned https://github.com/redhat-scholars/tekton-tutorial-greeter @ d9291c456db1ce29177b77ffeaa9b71ad80a50e6 (grafted, HEAD, origin/master) in path /workspace/source/"}
+[clone] {"level":"info","ts":1646396392.5134826,"caller":"git/git.go:198","msg":"Successfully initialized and updated submodules in path /workspace/source/"}
+[clone] + cd /workspace/source/
+[clone] + git rev-parse HEAD
+[clone] + RESULT_SHA=d9291c456db1ce29177b77ffeaa9b71ad80a50e6
+[clone] + printf '%s' d9291c456db1ce29177b77ffeaa9b71ad80a50e6
+[clone] + printf '%s' https://github.com/redhat-scholars/tekton-tutorial-greeter
 
-[ls-build-sources] total 36
-[ls-build-sources] drwxr-xr-x    4 root     root          4096 Jul 26 06:02 src
-[ls-build-sources] -rw-r--r--    1 root     root          4005 Jul 26 06:02 pom.xml
-[ls-build-sources] -rwxr-xr-x    1 root     root          6607 Jul 26 06:02 mvnw.cmd
-[ls-build-sources] -rwxr-xr-x    1 root     root         10069 Jul 26 06:02 mvnw
-[ls-build-sources] drwxr-xr-x    2 root     root          4096 Jul 26 06:02 k8s
-[ls-build-sources] -rw-r--r--    1 root     root           154 Jul 26 06:02 Dockerfile</code></pre>
+[ls-build-sources] total 20
+[ls-build-sources] drwxr-sr-x    4 root     10007200      4096 Mar  4 12:19 src
+[ls-build-sources] -rw-r--r--    1 root     10007200      4322 Mar  4 12:19 pom.xml
+[ls-build-sources] -rw-r--r--    1 root     10007200       380 Mar  4 12:19 README.md
+[ls-build-sources] -rw-r--r--    1 root     10007200        87 Mar  4 12:19 Dockerfile</code></pre>
 </div>
 </div>
 <div class="admonitionblock note">
@@ -768,14 +806,19 @@ source-lister-run-6kt8d-pod-67b326   0/2     Completed    41s</code></pre>
 </div>
 <div class="listingblock console-output">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">Taskrun started: source-lister-run-96qc4
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">TaskRun started: source-lister-run-pqx9r
 Waiting for logs to be available...
 ...
-[git-source-git-source-rdr2k] {"level":"info","ts":1585065123.3817806,"logger":"fallback-logger","caller":"logging/config.go:69","msg":"Fetch GitHub commit ID from kodata failed: open /var/run/ko/refs/heads/master: no such file or directory"}
-[git-source-git-source-rdr2k] {"level":"info","ts":1585065133.3997571,"logger":"fallback-logger","caller":"logging/config.go:69","msg":"Fetch GitHub commit ID from kodata failed: open /var/run/ko/refs/heads/master: no such file or directory"}
-[git-source-git-source-rdr2k] {"level":"info","ts":1585065138.9021251,"logger":"fallback-logger","caller":"git/git.go:102","msg":"Successfully cloned https://github.com/redhat-scholars/tekton-tutorial @ master in path /workspace/source"}
-[git-source-git-source-rdr2k] {"level":"warn","ts":1585065138.902316,"logger":"fallback-logger","caller":"git/git.go:149","msg":"Unexpected error: creating symlink: symlink /tekton/home/.ssh /root/.ssh: file exists"}
-[git-source-git-source-rdr2k] {"level":"info","ts":1585065138.9946759,"logger":"fallback-logger","caller":"git/git.go:130","msg":"Successfully initialized and updated submodules in path /workspace/source"}
+[clone] + CHECKOUT_DIR=/workspace/source/
+[clone] + /ko-app/git-init -url https://github.com/redhat-scholars/tekton-tutorial-greeter -revision master -path /workspace/source/ '-sslVerify=false'
+[clone] {"level":"info","ts":1646396392.4501123,"caller":"git/git.go:157","msg":"Successfully cloned https://github.com/redhat-scholars/tekton-tutorial-greeter @ d9291c456db1ce29177b77ffeaa9b71ad80a50e6 (grafted, HEAD, origin/master) in path /workspace/source/"}
+[clone] {"level":"info","ts":1646396392.5134826,"caller":"git/git.go:198","msg":"Successfully initialized and updated submodules in path /workspace/source/"}
+[clone] + cd /workspace/source/
+[clone] + git rev-parse HEAD
+[clone] + RESULT_SHA=d9291c456db1ce29177b77ffeaa9b71ad80a50e6
+[clone] + printf '%s' d9291c456db1ce29177b77ffeaa9b71ad80a50e6
+[clone] + printf '%s' https://github.com/redhat-scholars/tekton-tutorial-greeter
+
 
 [ls-build-sources] {"level":"info","ts":1585065132.8109465,"logger":"fallback-logger","caller":"logging/config.go:69","msg":"Fetch GitHub commit ID from kodata failed: \"KO_DATA_PATH\" does not exist or is empty"}
 [ls-build-sources] total 36
@@ -1044,18 +1087,18 @@ Waiting for logs to be available...
 <p>All the Tekton Tasks that we created and ran so far had only one <code>Step</code>, but the Tekton Tasks can have more than one <code>Step</code>.</p>
 </div>
 <div class="paragraph">
-<p>Lets take an example of buildaing a Cloud Native Java Application, at minimum the <code>Task</code> need to do the following:</p>
+<p>Lets take an example of building a Cloud Native Java Application, at minimum the <code>Task</code> need to do the following:</p>
 </div>
 <div class="olist arabic">
 <ol class="arabic">
 <li>
-<p>Building the Application from sources using build tool like <a href="https://maven.apache.org">Apache Maven</a> or <a href="https://gradle.org">Gradle</a></p>
+<p>Clone the application from git.</p>
 </li>
 <li>
-<p>Building the linux container image from the build artifacts</p>
+<p>Build the Application from sources using build tool like <a href="https://maven.apache.org">Apache Maven</a> or <a href="https://gradle.org">Gradle</a></p>
 </li>
 <li>
-<p>Pushing the built container image to remote container registry like <a href="https://quay.io">Quay.io</a> or <a href="https://hub.docker.com">Docker Hub</a></p>
+<p>Build and push the container image to remote container registry like <a href="https://quay.io">Quay.io</a> or <a href="https://hub.docker.com">Docker Hub</a></p>
 </li>
 </ol>
 </div>
@@ -1065,13 +1108,14 @@ Waiting for logs to be available...
 <div class="olist arabic">
 <ol class="arabic">
 <li>
-<p>As a step one(<code>build-sources</code>) the application will be built using <a href="https://apache.maven.org">Apache Maven</a></p>
+<p>As a step one(<code>clone</code>) the application will be cloned from <a href="https://github.com/redhat-scholars/tekton-tutorial">tekton-tutorial master branch</a></p>
 </li>
 <li>
-<p>then the step two (<code>build-image</code>) the application artifacts a <strong>jar</strong> in this case will be used to built the linux container image using <a href="https://buildah.io">buildah</a>, the <a href="https://github.com/redhat-scholars/tekton-tutorial/tree/master/apps/greeter/java/quarkus/Dockerfile.jvm">Dockerfile</a> in the sources will be used as base to build the linux container image</p>
+<p>Then the step two (<code>build-sources</code>) builds the application using <a href="https://apache.maven.org">Apache Maven</a></p>
 </li>
 <li>
-<p>As part of the last step(<code>build-push</code>) the built linux container image will be pushed to the container registry.</p>
+<p>The last step (<code>build-image-push</code>) uses the application artifacts generated by previous step, and builds the linux container image using <a href="https://buildah.io">buildah</a> and the <a href="https://github.com/redhat-scholars/tekton-tutorial/tree/master/apps/greeter/java/quarkus/Dockerfile.jvm">Dockerfile</a>.
+The resulted linux container image will be pushed to the container registry.</p>
 </li>
 </ol>
 </div>
@@ -1079,39 +1123,47 @@ Waiting for logs to be available...
 <p>The following section explains the three Task <code>Steps</code>. The <a href="#tekton-task-deploy">Deploy a task</a> will finally deploy all these three steps together as one single <code>build-app</code> task.</p>
 </div>
 <div class="sect2">
-<h3 id="task-parameters"><a class="anchor" href="#task-parameters"></a>Task Inputs and Outputs</h3>
+<h3 id="task-parameters"><a class="anchor" href="#task-parameters"></a>Task Workspace and Parameters</h3>
 <div class="listingblock">
-<div class="title"><a href="https://github.com/redhat-scholars/tekton-tutorial/blob/master/tasks/build-app-task.yaml" target="_blank" rel="noopener">task inputs and outputs</a></div>
+<div class="title"><a href="https://github.com/redhat-scholars/tekton-tutorial/blob/master/tasks/build-app-task.yaml">task workspace and parameters</a></div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">inputs:
-    resources: <i class="conum" data-value="1"></i><b>(1)</b>
-      - name: source
-        type: git
-    params:
-      - name: contextDir <i class="conum" data-value="2"></i><b>(2)</b>
-        description: the context dir within source
-        default: springboot
-      - name: destinationImage <i class="conum" data-value="3"></i><b>(3)</b>
-        description: the fully qualified image name
-        default: "$(outputs.resources.builtImage.url)"
-      - name: dockerFile <i class="conum" data-value="4"></i><b>(4)</b>
-        description: the docker file to used for building the application
-        default: Dockerfile
-      - name: tlsVerify <i class="conum" data-value="5"></i><b>(5)</b>
-        description: tls verify
-        type: string
-        default: "false"
-outputs:
-  resources: <i class="conum" data-value="6"></i><b>(6)</b>
-    - name: builtImage
-      type: image</code></pre>
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">  workspaces:
+    - name: source <i class="conum" data-value="1"></i><b>(1)</b>
+      description: The git repo will be cloned onto the volume backing this workspace
+  params:
+    - name: contextDir <i class="conum" data-value="2"></i><b>(2)</b>
+      description: the context dir within source
+      default: springboot
+    - name: mavenMirrorUrl
+      description: the maven mirrror url
+      default: <a href="https://repo.maven.apache.org/maven2/" class="bare">https://repo.maven.apache.org/maven2/</a>
+    - name: destinationImage <i class="conum" data-value="3"></i><b>(3)</b>
+      description: the fully qualified image name
+      default: ""
+    - name: dockerFile
+      description: the docker file to used for building the application
+      default: Dockerfile
+    - name: tlsVerify
+      description: tls verify
+      type: string
+      default: "false"
+    - name: url
+      default: <a href="https://github.com/redhat-scholars/tekton-tutorial-greeter" class="bare">https://github.com/redhat-scholars/tekton-tutorial-greeter</a>
+    - name: revision
+      default: master
+    - name: subdirectory
+      default: ""
+    - name: sslVerify <i class="conum" data-value="4"></i><b>(4)</b>
+      description: defines if http.sslVerify should be set to true or false in the global git config
+      type: string
+      default: "false"</code></pre>
 </div>
 </div>
 <div class="colist arabic">
 <table>
 <tr>
 <td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>The input referred via <code>source</code>, which will be of type <code>git</code>. Having a input resource of type <code>git</code> will cause the TektonPipelines to add implict git clone step to download the sources to <code>workspace/source</code> directory</td>
+<td>The workspace shared by all the steps of this task and will cause the TektonPipelines to download the sources to <code>workspace/source</code> directory.</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="2"></i><b>2</b></td>
@@ -1129,41 +1181,54 @@ outputs:
 <td><i class="conum" data-value="5"></i><b>5</b></td>
 <td><code>tlsVerify</code> - enable or disable TLS when pushing the image to remote registry</td>
 </tr>
-<tr>
-<td><i class="conum" data-value="6"></i><b>6</b></td>
-<td>The output specifices the final output of the Task, in this case the built linux container image referred via <code>builtImage</code></td>
-</tr>
-</table>
-</div>
-<div class="admonitionblock note">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-note" title="Note"></i>
-</td>
-<td class="content">
-<div class="paragraph">
-<p>For Task inputs and outputs - we will use the <a href="pipeline-resources.html#tkn-see-what-you-have-deployed" class="page">PipelineResources</a> that was created in previous chapter.</p>
-</div>
-</td>
-</tr>
 </table>
 </div>
 </div>
 <div class="sect2">
-<h3 id="build-sources"><a class="anchor" href="#build-sources"></a>Step#1 - Build Application Sources</h3>
+<h3 id="clone-resources"><a class="anchor" href="#clone-resources"></a>Step#1 - Clone application resources</h3>
+<div class="listingblock">
+<div class="title"><a href="https://github.com/redhat-scholars/tekton-tutorial/blob/master/tasks/build-app-task.yaml#L63-L78" target="_blank" rel="noopener">step-clone</a></div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">- name: clone
+  image: 'gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/git-init:v0.15.2'
+  script: |
+        CHECKOUT_DIR="$(workspaces.source.path)/$(params.subdirectory)"
+        cleandir() {
+          # Delete any existing contents of the repo directory if it exists.
+          #
+          # We don't just "rm -rf $CHECKOUT_DIR" because $CHECKOUT_DIR might be "/"
+          # or the root of a mounted volume.
+          if [[ -d "$CHECKOUT_DIR" ]] ; then
+            # Delete non-hidden files and directories
+            rm -rf "$CHECKOUT_DIR"/*
+            # Delete files and directories starting with . but excluding ..
+            rm -rf "$CHECKOUT_DIR"/.[!.]*
+            # Delete files and directories starting with .. plus any other character
+            rm -rf "$CHECKOUT_DIR"/..?*
+          fi
+        }
+        /ko-app/git-init \
+          -url "$(params.url)" \
+          -revision "$(params.revision)" \
+          -path "$CHECKOUT_DIR" \
+          -sslVerify="$(params.sslVerify)"
+        cd "$CHECKOUT_DIR"
+        RESULT_SHA="$(git rev-parse HEAD)"</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="build-sources"><a class="anchor" href="#build-sources"></a>Step#2 - Build Application Sources</h3>
 <div class="listingblock">
 <div class="title"><a href="https://github.com/redhat-scholars/tekton-tutorial/blob/master/tasks/build-app-task.yaml#L32-L43" target="_blank" rel="noopener">step-build-sources</a></div>
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">- name: build-sources
   image: docker.io/maven:3.6.3-jdk-8-slim
-  workingDir: "/workspace/source/$(inputs.params.contextDir)" <i class="conum" data-value="1"></i><b>(1)</b>
+  workingDir: "/workspace/source/$(params.contextDir)" <i class="conum" data-value="1"></i><b>(1)</b>
   command: <i class="conum" data-value="2"></i><b>(2)</b>
     - mvn
   args: <i class="conum" data-value="3"></i><b>(3)</b>
     - -DskipTests
-    - -pl
-    - $(inputs.params.contextDir)
     - clean
     - package
   env: <i class="conum" data-value="4"></i><b>(4)</b>
@@ -1193,25 +1258,25 @@ outputs:
 </div>
 </div>
 <div class="sect2">
-<h3 id="build-linux-image"><a class="anchor" href="#build-linux-image"></a>Step#2 - Build Application Linux Container Image</h3>
+<h3 id="build-push-image"><a class="anchor" href="#build-push-image"></a>Step#3 - Build and Push Application Linux Container Image</h3>
 <div class="listingblock">
-<div class="title"><a href="https://github.com/redhat-scholars/tekton-tutorial/blob/master/tasks/build-app-task.yaml#L44-L62" target="_blank" rel="noopener">step-build-image</a></div>
+<div class="title"><a href="https://github.com/redhat-scholars/tekton-tutorial/blob/master/tasks/build-app-task.yaml#L44-L62" target="_blank" rel="noopener">step-build-and-push-image</a></div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">- name: build-image
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">- name: build-and-push-image
   image: quay.io/buildah/stable
-  workingDir: "/workspace/source/$(inputs.params.contextDir)"
-  command:
-    - "buildah"
-  args:
-    - "bud"
-    - "--layers"
-    - "-f"
-    - "$(inputs.params.dockerFile)"
-    - "-t"
-    - "$(inputs.params.destinationImage)"
-    - "."
-  securityContext: <i class="conum" data-value="1"></i><b>(1)</b>
-    runAsUser: 0
+  script: |
+      #!/usr/bin/env bash
+      buildah --storage-driver=vfs bud --layers -t $DESTINATION_IMAGE $CONTEXT_DIR
+      buildah --storage-driver=vfs push $DESTINATION_IMAGE docker://$DESTINATION_IMAGE
+  env:
+     - name: DESTINATION_IMAGE
+       value: "$(params.destinationImage)"
+     - name: CONTEXT_DIR
+       value: "/workspace/source/$(params.contextDir)"
+#  enable the following lines only for Minikube
+#  securityContext: <i class="conum" data-value="1"></i><b>(1)</b>
+#    runAsUser: 0
+#    privileged: true
   volumeMounts: <i class="conum" data-value="2"></i><b>(2)</b>
     - name: varlibc
       mountPath: /var/lib/containers</code></pre>
@@ -1221,7 +1286,7 @@ outputs:
 <table>
 <tr>
 <td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>Running buildah inside container needs to be run as root user and needs privilege esclation. These are set as part of security context.</td>
+<td>Running buildah inside container needs to a set of privileges. When running in Minikube, these should be set as part of security context.</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="2"></i><b>2</b></td>
@@ -1229,51 +1294,30 @@ outputs:
 </tr>
 </table>
 </div>
-</div>
-<div class="sect2">
-<h3 id="push-linux-image"><a class="anchor" href="#push-linux-image"></a>Step#3 - Push Application Linux Container Image</h3>
-<div class="listingblock">
-<div class="title"><a href="https://github.com/redhat-scholars/tekton-tutorial/blob/master/tasks/build-app-task.yaml#L63-L78" target="_blank" rel="noopener">step-build-image</a></div>
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">- name: push-image
-  image: quay.io/buildah/stable
-  workingDir: "/workspace/source/$(inputs.params.contextDir)"
-  command:
-    - "buildah"
-  args:
-    - "push"
-    - "--tls-verify=$(inputs.params.tlsVerify)"
-    - $(inputs.params.destinationImage)
-    - "docker://$(inputs.params.destinationImage)"
-  securityContext:
-    runAsUser: 0
-  volumeMounts:
-    - name: varlibc
-      mountPath: /var/lib/containers</code></pre>
-</div>
-</div>
 <div class="paragraph">
 <p>Having see the three individual steps of the <code>build-app</code> task, the following snippet shows all three chained together:</p>
 </div>
 <div class="listingblock">
 <div class="title"><a href="https://github.com/redhat-scholars/tekton-tutorial/blob/master/tasks/build-app-task.yaml" target="_blank" rel="noopener">build-app-task.yaml</a></div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">---
-apiVersion: tekton.dev/v1beta1
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">apiVersion: tekton.dev/v1beta1
 kind: Task
 metadata:
   name: build-app
 spec:
+  workspaces:
+    - name: source
+      description: The git repo will be cloned onto the volume backing this workspace
   params:
     - name: contextDir
       description: the context dir within source
-      default: .
+      default: springboot
     - name: mavenMirrorUrl
       description: the maven mirrror url
       default: <a href="https://repo.maven.apache.org/maven2/" class="bare">https://repo.maven.apache.org/maven2/</a>
     - name: destinationImage
       description: the fully qualified image name
-      default: "$(outputs.resources.builtImage.url)"
+      default: ""
     - name: dockerFile
       description: the docker file to used for building the application
       default: Dockerfile
@@ -1281,58 +1325,66 @@ spec:
       description: tls verify
       type: string
       default: "false"
-  resources:
-    inputs:
-      - name: source
-        type: git
-    outputs:
-      - name: builtImage
-        type: image
+    - name: url
+      default: <a href="https://github.com/redhat-scholars/tekton-tutorial-greeter" class="bare">https://github.com/redhat-scholars/tekton-tutorial-greeter</a>
+    - name: revision
+      default: master
+    - name: subdirectory
+      default: ""
+    - name: sslVerify
+      description: defines if http.sslVerify should be set to true or false in the global git config
+      type: string
+      default: "false"
   steps:
+    - image: 'gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/git-init:v0.15.2'
+      name: clone
+      resources: {}
+      script: |
+        CHECKOUT_DIR="$(workspaces.source.path)/$(params.subdirectory)"
+        cleandir() {
+          # Delete any existing contents of the repo directory if it exists.
+          #
+          # We don't just "rm -rf $CHECKOUT_DIR" because $CHECKOUT_DIR might be "/"
+          # or the root of a mounted volume.
+          if [[ -d "$CHECKOUT_DIR" ]] ; then
+            # Delete non-hidden files and directories
+            rm -rf "$CHECKOUT_DIR"/*
+            # Delete files and directories starting with . but excluding ..
+            rm -rf "$CHECKOUT_DIR"/.[!.]*
+            # Delete files and directories starting with .. plus any other character
+            rm -rf "$CHECKOUT_DIR"/..?*
+          fi
+        }
+        /ko-app/git-init \
+          -url "$(params.url)" \
+          -revision "$(params.revision)" \
+          -path "$CHECKOUT_DIR" \
+          -sslVerify="$(params.sslVerify)"
+        cd "$CHECKOUT_DIR"
+        RESULT_SHA="$(git rev-parse HEAD)"
     - name: build-sources
-      image: docker.io/maven:3.6.3-openjdk-11-slim
-      workingDir: "/workspace/source/$(inputs.params.contextDir)"
+      image: docker.io/maven:3.6.3-jdk-11-slim
       command:
         - mvn
       args:
         - -DskipTests
         - clean
-        - package
+        - install
       env:
         - name: user.home
           value: /home/tekton
-    - name: build-image
+      workingDir: "/workspace/source/$(params.contextDir)"
+    - name: build-and-push-image
       image: quay.io/buildah/stable
-      workingDir: "/workspace/source/$(inputs.params.contextDir)"
-      command:
-        - "buildah"
-      args:
-        - "bud"
-        - "--layers"
-        - "-f"
-        - "$(inputs.params.dockerFile)"
-        - "-t"
-        - "$(inputs.params.destinationImage)"
-        - "."
-      securityContext:
-        privileged: true
-        runAsUser: 0
-      volumeMounts:
-        - name: varlibc
-          mountPath: /var/lib/containers
-    - name: push-image
-      image: quay.io/buildah/stable
-      workingDir: "/workspace/source/$(inputs.params.contextDir)"
-      command:
-        - "buildah"
-      args:
-        - "push"
-        - "--tls-verify=$(inputs.params.tlsVerify)"
-        - $(inputs.params.destinationImage)
-        - "docker://$(inputs.params.destinationImage)"
-      securityContext:
-        runAsUser: 0
-        privileged: true
+      script: |
+        #!/usr/bin/env bash
+        buildah --storage-driver=vfs bud --layers -t $DESTINATION_IMAGE $CONTEXT_DIR
+        buildah --storage-driver=vfs push $DESTINATION_IMAGE docker://$DESTINATION_IMAGE
+      env:
+        - name: DESTINATION_IMAGE
+          value: "$(params.destinationImage)"
+        - name: CONTEXT_DIR
+          value: "/workspace/source/$(params.contextDir)"
       volumeMounts:
         - name: varlibc
           mountPath: /var/lib/containers
@@ -1418,13 +1470,38 @@ source-lister   7 minutes ago</code></pre>
 <div class="paragraph">
 <p>The application build task(<code>build-app</code>) could be run using the command:</p>
 </div>
+<div class="tabset is-loading">
+<div class="ulist tabs">
+<ul>
+<li>
+<p><a id="tabset1_minikube"></a>Minikube</p>
+</li>
+<li>
+<p><a id="tabset1_openshift"></a>OpenShift</p>
+</li>
+</ul>
+</div>
+<div class="content">
+<div class="tab-pane" aria-labelledby="tabset1_minikube">
 <div class="listingblock console-input">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">tkn task start -n tektontutorial build-app \<i class="conum" data-value="1"></i><b>(1)</b>
-  --inputresource='source=git-source' \<i class="conum" data-value="2"></i><b>(2)</b>
-  --outputresource='builtImage=tekton-tutorial-greeter-image' \<i class="conum" data-value="3"></i><b>(3)</b>
-  --param contextDir='springboot' \<i class="conum" data-value="4"></i><b>(4)</b>
-  --showlog<i class="conum" data-value="5"></i><b>(5)</b></code></pre>
+  --param contextDir='springboot' \<i class="conum" data-value="2"></i><b>(2)</b>
+  --param destinationImage='example.com/rhdevelopers/tekton-tutorial-greeter' \<i class="conum" data-value="3"></i><b>(3)</b>
+  --showlog<i class="conum" data-value="4"></i><b>(4)</b></code></pre>
+</div>
+</div>
+</div>
+<div class="tab-pane" aria-labelledby="tabset1_openshift">
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">tkn task start -n tektontutorial build-app \<i class="conum" data-value="1"></i><b>(1)</b>
+  --param contextDir='springboot' \<i class="conum" data-value="2"></i><b>(2)</b>
+  --param destinationImage='image-registry.openshift-image-registry.svc:5000/tektontutorial/tekton-tutorial-greeter' \<i class="conum" data-value="3"></i><b>(3)</b>
+  --showlog<i class="conum" data-value="4"></i><b>(4)</b></code></pre>
+</div>
+</div>
+</div>
 </div>
 </div>
 <div class="colist arabic">
@@ -1435,11 +1512,15 @@ source-lister   7 minutes ago</code></pre>
 </tr>
 <tr>
 <td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>The input resource mapping, i.e. mapping  input <code>source</code> to PipelineResource <code>git-source</code> of type <code>git</code></td>
+<td>The directory inside repository where to do the build</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="3"></i><b>3</b></td>
-<td>The output resource mapping, i.e. mapping output <code>builtImage</code> to PipelineResource <code>built-image</code> of type <code>image</code></td>
+<td>The image repository URL where we want to push the image into.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>Keep following the build logs</td>
 </tr>
 </table>
 </div>
@@ -1525,12 +1606,9 @@ tkn tr logs -f -a build-app-run-tsqrf <i class="conum" data-value="1"></i><b>(1)
 </div>
 <div class="listingblock console-output">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">step-create-dir-builtimage-hn654
-step-git-source-git-source-2lqtx
-step-build-sources
-step-build-image
-step-push-image
-step-image-digest-exporter-52lh6</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">step-clone
+step-maven-build
+step-build-and-push-image</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1557,15 +1635,15 @@ step-image-digest-exporter-52lh6</code></pre>
 <div class="ulist tabs">
 <ul>
 <li>
-<p><a id="tabset1_minikube"></a>Minikube</p>
+<p><a id="tabset2_minikube"></a>Minikube</p>
 </li>
 <li>
-<p><a id="tabset1_openshift"></a>OpenShift</p>
+<p><a id="tabset2_openshift"></a>OpenShift</p>
 </li>
 </ul>
 </div>
 <div class="content">
-<div class="tab-pane" aria-labelledby="tabset1_minikube">
+<div class="tab-pane" aria-labelledby="tabset2_minikube">
 <div class="listingblock console-input">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl apply -n tektontutorial -f $TUTORIAL_HOME/kubernetes/demo-greeter.yaml</code></pre>
@@ -1588,7 +1666,7 @@ step-image-digest-exporter-52lh6</code></pre>
 </div>
 </div>
 </div>
-<div class="tab-pane" aria-labelledby="tabset1_openshift">
+<div class="tab-pane" aria-labelledby="tabset2_openshift">
 <div class="listingblock console-input">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc expose svc -n tektontutorial demo-greeter</code></pre>
@@ -1596,7 +1674,7 @@ step-image-digest-exporter-52lh6</code></pre>
 </div>
 <div class="listingblock console-input">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">SVC_URL=$(oc get routes -o yaml | yq r - 'spec.url.host' )</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">SVC_URL=$(oc get route demo-greeter  -o yaml -o jsonpath='{.spec.host}')</code></pre>
 </div>
 </div>
 </div>
@@ -1620,7 +1698,7 @@ step-image-digest-exporter-52lh6</code></pre>
 <p>When there is a need to have similar container configuration across all steps of a Task, we can have them defined in the stepTemplate. The Task steps will then inherit them implicitly in all steps. In the example above we define the resources and securityContext for all the steps using the stepTemplate.  Also if you notice in the example above we can also override the stepTemplate at the step level. That gives a unique flexibility to tweak the settings at step level.</p>
 </div>
 <div class="paragraph">
-<p>With the current <code>build-app</code> task, we see the following configurations are repeated in <code>build-image</code> and <code>push-image</code>:</p>
+<p>With the current <code>build-app</code> task, we see the following configuration in <code>build&#8212;&#8203;push-image</code>:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -1633,7 +1711,7 @@ volumeMounts:
 </div>
 </div>
 <div class="paragraph">
-<p>We can move the the above step configuration into a stepTemplate as shown in the following updated <code>build-app</code> task:</p>
+<p>We can move the above step configuration into a stepTemplate as shown in the following updated <code>build-app</code> task:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -1644,22 +1722,25 @@ metadata:
   name: build-app
 spec:
   stepTemplate:
-    securityContext:
-      runAsUser: 0
-      privileged: true
+    #    securityContext:
+    #      runAsUser: 0
+    #      privileged: true
     volumeMounts:
       - name: varlibc
         mountPath: /var/lib/containers
+  workspaces:
+    - name: source
+      description: The git repo will be cloned onto the volume backing this workspace
   params:
     - name: contextDir
       description: the context dir within source
-      default: .
+      default: springboot
     - name: mavenMirrorUrl
       description: the maven mirrror url
       default: https://repo.maven.apache.org/maven2/
     - name: destinationImage
       description: the fully qualified image name
-      default: "$(outputs.resources.builtImage.url)"
+      default: ""
     - name: dockerFile
       description: the docker file to used for building the application
       default: Dockerfile
@@ -1667,49 +1748,66 @@ spec:
       description: tls verify
       type: string
       default: "false"
-  resources:
-    inputs:
-      - name: source
-        type: git
-    outputs:
-      - name: builtImage
-        type: image
+    - name: url
+      default: https://github.com/redhat-scholars/tekton-tutorial-greeter
+    - name: revision
+      default: master
+    - name: subdirectory
+      default: ""
+    - name: sslVerify
+      description: defines if http.sslVerify should be set to true or false in the global git config
+      type: string
+      default: "false"
   steps:
+    - image: 'gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/git-init:v0.15.2'
+      name: clone
+      resources: {}
+      script: |
+        CHECKOUT_DIR="$(workspaces.source.path)/$(params.subdirectory)"
+        cleandir() {
+          # Delete any existing contents of the repo directory if it exists.
+          #
+          # We don't just "rm -rf $CHECKOUT_DIR" because $CHECKOUT_DIR might be "/"
+          # or the root of a mounted volume.
+          if [[ -d "$CHECKOUT_DIR" ]] ; then
+            # Delete non-hidden files and directories
+            rm -rf "$CHECKOUT_DIR"/*
+            # Delete files and directories starting with . but excluding ..
+            rm -rf "$CHECKOUT_DIR"/.[!.]*
+            # Delete files and directories starting with .. plus any other character
+            rm -rf "$CHECKOUT_DIR"/..?*
+          fi
+        }
+        /ko-app/git-init \
+          -url "$(params.url)" \
+          -revision "$(params.revision)" \
+          -path "$CHECKOUT_DIR" \
+          -sslVerify="$(params.sslVerify)"
+        cd "$CHECKOUT_DIR"
+        RESULT_SHA="$(git rev-parse HEAD)"
     - name: build-sources
-      image: docker.io/maven:3.6.3-openjdk-11-slim
+      image: docker.io/maven:3.6.3-jdk-11-slim
       command:
         - mvn
       args:
         - -DskipTests
         - clean
-        - package
+        - install
       env:
         - name: user.home
           value: /home/tekton
-      workingDir: "/workspace/source/$(inputs.params.contextDir)"
-    - name: build-image
+      workingDir: "/workspace/source/$(params.contextDir)"
+    - name: build-and-push-image
       image: quay.io/buildah/stable
-      command:
-        - "buildah"
-      args:
-        - "bud"
-        - "--layers"
-        - "-f"
-        - "$(inputs.params.dockerFile)"
-        - "-t"
-        - "$(inputs.params.destinationImage)"
-        - "."
-      workingDir: "/workspace/source/$(inputs.params.contextDir)"
-    - name: push-image
-      image: quay.io/buildah/stable
-      command:
-        - "buildah"
-      args:
-        - "push"
-        - "--tls-verify=$(inputs.params.tlsVerify)"
-        - $(inputs.params.destinationImage)
-        - "docker://$(inputs.params.destinationImage)"
-      workingDir: "/workspace/source/$(inputs.params.contextDir)"
+      script: |
+        #!/usr/bin/env bash
+        buildah --storage-driver=vfs bud --layers -t $DESTINATION_IMAGE $CONTEXT_DIR
+        buildah --storage-driver=vfs push $DESTINATION_IMAGE docker://$DESTINATION_IMAGE
+      env:
+        - name: DESTINATION_IMAGE
+          value: "$(params.destinationImage)"
+        - name: CONTEXT_DIR
+          value: "/workspace/source/$(params.contextDir)"
   volumes:
     - name: varlibc
       emptyDir: {}</code></pre>
@@ -1728,13 +1826,38 @@ spec:
 <div class="paragraph">
 <p>Now try running <code>build-app</code> Task again:</p>
 </div>
+<div class="tabset is-loading">
+<div class="ulist tabs">
+<ul>
+<li>
+<p><a id="tabset3_minikube"></a>Minikube</p>
+</li>
+<li>
+<p><a id="tabset3_openshift"></a>OpenShift</p>
+</li>
+</ul>
+</div>
+<div class="content">
+<div class="tab-pane" aria-labelledby="tabset3_minikube">
 <div class="listingblock console-input">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">tkn task start -n tektontutorial build-app \
-  --inputresource='source=git-source' \
-  --outputresource='builtImage=tekton-tutorial-greeter-image' \
   --param contextDir='springboot' \
-  --showlog</code></pre>
+  --param destinationImage='example.com/rhdevelopers/tekton-tutorial-greeter' \
+  --showlog<i class="conum" data-value="1"></i><b>(1)</b></code></pre>
+</div>
+</div>
+</div>
+<div class="tab-pane" aria-labelledby="tabset3_openshift">
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">tkn task start -n tektontutorial build-app \
+  --param contextDir='springboot' \
+  --param destinationImage='image-registry.openshift-image-registry.svc:5000/tektontutorial/tekton-tutorial-greeter'\
+  --showlog<i class="conum" data-value="1"></i><b>(1)</b></code></pre>
+</div>
+</div>
+</div>
 </div>
 </div>
 <div class="paragraph">
@@ -1766,18 +1889,12 @@ spec:
 </div>
 <div class="listingblock console-output">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">step-create-dir-builtimage-mqg45
-        Privileged: true        User: 0
-step-git-source-git-source-t5xcb
-        Privileged: true        User: 0
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">step-clone
+  	Privileged: 	User:
 step-build-sources
-        Privileged: true        User: 0
-step-build-image
-        Privileged: true        User: 0
-step-push-image
-        Privileged: true        User: 0
-step-image-digest-exporter-tr4mf
-        Privileged: true        User: 0</code></pre>
+  	Privileged: 	User:
+step-build-and-push-image
+  	Privileged: 	User:</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1797,18 +1914,12 @@ step-image-digest-exporter-tr4mf
 </div>
 <div class="listingblock console-output">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">step-create-dir-builtimage-mqg45
-        Mount Path: /var/lib/containers
-step-git-source-git-source-t5xcb
-        Mount Path: /var/lib/containers
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">step-clone
+	Mount Path: /var/lib/containers
 step-build-sources
-        Mount Path: /var/lib/containers
-step-build-image
-        Mount Path: /var/lib/containers
-step-push-image
-        Mount Path: /var/lib/containers
-step-image-digest-exporter-tr4mf
-        Mount Path: /var/lib/containers</code></pre>
+	Mount Path: /var/lib/containers
+step-build-and-push-image
+	Mount Path: /var/lib/containers</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1848,7 +1959,7 @@ The Task steps can override the stepTemplate values.
 </div>
 </div>
 <nav class="pagination">
-  <span class="prev"><a href="pipeline-resources.html">Pipeline Resources</a></span>
+  <span class="prev"><a href="setup.html">Setup</a></span>
   <span class="next"><a href="pipelines.html">Pipelines</a></span>
 </nav>
 </article>

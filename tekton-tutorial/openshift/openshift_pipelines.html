@@ -71,24 +71,10 @@
   </li>
 </ul>
   </li>
-  <li class="nav-item" data-depth="1">
-    <button class="nav-item-toggle"></button>
-    <a class="nav-link" href="../pipeline-resources.html">Pipeline Resources</a>
-<ul class="nav-list">
-  <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../pipeline-resources.html#tekton-res-prerequisite">Prerequisites</a>
-  </li>
-  <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../pipeline-resources.html#tekton-res-create">Create Pipeline Resource</a>
-  </li>
-  <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../pipeline-resources.html#tekton-res-deploy">Deploy Pipeline Resource</a>
-  </li>
-  <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../pipeline-resources.html#tkn-see-what-you-have-deployed">See what you have deployed</a>
-  </li>
 </ul>
   </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
   <li class="nav-item" data-depth="1">
     <button class="nav-item-toggle"></button>
     <a class="nav-link" href="../tasks.html">Tasks</a>
@@ -394,7 +380,7 @@
     <li><a href="openshift_pipelines.html">Pipelines</a></li>
   </ul>
 </nav>
-  <div class="edit-this-page"><a href="https://github.com/redhat-scholars/tekton-tutorial/blob/v1.3.0/documentation/modules/openshift/pages/openshift_pipelines.adoc">Edit this Page</a></div>
+  <div class="edit-this-page"><a href="https://github.com/redhat-scholars/tekton-tutorial/edit/tekton-tutorial-v2.0.0/documentation/modules/openshift/pages/openshift_pipelines.adoc">Edit this Page</a></div>
   </div>
   <div class="content">
 <article class="doc">
@@ -563,7 +549,7 @@ service/nexus        NodePort    10.100.205.22   &lt;none&gt;        8081:31743/
 </div>
 <div class="listingblock console-input">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl expose svc -n pipelines-demos nexus</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc expose svc -n pipelines-demos nexus</code></pre>
 </div>
 </div>
 </div>
@@ -588,8 +574,8 @@ service/nexus        NodePort    10.100.205.22   &lt;none&gt;        8081:31743/
 </div>
 <div class="listingblock console-input">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl get -n pipelines-demos cm maven-settings -oyaml \
-  | yq r - data['settings.xml']</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl get -n pipelines-demos cm maven-settings -o yaml \
+    -o jsonpath='{.data}'</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -743,7 +729,7 @@ tkn                                      13 hours ago</code></pre>
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc replace \
   -f <a href="https://raw.githubusercontent.com/tektoncd/catalog/master/task/buildah/0.1/buildah.yaml" class="bare">https://raw.githubusercontent.com/tektoncd/catalog/master/task/buildah/0.1/buildah.yaml</a> --dry-run=client -oyaml \
-  | yq w - kind ClusterTask \
+  | yq '.kind="ClusterTask"' \
   | oc replace -f -</code></pre>
 </div>
 </div>
@@ -759,7 +745,7 @@ tkn                                      13 hours ago</code></pre>
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc replace \
   -f <a href="https://raw.githubusercontent.com/tektoncd/catalog/master/task/maven/0.1/maven.yaml" class="bare">https://raw.githubusercontent.com/tektoncd/catalog/master/task/maven/0.1/maven.yaml</a> --dry-run=client -oyaml \
-  | yq w - kind ClusterTask \
+  | yq '.kind="ClusterTask"' \
   | oc replace -f -</code></pre>
 </div>
 </div>
@@ -775,7 +761,7 @@ tkn                                      13 hours ago</code></pre>
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc replace \
   -f <a href="https://raw.githubusercontent.com/tektoncd/catalog/master/task/kn/0.1/kn.yaml" class="bare">https://raw.githubusercontent.com/tektoncd/catalog/master/task/kn/0.1/kn.yaml</a> --dry-run=client -oyaml \
-  | yq w - kind ClusterTask \
+  | yq '.kind="ClusterTask"' \
   | oc replace -f -</code></pre>
 </div>
 </div>
@@ -860,7 +846,7 @@ You Show/Hide Pipeline visualization by toggling <em>Show[Hide] Pipeline visuali
 <h2 id="ocp-create-java-ksvc-pipeline-tpl"><a class="anchor" href="#ocp-create-java-ksvc-pipeline-tpl"></a>Create Pipeline Template for Java and Knative Service</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>As part of this excecise we will deploy a Pipeline Template, that will allow us to deploy the a Java Knative Service application using ODC.</p>
+<p>As part of this exercise we will deploy a Pipeline Template, that will allow us to deploy the a Java Knative Service application using ODC.</p>
 </div>
 <div class="listingblock">
 <div class="title"><a href="https://github.com/redhat-scholars/tekton-tutorial/blob/master/openshift/cloud-native-app-serverless-pipeline.yaml">Java and Knative Pipeline Template</a></div>
@@ -872,11 +858,13 @@ metadata:
   name: cloud-native-app-serverless
   namespace: openshift <i class="conum" data-value="1"></i><b>(1)</b>
   labels:
+    app.kubernetes.io/instance: tekton-tutorial-greeter
+    app.kubernetes.io/name: tekton-tutorial-greeter
     pipeline.openshift.io/runtime: java <i class="conum" data-value="2"></i><b>(2)</b>
     pipeline.openshift.io/type: knative <i class="conum" data-value="3"></i><b>(3)</b>
 spec:
   description: &gt;-
-    The Pipline to buld and deploy the Hello World Java App &lt;a href="https://github.com/redhat-scholars/tekton-tutorial-greeter" class="bare"&gt;https://github.com/redhat-scholars/tekton-tutorial-greeter&lt;/a&gt; as Knative Service.
+    The Pipeline to build and deploy the Hello World Java App &lt;a href="https://github.com/redhat-scholars/tekton-tutorial-greeter" class="bare"&gt;https://github.com/redhat-scholars/tekton-tutorial-greeter&lt;/a&gt; as Knative Service.
   params:
     - name: IMAGE_NAME
       description: &gt;-
@@ -965,6 +953,9 @@ spec:
           value: '$(params.APP_PROFILE)'
         - name: IMAGE
           value: '$(params.IMAGE_NAME)'
+        # needed for OpenShift buildah run as vfs is the default storage driver
+        - name: STORAGE_DRIVER
+          value: vfs
         # since pushing to internal registry we skip TLS verify
         - name: TLSVERIFY
           value: 'false'

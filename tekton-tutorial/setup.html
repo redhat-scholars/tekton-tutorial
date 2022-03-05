@@ -6,7 +6,7 @@
     <title>Setup :: Tekton Tutorial</title>
     <link rel="canonical" href="https://redhat-scholars.github.io/tekton-tutorial/tekton-tutorial/setup.html">
     <link rel="prev" href="index.html">
-    <link rel="next" href="pipeline-resources.html">
+    <link rel="next" href="tasks.html">
     <meta name="generator" content="Antora 2.3.4">
     <link rel="stylesheet" href="../_/css/site.css">
   </head>
@@ -72,24 +72,10 @@
   </li>
 </ul>
   </li>
-  <li class="nav-item" data-depth="1">
-    <button class="nav-item-toggle"></button>
-    <a class="nav-link" href="pipeline-resources.html">Pipeline Resources</a>
-<ul class="nav-list">
-  <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="pipeline-resources.html#tekton-res-prerequisite">Prerequisites</a>
-  </li>
-  <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="pipeline-resources.html#tekton-res-create">Create Pipeline Resource</a>
-  </li>
-  <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="pipeline-resources.html#tekton-res-deploy">Deploy Pipeline Resource</a>
-  </li>
-  <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="pipeline-resources.html#tkn-see-what-you-have-deployed">See what you have deployed</a>
-  </li>
 </ul>
   </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
   <li class="nav-item" data-depth="1">
     <button class="nav-item-toggle"></button>
     <a class="nav-link" href="tasks.html">Tasks</a>
@@ -394,7 +380,7 @@
     <li><a href="setup.html">Setup</a></li>
   </ul>
 </nav>
-  <div class="edit-this-page"><a href="https://github.com/redhat-scholars/tekton-tutorial/blob/v1.3.0/documentation/modules/ROOT/pages/setup.adoc">Edit this Page</a></div>
+  <div class="edit-this-page"><a href="https://github.com/redhat-scholars/tekton-tutorial/edit/tekton-tutorial-v2.0.0/documentation/modules/ROOT/pages/setup.adoc">Edit this Page</a></div>
   </div>
   <div class="content">
 <article class="doc">
@@ -446,16 +432,16 @@
 <td class="tableblock halign-center valign-top"><p class="tableblock"><a href="https://kubernetes.io/docs/tasks/tools/install-kubectl/">Install</a></p></td>
 </tr>
 <tr>
-<td class="tableblock halign-center valign-top"><p class="tableblock"><a href="https://github.com/wercker/stern">stern</a></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock"><a href="https://github.com/stern/stern">stern</a></p></td>
 <td class="tableblock halign-center valign-top"><p class="tableblock"><code>brew install stern</code></p></td>
 <td class="tableblock halign-center valign-top"><p class="tableblock"><a href="https://github.com/wercker/stern/releases/download/1.6.0/stern_linux_amd64">Download</a></p></td>
 <td class="tableblock halign-center valign-top"><p class="tableblock"><a href="https://github.com/wercker/stern/releases/download/1.11.0/stern_windows_amd64.exe">Download</a></p></td>
 </tr>
 <tr>
-<td class="tableblock halign-center valign-top"><p class="tableblock"><a href="https://github.com/mikefarah/yq">yqv3.x</a></p></td>
-<td class="tableblock halign-center valign-top"><p class="tableblock">brew install yq@3</p></td>
-<td class="tableblock halign-center valign-top"><p class="tableblock">brew install yq@3</p></td>
-<td class="tableblock halign-center valign-top"><p class="tableblock">choco install yq@3</p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock"><a href="https://github.com/mikefarah/yq">yqv4.x</a></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">brew install yq@4</p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">brew install yq@4</p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">choco install yq@4</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-center valign-top"><p class="tableblock"><a href="https://httpie.org/">httpie</a></p></td>
@@ -510,19 +496,19 @@
 <div class="ulist">
 <ul>
 <li>
-<p>Tekton <code>v0.19.0</code></p>
+<p>Tekton <code>v0.24.3</code></p>
 </li>
 <li>
-<p>Tekton Triggers <code>v0.10.2</code></p>
+<p>Tekton Triggers <code>v0.14.2</code></p>
 </li>
 <li>
-<p>Minikube <code>v1.18.1</code></p>
+<p>Minikube <code>v1.25.0</code></p>
 </li>
 <li>
-<p>OpenShift <code>4.7</code></p>
+<p>OpenShift <code>4.8</code></p>
 </li>
 <li>
-<p>Tekton CLI <code>0.15.0</code></p>
+<p>Tekton CLI <code>0.19.0</code></p>
 </li>
 <li>
 <p>Knative Client(kn) <code>v0.17.3</code></p>
@@ -571,11 +557,11 @@
 <div class="listingblock console-output">
 <div class="title">Minikube starting</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">😄  [tektontutorial] minikube v1.18.1 on Darwin 11.1
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">😄  [tektontutorial] minikube v1.25.0 on Darwin 11.1
 ✨  Using the hyperkit driver based on user configuration
 👍  Starting control plane node tektontutorial in cluster tektontutorial
 🔥  Creating hyperkit VM (CPUs=6, Memory=8192MB, Disk=51200MB) ...
-🐳  Preparing Kubernetes v1.20.0 on Docker 20.10.2 ...
+🐳  Preparing Kubernetes v1.23.3 on Docker 20.10.2 ...
     &gt; kubelet.sha256: 65 B / 65 B [--------------------------] 100.00% ? p/s 0s
     &gt; kubectl.sha256: 65 B / 65 B [--------------------------] 100.00% ? p/s 0s
     &gt; kubeadm.sha256: 65 B / 65 B [--------------------------] 100.00% ? p/s 0s
@@ -634,6 +620,25 @@
 </ul>
 </div>
 <div class="paragraph">
+<p>Now, let&#8217;s configure these registry-aliases in minikube by running the following:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl apply -f <a href="https://raw.githubusercontent.com/kameshsampath/minikube-helpers/master/registry/registry-aliases-config.yaml" class="bare">https://raw.githubusercontent.com/kameshsampath/minikube-helpers/master/registry/registry-aliases-config.yaml</a></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Next, we should patch the core dns configuration of minikube and we can use the following set of commands:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl apply -f <a href="https://raw.githubusercontent.com/kameshsampath/minikube-helpers/master/registry/node-etc-hosts-update.yaml" class="bare">https://raw.githubusercontent.com/kameshsampath/minikube-helpers/master/registry/node-etc-hosts-update.yaml</a>
+kubectl apply -f <a href="https://raw.githubusercontent.com/kameshsampath/minikube-helpers/master/registry/registry-aliases-sa.yaml" class="bare">https://raw.githubusercontent.com/kameshsampath/minikube-helpers/master/registry/registry-aliases-sa.yaml</a>
+kubectl apply -f <a href="https://raw.githubusercontent.com/kameshsampath/minikube-helpers/master/registry/registry-aliases-sa-crb.yaml" class="bare">https://raw.githubusercontent.com/kameshsampath/minikube-helpers/master/registry/registry-aliases-sa-crb.yaml</a>
+kubectl apply -f <a href="https://raw.githubusercontent.com/kameshsampath/minikube-helpers/master/registry/patch-coredns-job.yaml" class="bare">https://raw.githubusercontent.com/kameshsampath/minikube-helpers/master/registry/patch-coredns-job.yaml</a></code></pre>
+</div>
+</div>
+<div class="paragraph">
 <p>The images build with the example.org, example.com, test.com and test.org will then be pushed and pulled from local internal registry, which was enable using minkube <code>registry</code> addon.</p>
 </div>
 <div id="deploy-tekton" class="paragraph">
@@ -645,7 +650,7 @@
 <div class="listingblock console-input">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl apply --filename \
-<a href="https://github.com/tektoncd/pipeline/releases/download/v0.19.0/release.notags.yaml" class="bare">https://github.com/tektoncd/pipeline/releases/download/v0.19.0/release.notags.yaml</a></code></pre>
+<a href="https://github.com/tektoncd/pipeline/releases/download/v0.24.3/release.notags.yaml" class="bare">https://github.com/tektoncd/pipeline/releases/download/v0.24.3/release.notags.yaml</a></code></pre>
 </div>
 </div>
 <div class="admonitionblock note">
@@ -692,13 +697,13 @@ tekton-pipelines-webhook-75bc7666c-9crwq       1/1     Running   85s</code></pre
 <div class="ulist">
 <ul>
 <li>
-<p><a href="https://github.com/tektoncd/cli/releases/download/v0.15.0/tkn_0.15.0_Darwin_x86_64.tar.gz">Download for macOS</a></p>
+<p><a href="https://github.com/tektoncd/cli/releases/download/v0.19.0/tkn_0.19.0_Darwin_x86_64.tar.gz">Download for macOS</a></p>
 </li>
 <li>
-<p><a href="https://github.com/tektoncd/cli/releases/download/v0.15.0/tkn_0.15.0_Linux_x86_64.tar.gz">Download for Linux</a></p>
+<p><a href="https://github.com/tektoncd/cli/releases/download/v0.19.0/tkn_0.19.0_Linux_x86_64.tar.gz">Download for Linux</a></p>
 </li>
 <li>
-<p><a href="https://github.com/tektoncd/cli/releases/download/v0.15.0/tkn_0.15.0_Windows_x86_64.zip">Download for Windows</a></p>
+<p><a href="https://github.com/tektoncd/cli/releases/download/v0.19.0/tkn_0.19.0_Windows_x86_64.zip">Download for Windows</a></p>
 </li>
 </ul>
 </div>
@@ -715,8 +720,8 @@ tekton-pipelines-webhook-75bc7666c-9crwq       1/1     Running   85s</code></pre
 </div>
 <div class="listingblock console-output">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">Client version: 0.15.0
-Pipeline version: v0.19.0</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">Client version: 0.19.0
+Pipeline version: v0.24.3</code></pre>
 </div>
 </div>
 <div class="admonitionblock note">
@@ -752,7 +757,7 @@ kubectl config set-context --current --namespace=tektontutorial</code></pre>
 <p>== Login as Cluster Admin</p>
 </div>
 <div class="paragraph">
-<p>Login to OpenShift console using the cluster admin credentials. Follow the <a href="https://docs.openshift.com/container-platform/4.7/pipelines/installing-pipelines.html" target="_blank" rel="noopener">OpenShift Documentation</a> to have OpenShift Pipelines installed in your OpenShift cluster.</p>
+<p>Login to OpenShift console using the cluster admin credentials. Follow the <a href="https://docs.openshift.com/container-platform/4.8/pipelines/installing-pipelines.html" target="_blank" rel="noopener">OpenShift Documentation</a> to have OpenShift Pipelines installed in your OpenShift cluster.</p>
 </div>
 <div class="paragraph">
 <p>Unless and until explictiy quoted, all the tutorial exercises will be deployed in namespace called <code>tektontutorial</code>:</p>
@@ -772,7 +777,7 @@ kubectl config set-context --current --namespace=tektontutorial</code></pre>
 </div>
 <nav class="pagination">
   <span class="prev"><a href="index.html">Tekton Tutorial</a></span>
-  <span class="next"><a href="pipeline-resources.html">Pipeline Resources</a></span>
+  <span class="next"><a href="tasks.html">Tasks</a></span>
 </nav>
 </article>
 <aside class="toc sidebar" data-title="Contents" data-levels="2">

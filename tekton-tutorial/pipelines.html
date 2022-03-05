@@ -72,24 +72,10 @@
   </li>
 </ul>
   </li>
-  <li class="nav-item" data-depth="1">
-    <button class="nav-item-toggle"></button>
-    <a class="nav-link" href="pipeline-resources.html">Pipeline Resources</a>
-<ul class="nav-list">
-  <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="pipeline-resources.html#tekton-res-prerequisite">Prerequisites</a>
-  </li>
-  <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="pipeline-resources.html#tekton-res-create">Create Pipeline Resource</a>
-  </li>
-  <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="pipeline-resources.html#tekton-res-deploy">Deploy Pipeline Resource</a>
-  </li>
-  <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="pipeline-resources.html#tkn-see-what-you-have-deployed">See what you have deployed</a>
-  </li>
 </ul>
   </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
   <li class="nav-item" data-depth="1">
     <button class="nav-item-toggle"></button>
     <a class="nav-link" href="tasks.html">Tasks</a>
@@ -394,7 +380,7 @@
     <li><a href="pipelines.html">Pipelines</a></li>
   </ul>
 </nav>
-  <div class="edit-this-page"><a href="https://github.com/redhat-scholars/tekton-tutorial/blob/v1.3.0/documentation/modules/ROOT/pages/pipelines.adoc">Edit this Page</a></div>
+  <div class="edit-this-page"><a href="https://github.com/redhat-scholars/tekton-tutorial/edit/tekton-tutorial-v2.0.0/documentation/modules/ROOT/pages/pipelines.adoc">Edit this Page</a></div>
   </div>
   <div class="content">
 <article class="doc">
@@ -429,22 +415,7 @@
 </div>
 </div>
 <div class="paragraph">
-<p>Ensure the pipeline Resources and Tasks are available:</p>
-</div>
-<div class="listingblock console-input">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">tkn res ls</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>The command above should show an output like:</p>
-</div>
-<div class="listingblock console-output">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">NAME                            TYPE    DETAILS
-git-source                      git     url: https://github.com/redhat-scholars/tekton-tutorial
-tekton-tutorial-greeter-image   image   url: example.com/rhdevelopers/tekton-tutorial-greeter</code></pre>
-</div>
+<p>Ensure the Tasks are available:</p>
 </div>
 <div class="listingblock console-input">
 <div class="content">
@@ -535,42 +506,33 @@ spec:
   params:
     - name: contextDir
       description: the context directory from where to build the application
-  resources:
-    - name: appSource
-      type: git
-    - name: appImage
-      type: image
+    - name: destinationImage
+      description: the fully qualified image name
+  workspaces:
+    - name: workspace
   tasks:
     - name: build-java-app
       taskRef:
         name: build-app
+      workspaces:
+        - name: source
+          workspace: workspace
       params:
         - name: contextDir
           value: $(params.contextDir)
-      resources:
-        inputs:
-          - name: source
-            resource: appSource
-        outputs:
-          - name: builtImage
-            resource: appImage
+        - name: destinationImage
+          value: $(params.destinationImage)
     - name: deploy-kubernetes-service
       taskRef:
+        kind: ClusterTask
         name: openshift-client
       runAfter:
         - build-java-app
-      resources:
-        inputs:
-          - name: source
-            resource: appSource
       params:
-        - name: ARGS
-          value:
-            - "apply"
-            - "-f"
-            - "/workspace/source/k8s/deployment.yaml"
-            - "-f"
-            - "/workspace/source/k8s/service.yaml"</code></pre>
+        - name: SCRIPT
+          value: |
+            kubectl create deployment greeter --port=8080 --image=$(params.destinationImage)
+            kubectl expose deployment/greeter --port=8080 --target-port=8080 --type=NodePort</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -580,31 +542,23 @@ spec:
 <ul>
 <li>
 <p><strong>name</strong> - the unique name using which the Pipeline can be referred</p>
-<div class="ulist">
-<ul>
-<li>
-<p><strong>resources</strong> - the pipeline resources that will be used in the Pipeline e.g. appImage, appSource</p>
-<div class="ulist">
-<ul>
-<li>
-<p><strong>name</strong> - the name of the input resource using which it can be referenced and bound via <a href="#tekton-pipeline-run">Run Pipeline</a></p>
 </li>
 <li>
-<p><strong>type</strong> - the type of the input resource, typically the pipeline resource type</p>
+<p><strong>params</strong> - the pipeline params that will be used in the Pipeline e.g. contextDir, destinationImage</p>
 </li>
-</ul>
-</div>
+<li>
+<p><strong>workspaces</strong> - the workspaces shared by the tasks in the Pipeline.</p>
 </li>
-</ul>
-</div>
+<li>
+<p><strong>tasks</strong> - one or more Tasks that needs to be executed as part of the Pipeline</p>
 </li>
 </ul>
 </div>
 <div class="paragraph">
-<p><strong>tasks</strong> has one or more Tasks that needs to be executed as part of the Pipeline. In this example we have two Tasks <code>build-java-app</code> and <code>deploy-kn-service</code> that will be run to build the application from sources and deploy the built linux container image as knative service.</p>
+<p>In this example we have two Tasks <code>build-java-app</code> and <code>deploy-kubernetes-service</code> that will be run to build the application from sources and deploy the built linux container image as kubernetes service.</p>
 </div>
 <div class="paragraph">
-<p>By default all Tasks of the Pipeline runs in parallel, you can control the execution via <code>runAfter</code> attribute. In this example we make the <code>deploy-kn-service</code> to run after the <code>build-java-app</code>.</p>
+<p>By default all Tasks of the Pipeline runs in parallel, you can control the execution via <code>runAfter</code> attribute. In this example we make the <code>deploy-kubernetes-service</code> to run after the <code>build-java-app</code>.</p>
 </div>
 <div class="paragraph">
 <p>Each Task in the Pipeline has</p>
@@ -626,15 +580,6 @@ spec:
 </li>
 </ul>
 </div>
-</li>
-<li>
-<p><strong>resources</strong> - used to bind the Pipeline inputs and output resource to Task&#8217;s input and output resource.</p>
-</li>
-<li>
-<p><strong>name</strong> - the local name of the resource</p>
-</li>
-<li>
-<p><strong>resource</strong> - the Pipeline resource (defined under <code>resources</code>) name</p>
 </li>
 </ul>
 </div>
@@ -728,33 +673,59 @@ OpenShift Pipelines creates and uses the <code>pipeline</code> SA by default.
 <div class="paragraph">
 <p>Run the following command to start the pipeline:</p>
 </div>
+<div class="tabset is-loading">
+<div class="ulist tabs">
+<ul>
+<li>
+<p><a id="tabset1_minikube"></a>Minikube</p>
+</li>
+<li>
+<p><a id="tabset1_openshift"></a>OpenShift</p>
+</li>
+</ul>
+</div>
+<div class="content">
+<div class="tab-pane" aria-labelledby="tabset1_minikube">
 <div class="listingblock console-input">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">tkn pipeline start svc-deploy \<i class="conum" data-value="1"></i><b>(1)</b>
- --resource="appSource=git-source" \<i class="conum" data-value="2"></i><b>(2)</b>
- --resource="appImage=tekton-tutorial-greeter-image" \<i class="conum" data-value="3"></i><b>(3)</b>
- --param="contextDir=springboot" \<i class="conum" data-value="4"></i><b>(4)</b>
- --serviceaccount='pipeline'\<i class="conum" data-value="5"></i><b>(5)</b>
- --showlog</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">tkn pipeline start -n tektontutorial svc-deploy \
+  --param contextDir='springboot' \<i class="conum" data-value="1"></i><b>(1)</b>
+  --param destinationImage='example.com/rhdevelopers/tekton-tutorial-greeter' \<i class="conum" data-value="2"></i><b>(2)</b>
+  --serviceaccount='pipeline' \<i class="conum" data-value="3"></i><b>(3)</b>
+  --showlog <i class="conum" data-value="4"></i><b>(4)</b></code></pre>
+</div>
+</div>
+</div>
+<div class="tab-pane" aria-labelledby="tabset1_openshift">
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">tkn pipeline start -n tektontutorial svc-deploy \
+  --param contextDir='springboot' \<i class="conum" data-value="1"></i><b>(1)</b>
+  --param destinationImage='image-registry.openshift-image-registry.svc:5000/tektontutorial/tekton-tutorial-greeter'\ <i class="conum" data-value="2"></i><b>(2)</b>
+  #--serviceaccount='pipeline' \<i class="conum" data-value="3"></i><b>(3)</b>
+  --showlog<i class="conum" data-value="4"></i><b>(4)</b></code></pre>
+</div>
+</div>
+</div>
 </div>
 </div>
 <div class="colist arabic">
 <table>
 <tr>
 <td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>The resources of the Pipeline could be bound via <code>--resource</code> option, here we bind the Pipeline <code>appSource</code> to pipeline resource <code>git-source</code></td>
+<td>Bind the Pipeline <code>contextDir</code> to context directory from where to build the application.</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>Bind the Pipeline <code>appImage</code> to pipeline resource <code>tekton-tutorial-greeter-image</code></td>
+<td>Bind the Pipeline <code>destinationImage</code> to a specified value.</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="3"></i><b>3</b></td>
-<td>Set the context directory to build the application sources</td>
+<td>The service account to use with Pipeline run. This is needed only for Minikube.</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="4"></i><b>4</b></td>
-<td>The service account to use with Pipeline run</td>
+<td>Show the logs when running the pipeline.</td>
 </tr>
 </table>
 </div>
@@ -819,29 +790,29 @@ service/greeter   NodePort   10.96.251.232   &lt;none&gt;        8080:31918/TCP 
 <div class="ulist tabs">
 <ul>
 <li>
-<p><a id="tabset1_minikube"></a>Minikube</p>
+<p><a id="tabset2_minikube"></a>Minikube</p>
 </li>
 <li>
-<p><a id="tabset1_openshift"></a>OpenShift</p>
+<p><a id="tabset2_openshift"></a>OpenShift</p>
 </li>
 </ul>
 </div>
 <div class="content">
-<div class="tab-pane" aria-labelledby="tabset1_minikube">
+<div class="tab-pane" aria-labelledby="tabset2_minikube">
 <div class="listingblock console-input">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">SVC_URL=$(minikube -p tektontutorial -n tektontutorial greeter --url)</code></pre>
 </div>
 </div>
 </div>
-<div class="tab-pane" aria-labelledby="tabset1_openshift">
+<div class="tab-pane" aria-labelledby="tabset2_openshift">
 <div class="paragraph">
 <p>In OpenShift you can use the routes like:</p>
 </div>
 <div class="listingblock console-input">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc expose svc greeter
-SVC_URL=$(oc get routes greeter -o yaml | yq r - 'spec.url.host' )</code></pre>
+SVC_URL=$(oc get route greeter  -o yaml -o jsonpath='{.spec.host}')</code></pre>
 </div>
 </div>
 </div>

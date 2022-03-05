@@ -72,24 +72,10 @@
   </li>
 </ul>
   </li>
-  <li class="nav-item" data-depth="1">
-    <button class="nav-item-toggle"></button>
-    <a class="nav-link" href="pipeline-resources.html">Pipeline Resources</a>
-<ul class="nav-list">
-  <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="pipeline-resources.html#tekton-res-prerequisite">Prerequisites</a>
-  </li>
-  <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="pipeline-resources.html#tekton-res-create">Create Pipeline Resource</a>
-  </li>
-  <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="pipeline-resources.html#tekton-res-deploy">Deploy Pipeline Resource</a>
-  </li>
-  <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="pipeline-resources.html#tkn-see-what-you-have-deployed">See what you have deployed</a>
-  </li>
 </ul>
   </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
   <li class="nav-item" data-depth="1">
     <button class="nav-item-toggle"></button>
     <a class="nav-link" href="tasks.html">Tasks</a>
@@ -394,25 +380,13 @@
     <li><a href="triggers.html">Triggers</a></li>
   </ul>
 </nav>
-  <div class="edit-this-page"><a href="https://github.com/redhat-scholars/tekton-tutorial/blob/v1.3.0/documentation/modules/ROOT/pages/triggers.adoc">Edit this Page</a></div>
+  <div class="edit-this-page"><a href="https://github.com/redhat-scholars/tekton-tutorial/edit/tekton-tutorial-v2.0.0/documentation/modules/ROOT/pages/triggers.adoc">Edit this Page</a></div>
   </div>
   <div class="content">
 <article class="doc">
 <h1 class="page">Triggers</h1>
 <div id="preamble">
 <div class="sectionbody">
-<div class="admonitionblock warning">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-warning" title="Warning"></i>
-</td>
-<td class="content">
-This chapter build is in progress, expect to change and not working as expected
-</td>
-</tr>
-</table>
-</div>
 <div class="paragraph">
 <p>At the end of this chapter you will be able to :</p>
 </div>
@@ -570,7 +544,7 @@ service/nexus        NodePort    10.100.205.22   &lt;none&gt;        8081:31743/
 </div>
 <div class="listingblock console-input">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl expose svc -n triggers-demo nexus</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc expose svc -n triggers-demo nexus</code></pre>
 </div>
 </div>
 </div>
@@ -598,8 +572,8 @@ service/nexus        NodePort    10.100.205.22   &lt;none&gt;        8081:31743/
 </div>
 <div class="listingblock console-input">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl get -n triggers-demo cm maven-settings -oyaml \
-  | yq r - data['settings.xml']</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl get -n triggers-demo cm maven-settings -o yaml \
+    -o jsonpath='{.data}'</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -978,7 +952,7 @@ Gitea admin user is <strong>gitea</strong> and password <strong>gitea</strong>.
 <div class="tab-pane" aria-labelledby="tabset5_minikube">
 <div class="listingblock console-input">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl apply -f <a href="https://storage.googleapis.com/tekton-releases/triggers/previous/v0.10.2/release.yaml" class="bare">https://storage.googleapis.com/tekton-releases/triggers/previous/v0.10.2/release.yaml</a></code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl apply -f <a href="https://storage.googleapis.com/tekton-releases/triggers/previous/v0.14.2/release.yaml" class="bare">https://storage.googleapis.com/tekton-releases/triggers/previous/v0.14.2/release.yaml</a></code></pre>
 </div>
 </div>
 <div class="paragraph">

@@ -72,24 +72,10 @@
   </li>
 </ul>
   </li>
-  <li class="nav-item" data-depth="1">
-    <button class="nav-item-toggle"></button>
-    <a class="nav-link" href="pipeline-resources.html">Pipeline Resources</a>
-<ul class="nav-list">
-  <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="pipeline-resources.html#tekton-res-prerequisite">Prerequisites</a>
-  </li>
-  <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="pipeline-resources.html#tekton-res-create">Create Pipeline Resource</a>
-  </li>
-  <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="pipeline-resources.html#tekton-res-deploy">Deploy Pipeline Resource</a>
-  </li>
-  <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="pipeline-resources.html#tkn-see-what-you-have-deployed">See what you have deployed</a>
-  </li>
 </ul>
   </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
   <li class="nav-item" data-depth="1">
     <button class="nav-item-toggle"></button>
     <a class="nav-link" href="tasks.html">Tasks</a>
@@ -394,36 +380,23 @@
     <li><a href="private_reg_repos.html">Private Registries and Repositories</a></li>
   </ul>
 </nav>
-  <div class="edit-this-page"><a href="https://github.com/redhat-scholars/tekton-tutorial/blob/v1.3.0/documentation/modules/ROOT/pages/private_reg_repos.adoc">Edit this Page</a></div>
+  <div class="edit-this-page"><a href="https://github.com/redhat-scholars/tekton-tutorial/edit/tekton-tutorial-v2.0.0/documentation/modules/ROOT/pages/private_reg_repos.adoc">Edit this Page</a></div>
   </div>
   <div class="content">
 <article class="doc">
 <h1 class="page">Using Private Repositories and Registries</h1>
-<div class="sect1">
-<h2 id="_using_private_repositories_and_registries"><a class="anchor" href="#_using_private_repositories_and_registries"></a>Using Private Repositories and Registries</h2>
+<div id="preamble">
 <div class="sectionbody">
-<div class="admonitionblock warning">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-warning" title="Warning"></i>
-</td>
-<td class="content">
-This chapter build is in progress, expect to change and not working as expected
-</td>
-</tr>
-</table>
-</div>
 <div class="paragraph">
 <p>At the end of this chapter you will be able to :</p>
 </div>
 <div class="ulist">
 <ul>
 <li>
-<p>Tekton Authentication Secrets</p>
+<p>Use Tekton Authentication Secrets</p>
 </li>
 <li>
-<p>How to push linux contianer image to external registry</p>
+<p>How to push linux container image to external registry</p>
 </li>
 <li>
 <p>How to clone from a private Github respository</p>
@@ -436,7 +409,7 @@ This chapter build is in progress, expect to change and not working as expected
 <h2 id="tkn-prr-overview"><a class="anchor" href="#tkn-prr-overview"></a>Overview</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>In many parctical usecase you might need to pull from private Git repsoitories or might need to push to external container registry such as <a href="https://quay.io">Quay.io</a>. In both the cases the access requires you to authenticate. With Tekton this is achieved using the Kubernetes Service Account(SA) and Kubernetes Secret.</p>
+<p>In many practical usecases you might need to pull from private Git repsoitories or might need to push to an external container registry such as <a href="https://quay.io">Quay.io</a>. In both cases the access requires you to authenticate. With Tekton this is achieved using the Kubernetes Service Account(SA) and Kubernetes Secret.</p>
 </div>
 <div class="paragraph">
 <p>If you are not in tutorial chapter folder, then navigate to the folder:</p>
@@ -459,13 +432,13 @@ This chapter build is in progress, expect to change and not working as expected
 <div class="ulist">
 <ul>
 <li>
-<p>It is assumed that you have completed <a href="workspaces.html" class="page">Workspaces</a> and the reusing the same namespace that was <a href="workspaces.html#ws-prepare" class="page">prepared</a> in that chapter.</p>
+<p>It is assumed that you have completed <a href="workspaces.html" class="page">Workspaces</a> and reusing the same namespace that was <a href="workspaces.html#ws-prepare" class="page">prepared</a> in that chapter.</p>
 </li>
 <li>
-<p>You have container registry account with <a href="https://quay.io">Quay.io</a> or <a href="https://hub.docker.com">Docker Hub</a></p>
+<p>You have a container registry account with <a href="https://quay.io">Quay.io</a> or <a href="https://hub.docker.com">Docker Hub</a></p>
 </li>
 <li>
-<p>You have GitHub account and a private repository</p>
+<p>You have a GitHub account and a private repository</p>
 </li>
 </ul>
 </div>
@@ -479,7 +452,7 @@ This chapter build is in progress, expect to change and not working as expected
 <h2 id="tekton-pull-from-remote-repo"><a class="anchor" href="#tekton-pull-from-remote-repo"></a>Pulling from Private Source Repository</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>In this exercise we will see how to pull i.e. clone the source code from the private source reporsitory. For this example we will use the GitHub as the remote source repository.</p>
+<p>In this exercise we will see how to pull i.e. clone the source code from the private source reporsitory. For this example we will use GitHub as the remote source repository.</p>
 </div>
 <div class="paragraph">
 <p>To be able to run this exercise you need:</p>
@@ -510,11 +483,10 @@ export TEKTON_TUTORIAL_GITHUB_PAT='&lt;your github.com username personal accesst
 </div>
 <div class="listingblock console-input">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl create secret -n workspace-auth-demo generic github-pat-secret --dry-run=client -o yaml \
-  | yq w - type kubernetes.io/basic-auth \
-  | yq w - stringData.username $GITHUB_USERNAME \
-  | yq w - stringData.password $TEKTON_TUTORIAL_GITHUB_PAT \
-  | kubectl apply -f -</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl create secret -n workspace-auth-demo generic github-pat-secret \
+    --type kubernetes.io/basic-auth \
+    --from-literal username=$GITHUB_USERNAME \
+    --from-literal password=$TEKTON_TUTORIAL_GITHUB_PAT</code></pre>
 </div>
 </div>
 <div class="listingblock console-output">
@@ -540,7 +512,7 @@ export TEKTON_TUTORIAL_GITHUB_PAT='&lt;your github.com username personal accesst
 </div>
 </div>
 <div class="paragraph">
-<p>Verify the github-pat-secret as right type, annoations and credential values:</p>
+<p>Verify the github-pat-secret as the right type, annotations and credential values:</p>
 </div>
 <div class="listingblock console-input">
 <div class="content">
@@ -548,7 +520,7 @@ export TEKTON_TUTORIAL_GITHUB_PAT='&lt;your github.com username personal accesst
 </div>
 </div>
 <div class="paragraph">
-<p>The command should show an output(trimmed for brevity) as shown in the following listing, with your GitHub.com username and PAT.</p>
+<p>The command should show an output (trimmed for brevity) as shown in the following listing, with your GitHub.com username and PAT.</p>
 </div>
 <div class="listingblock console-output">
 <div class="content">
@@ -569,7 +541,7 @@ metadata:
 <div class="sect2">
 <h3 id="tekton-github-sa"><a class="anchor" href="#tekton-github-sa"></a>Create Service Account</h3>
 <div class="paragraph">
-<p>Let us create a Kubernetes ServiceAccount that could be used pull from the private GitHub repository:</p>
+<p>Let us create a Kubernetes ServiceAccount that could be used to pull from the private GitHub repository:</p>
 </div>
 <div class="listingblock console-input">
 <div class="content">
@@ -607,7 +579,7 @@ metadata:
 </div>
 </div>
 <div class="paragraph">
-<p>The command should show an output(trimmed for brevity) like:</p>
+<p>The command should show an output (trimmed for brevity) like:</p>
 </div>
 <div class="listingblock console-output">
 <div class="content">
@@ -729,7 +701,7 @@ spec:
 </div>
 </div>
 <div class="paragraph">
-<p>A successful clone from private repo will show the following output ( trimmed brevity):</p>
+<p>A successful clone from private repo will show the following output (trimmed brevity):</p>
 </div>
 <div class="listingblock console-output">
 <div class="content">
@@ -782,7 +754,7 @@ spec:
 <h2 id="tekton-push-to-external-reg"><a class="anchor" href="#tekton-push-to-external-reg"></a>Pushing to external registry</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>To able push to external container registry, its requried that the Pipline is run with a ServiceAccount that has container registry credentials configured via ServiceAccount secrets.  Kubernetes provider a Secret type called <code>docker-registry</code>, that can be used to configure the container registry credentials.</p>
+<p>To able push to an external container registry, its requried that the Pipline is run with a ServiceAccount that has container registry credentials configured via ServiceAccount secrets.  Kubernetes provider a Secret type called <code>docker-registry</code>, that can be used to configure the container registry credentials.</p>
 </div>
 <div class="paragraph">
 <p>Set the requried environment variables to be used when creating the container-registry-secret:</p>
@@ -874,6 +846,30 @@ secrets:
 - name: build-bot-token-8nl2v</code></pre>
 </div>
 </div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+<div class="title">Running Tasks with privileged access on OpenShift</div>
+<div class="paragraph">
+<p>Sometimes, Tekton Tasks or ClusterTasks require privileged access to create certain Kubernetes resources.
+Using a service account and adding it to a security policy is the safe way to run those kind of Tasks or ClusterTasks.</p>
+</div>
+<div class="paragraph">
+<p>For our example, we should run the following command:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc adm policy add-scc-to-user anyuid -z build-bot -n workspace-auth-demo</code></pre>
+</div>
+</div>
+</td>
+</tr>
+</table>
+</div>
 </div>
 <div class="sect2">
 <h3 id="tekton-create-build-push-pipeline"><a class="anchor" href="#tekton-create-build-push-pipeline"></a>Create Pipeline</h3>
@@ -914,7 +910,7 @@ secrets:
   --serviceaccount=build-bot \
   --workspace name=maven-settings,config=maven-settings \
   --workspace name=source,claimName=tekton-tutorial-sources \
-  --use-param-defaults \
+  --param image-name=$CONTAINER_REGISTRY_SERVER/$CONTAINER_REGISTRY_USER/tekton-tutorial-greeter  \
   --showlog</code></pre>
 </div>
 </div>
@@ -987,7 +983,7 @@ spec:
 </div>
 </div>
 <div class="paragraph">
-<p>A successful pipeline should have pushed the image to the external container registry. The following screen shot shows the image pushed to <strong>rhdevelopers</strong> Quay.io container registry repo:</p>
+<p>A successful pipeline should have pushed the image to the external container registry. The following screenshot shows the image pushed to <strong>rhdevelopers</strong> Quay.io container registry repo:</p>
 </div>
 <div class="imageblock">
 <div class="content">
@@ -1002,7 +998,7 @@ spec:
 </td>
 <td class="content">
 <div class="paragraph">
-<p>If you noticed the highlighted <strong>sha256</strong> from the log above, is same as that of the <strong>sha256</strong> listed in the contianer registry repository.</p>
+<p>If you noticed the highlighted <strong>sha256</strong> from the log above, is same as that of the <strong>sha256</strong> listed in the container registry repository.</p>
 </div>
 </td>
 </tr>
@@ -1015,7 +1011,7 @@ spec:
 <h2 id="tekton-remote-ref-points"><a class="anchor" href="#tekton-remote-ref-points"></a>Points to Ponder</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>When need to pull from remote source repository or push to external container registry:</p>
+<p>When you need to pull from remote source repository or push to external container registry you need:</p>
 </div>
 <div class="ulist">
 <ul>
@@ -1023,13 +1019,13 @@ spec:
 <p>A Kubernetes Secret to hold the container registry credentials</p>
 </li>
 <li>
-<p>A Kubenretes Service Account, with the container registry Secret added to it</p>
+<p>A Kubernetes Service Account, with the container registry Secret added to it</p>
 </li>
 <li>
-<p>Use the Service Account as <code>serviceAccountName</code> in PipelineRuns/TaskRuns</p>
+<p>To use the Service Account as <code>serviceAccountName</code> in PipelineRuns/TaskRuns</p>
 </li>
 <li>
-<p>Annotate Secerts to map which Secret to be used with source repository</p>
+<p>To annotate Secrets to map which Secret to be used with source repository</p>
 </li>
 </ul>
 </div>

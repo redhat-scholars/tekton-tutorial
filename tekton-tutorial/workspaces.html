@@ -72,24 +72,10 @@
   </li>
 </ul>
   </li>
-  <li class="nav-item" data-depth="1">
-    <button class="nav-item-toggle"></button>
-    <a class="nav-link" href="pipeline-resources.html">Pipeline Resources</a>
-<ul class="nav-list">
-  <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="pipeline-resources.html#tekton-res-prerequisite">Prerequisites</a>
-  </li>
-  <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="pipeline-resources.html#tekton-res-create">Create Pipeline Resource</a>
-  </li>
-  <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="pipeline-resources.html#tekton-res-deploy">Deploy Pipeline Resource</a>
-  </li>
-  <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="pipeline-resources.html#tkn-see-what-you-have-deployed">See what you have deployed</a>
-  </li>
 </ul>
   </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
   <li class="nav-item" data-depth="1">
     <button class="nav-item-toggle"></button>
     <a class="nav-link" href="tasks.html">Tasks</a>
@@ -394,25 +380,13 @@
     <li><a href="workspaces.html">Workspaces</a></li>
   </ul>
 </nav>
-  <div class="edit-this-page"><a href="https://github.com/redhat-scholars/tekton-tutorial/blob/v1.3.0/documentation/modules/ROOT/pages/workspaces.adoc">Edit this Page</a></div>
+  <div class="edit-this-page"><a href="https://github.com/redhat-scholars/tekton-tutorial/edit/tekton-tutorial-v2.0.0/documentation/modules/ROOT/pages/workspaces.adoc">Edit this Page</a></div>
   </div>
   <div class="content">
 <article class="doc">
 <h1 class="page">Workspaces</h1>
 <div id="preamble">
 <div class="sectionbody">
-<div class="admonitionblock warning">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-warning" title="Warning"></i>
-</td>
-<td class="content">
-This chapter build is in progress, expect to change and not working as expected
-</td>
-</tr>
-</table>
-</div>
 <div class="paragraph">
 <p>At the end of this chapter you will be able to :</p>
 </div>
@@ -606,7 +580,7 @@ service/nexus        NodePort    10.100.205.22   &lt;none&gt;        8081:31743/
 </div>
 <div class="listingblock console-input">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl expose svc -n workspace-auth-demo nexus</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc expose svc -n workspace-auth-demo nexus</code></pre>
 </div>
 </div>
 </div>
@@ -634,8 +608,8 @@ service/nexus        NodePort    10.100.205.22   &lt;none&gt;        8081:31743/
 </div>
 <div class="listingblock console-input">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl get -n workspace-auth-demo cm maven-settings -oyaml \
-  | yq r - data['settings.xml']</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl get -n workspace-auth-demo cm maven-settings -o yaml \
+    -o jsonpath='{.data}'</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -820,7 +794,7 @@ standard (default)   kubernetes.io/gce-pd   Delete          WaitForFirstConsumer
 <pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">apiVersion: tekton.dev/v1beta1
 kind: TaskRun
 metadata:
-  genrateName: git-clone- <i class="conum" data-value="1"></i><b>(1)</b>
+  generateName: git-clone- <i class="conum" data-value="1"></i><b>(1)</b>
   labels: <i class="conum" data-value="2"></i><b>(2)</b>
     tekton.dev/task: git-clone
 spec:
@@ -1391,11 +1365,12 @@ metadata:
   name: greeter-app-deploy
 spec:
   description: &gt;-
-    The Pipline to buld and deploy the Hello World Java App <a href="https://github.com/redhat-scholars/tekton-tutorial-greeter" class="bare">https://github.com/redhat-scholars/tekton-tutorial-greeter</a> as Knative Service.
+    The Pipeline to build and deploy the Hello World Java App <a href="https://github.com/redhat-scholars/tekton-tutorial-greeter" class="bare">https://github.com/redhat-scholars/tekton-tutorial-greeter</a> as Knative Service.
   params:
-    - name: image-name <i class="conum" data-value="1"></i><b>(1)</b>
-      description: The fully qualified image name e.g example.com/tekton-tutorial/greeter
-      default: example.com/tekton-tutorial/greeter
+    - name: IMAGE_NAME &lt;mark&gt;<i class="conum" data-value="1"></i><b>(1)</b>
+      description: &gt;-
+        The fully qualified image name. If you are running on Minikube please use example.com/tekton-tutorial/greeter
+        On OpenShift, use image-registry.openshift-image-registry.svc:5000/workspace-auth-demo/tekton-tutorial-greeter
     - name: context-dir
       description: &gt;-
         The application framework to use, value can be either quarkus or springboot
@@ -1449,12 +1424,12 @@ spec:
         - name: GOALS
           value:
             [
-              '-pl',
-              '$(params.context-dir)',
-              '-B',
-              '-DskipTests',
-              'clean',
-              'package',
+                '-pl',
+                '$(params.context-dir)',
+                '-B',
+                '-DskipTests',
+                'clean',
+                'package',
             ]
       workspaces:
         - name: maven-settings
@@ -1470,7 +1445,9 @@ spec:
         - name: CONTEXT
           value: '$(params.context-dir)'
         - name: IMAGE
-          value: '$(params.image-name)'
+          value: '$(params.IMAGE_NAME)'
+        - name: STORAGE_DRIVER
+          value: vfs
         # since pushing to internal registry we skip TLS verify
         - name: TLSVERIFY
           value: 'false'
@@ -1489,7 +1466,7 @@ spec:
             - 'create'
             - '$(params.kn-service-name)'
             - '--force'
-            - '--image=$(params.image-name)@$(tasks.build-java-app-image.results.IMAGE_DIGEST)' <i class="conum" data-value="4"></i><b>(4)</b></code></pre>
+            - '--image=$(params.IMAGE_NAME)@$(tasks.build-java-app-image.results.IMAGE_DIGEST)'&lt;/mark&gt;<i class="conum" data-value="4"></i><b>(4)</b></code></pre>
 </div>
 </div>
 <div class="colist arabic">
@@ -1534,8 +1511,8 @@ spec:
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">curl -sSL \
   <a href="https://raw.githubusercontent.com/tektoncd/catalog/master/task/kn/0.1/support/kn-deployer.yaml" class="bare">https://raw.githubusercontent.com/tektoncd/catalog/master/task/kn/0.1/support/kn-deployer.yaml</a> \
-  | yq w - -d0 metadata.namespace workspace-auth-demo \
-  | yq w - -d2 subjects.[0].namespace workspace-auth-demo \
+  | yq '.metadata.namespace="workspace-auth-demo"' \
+  | yq '.subjects.[0].namespace="workspace-auth-demo"' \
   | kubectl apply -f -</code></pre>
 </div>
 </div>
@@ -1626,7 +1603,7 @@ spec:
 </div>
 </div>
 <div class="paragraph">
-<p>A successfull Pipelinerun should have the <code>greeter</code> application up and running as shown:</p>
+<p>A successful Pipelinerun should have the <code>greeter</code> application up and running as shown:</p>
 </div>
 <div class="listingblock console-input">
 <div class="content">
