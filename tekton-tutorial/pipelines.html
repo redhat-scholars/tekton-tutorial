@@ -508,6 +508,10 @@ spec:
       description: the context directory from where to build the application
     - name: destinationImage
       description: the fully qualified image name
+    - name: storageDriver
+      description: Use storage driver type vfs if you are running on OpenShift.
+      type: string
+      default: overlay
   workspaces:
     - name: workspace
   tasks:
@@ -522,6 +526,8 @@ spec:
           value: $(params.contextDir)
         - name: destinationImage
           value: $(params.destinationImage)
+        - name: storageDriver
+          value: $(params.storageDriver)
     - name: deploy-kubernetes-service
       taskRef:
         name: openshift-client
@@ -701,6 +707,7 @@ OpenShift Pipelines creates and uses the <code>pipeline</code> SA by default.
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">tkn pipeline start -n tektontutorial svc-deploy \
   --param contextDir='springboot' \<i class="conum" data-value="1"></i><b>(1)</b>
   --param destinationImage='image-registry.openshift-image-registry.svc:5000/tektontutorial/tekton-tutorial-greeter'\ <i class="conum" data-value="2"></i><b>(2)</b>
+  --param storageDriver='vfs' \
   #--serviceaccount='pipeline' \<i class="conum" data-value="3"></i><b>(3)</b>
   --showlog<i class="conum" data-value="4"></i><b>(4)</b></code></pre>
 </div>

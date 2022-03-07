@@ -1156,7 +1156,11 @@ The resulted linux container image will be pushed to the container registry.</p>
     - name: sslVerify
       description: defines if http.sslVerify should be set to true or false in the global git config
       type: string
-      default: "false"</code></pre>
+      default: "false"
+    - name: storageDriver
+      type: string
+      description: Use storage driver type vfs if you are running on OpenShift.
+      default: overlay</code></pre>
 </div>
 </div>
 <div class="colist arabic">
@@ -1223,7 +1227,7 @@ The resulted linux container image will be pushed to the container registry.</p>
 <div class="title"><a href="https://github.com/redhat-scholars/tekton-tutorial/blob/master/tasks/build-app-task.yaml#L32-L43" target="_blank" rel="noopener">step-build-sources</a></div>
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">- name: build-sources
-  image: docker.io/maven:3.6.3-jdk-8-slim
+  image: docker.io/maven:3.6.3-openjdk-8-slim
   workingDir: "/workspace/source/$(params.contextDir)" <i class="conum" data-value="1"></i><b>(1)</b>
   command: <i class="conum" data-value="2"></i><b>(2)</b>
     - mvn
@@ -1265,14 +1269,16 @@ The resulted linux container image will be pushed to the container registry.</p>
 <pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">- name: build-and-push-image
   image: quay.io/buildah/stable
   script: |
-      #!/usr/bin/env bash
-      buildah --storage-driver=vfs bud --layers -t $DESTINATION_IMAGE $CONTEXT_DIR
-      buildah --storage-driver=vfs push $DESTINATION_IMAGE docker://$DESTINATION_IMAGE
+        #!/usr/bin/env bash
+        buildah --storage-driver=$STORAGE_DRIVER bud --layers -t $DESTINATION_IMAGE $CONTEXT_DIR
+        buildah --storage-driver=$STORAGE_DRIVER push $DESTINATION_IMAGE docker://$DESTINATION_IMAGE
   env:
      - name: DESTINATION_IMAGE
        value: "$(params.destinationImage)"
      - name: CONTEXT_DIR
        value: "/workspace/source/$(params.contextDir)"
+     - name: STORAGE_DRIVER
+       value: "$(params.storageDriver)"
 #  enable the following lines only for Minikube
 #  securityContext: <i class="conum" data-value="1"></i><b>(1)</b>
 #    runAsUser: 0
@@ -1498,6 +1504,7 @@ source-lister   7 minutes ago</code></pre>
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">tkn task start -n tektontutorial build-app \<i class="conum" data-value="1"></i><b>(1)</b>
   --param contextDir='springboot' \<i class="conum" data-value="2"></i><b>(2)</b>
   --param destinationImage='image-registry.openshift-image-registry.svc:5000/tektontutorial/tekton-tutorial-greeter' \<i class="conum" data-value="3"></i><b>(3)</b>
+  --param storageDriver='vfs' \
   --showlog<i class="conum" data-value="4"></i><b>(4)</b></code></pre>
 </div>
 </div>
@@ -1758,6 +1765,10 @@ spec:
       description: defines if http.sslVerify should be set to true or false in the global git config
       type: string
       default: "false"
+    - name: storageDriver
+      type: string
+      description: Use storage driver type vfs if you are running on OpenShift.
+      default: overlay
   steps:
     - image: 'gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/git-init:v0.15.2'
       name: clone
@@ -1801,13 +1812,15 @@ spec:
       image: quay.io/buildah/stable
       script: |
         #!/usr/bin/env bash
-        buildah --storage-driver=vfs bud --layers -t $DESTINATION_IMAGE $CONTEXT_DIR
-        buildah --storage-driver=vfs push $DESTINATION_IMAGE docker://$DESTINATION_IMAGE
+        buildah --storage-driver=$STORAGE_DRIVER bud --layers -t $DESTINATION_IMAGE $CONTEXT_DIR
+        buildah --storage-driver=$STORAGE_DRIVER push $DESTINATION_IMAGE docker://$DESTINATION_IMAGE
       env:
         - name: DESTINATION_IMAGE
           value: "$(params.destinationImage)"
         - name: CONTEXT_DIR
           value: "/workspace/source/$(params.contextDir)"
+        - name: STORAGE_DRIVER
+          value: "$(params.storageDriver)"
   volumes:
     - name: varlibc
       emptyDir: {}</code></pre>
@@ -1854,6 +1867,7 @@ spec:
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">tkn task start -n tektontutorial build-app \
   --param contextDir='springboot' \
   --param destinationImage='image-registry.openshift-image-registry.svc:5000/tektontutorial/tekton-tutorial-greeter'\
+  --param storageDriver='vfs' \
   --showlog<i class="conum" data-value="1"></i><b>(1)</b></code></pre>
 </div>
 </div>
