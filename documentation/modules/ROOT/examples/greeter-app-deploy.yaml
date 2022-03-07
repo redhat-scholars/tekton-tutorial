@@ -31,6 +31,10 @@ spec:
       description: The GitHub revision to use
       name: github-repo-revision
       type: string
+    - name: storageDriver
+      type: string
+      description: Use storage driver type vfs if you are running on OpenShift.
+      default: overlay
   workspaces:
     - name: source #<.>
     - name: maven-settings #<.>
@@ -95,7 +99,7 @@ spec:
         - name: IMAGE
           value: $(params.image-name)
         - name: STORAGE_DRIVER
-          value: vfs
+          value: $(params.storageDriver)
         - name: TLSVERIFY
           value: 'false'
       runAfter:

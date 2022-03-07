@@ -14,6 +14,10 @@ spec:
         The application profile to use for building the application. In this example it should be either:
           * quarkus
           * springboot
+    - name: storageDriver
+      type: string
+      description: Use storage driver type vfs if you are running on OpenShift.
+      default: overlay
   workspaces:
     - name: source #<.>
     - name: maven-settings #<.>
@@ -41,7 +45,7 @@ spec:
           value: '$(params.image-name)'
         # needed for OpenShift buildah run as vfs is the default storage driver
         - name: STORAGE_DRIVER
-          value: vfs
+          value: "$(params.storageDriver)"
         - name: TLSVERIFY
           value: 'false'
       workspaces:

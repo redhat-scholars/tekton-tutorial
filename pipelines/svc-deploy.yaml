@@ -8,6 +8,10 @@ spec:
       description: the context directory from where to build the application
     - name: destinationImage
       description: the fully qualified image name
+    - name: storageDriver
+      description: Use storage driver type vfs if you are running on OpenShift.
+      type: string
+      default: overlay
   workspaces:
     - name: workspace
   tasks:
@@ -22,6 +26,8 @@ spec:
           value: $(params.contextDir) 
         - name: destinationImage
           value: $(params.destinationImage)
+        - name: storageDriver
+          value: $(params.storageDriver)
     - name: deploy-kubernetes-service
       taskRef:
         name: openshift-client

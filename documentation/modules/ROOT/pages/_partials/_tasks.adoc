@@ -517,6 +517,10 @@ The following section explains the three Task `Steps`. The <<tekton-task-deploy>
       description: defines if http.sslVerify should be set to true or false in the global git config
       type: string
       default: "false"
+    - name: storageDriver
+      type: string
+      description: Use storage driver type vfs if you are running on OpenShift.
+      default: overlay
 ----
 
 <.> The workspace shared by all the steps of this task and will cause the TektonPipelines to download the sources to `workspace/source` directory.
@@ -564,7 +568,7 @@ The following section explains the three Task `Steps`. The <<tekton-task-deploy>
 [source,yaml,subs="+macros,attributes+"]
 ----
 - name: build-sources
-  image: docker.io/maven:3.6.3-jdk-8-slim
+  image: docker.io/maven:3.6.3-openjdk-8-slim
   workingDir: "/workspace/source/$(params.contextDir)" #<.>
   command: #<.>
     - mvn
@@ -591,14 +595,16 @@ The following section explains the three Task `Steps`. The <<tekton-task-deploy>
 - name: build-and-push-image
   image: quay.io/buildah/stable
   script: |
-      #!/usr/bin/env bash
-      buildah --storage-driver=vfs bud --layers -t $DESTINATION_IMAGE $CONTEXT_DIR 
-      buildah --storage-driver=vfs push $DESTINATION_IMAGE docker://$DESTINATION_IMAGE
+        #!/usr/bin/env bash
+        buildah --storage-driver=$STORAGE_DRIVER bud --layers -t $DESTINATION_IMAGE $CONTEXT_DIR 
+        buildah --storage-driver=$STORAGE_DRIVER push $DESTINATION_IMAGE docker://$DESTINATION_IMAGE
   env:
      - name: DESTINATION_IMAGE
        value: "$(params.destinationImage)"
      - name: CONTEXT_DIR
        value: "/workspace/source/$(params.contextDir)"
+     - name: STORAGE_DRIVER
+       value: "$(params.storageDriver)"
 #  enable the following lines only for Minikube
 #  securityContext: #<.>
 #    runAsUser: 0
@@ -698,6 +704,7 @@ OpenShift::
 tkn task start -n {tutorial-namespace} build-app \#<.>
   --param contextDir='springboot' \#<.>
   --param destinationImage='image-registry.openshift-image-registry.svc:5000/tektontutorial/tekton-tutorial-greeter' \#<.>
+  --param storageDriver='vfs' \
   --showlog#<.>
 ----
 --
@@ -904,6 +911,7 @@ OpenShift::
 tkn task start -n {tutorial-namespace} build-app \
   --param contextDir='springboot' \
   --param destinationImage='image-registry.openshift-image-registry.svc:5000/tektontutorial/tekton-tutorial-greeter'\
+  --param storageDriver='vfs' \
   --showlog#<.>
 ----
 --
