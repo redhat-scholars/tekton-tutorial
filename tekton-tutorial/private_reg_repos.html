@@ -910,6 +910,7 @@ Using a service account and adding it to a security policy is the safe way to ru
   --serviceaccount=build-bot \
   --workspace name=maven-settings,config=maven-settings \
   --workspace name=source,claimName=tekton-tutorial-sources \
+  --param app-profile='quarkus' \
   --param image-name=$CONTAINER_REGISTRY_SERVER/$CONTAINER_REGISTRY_USER/tekton-tutorial-greeter  \
   #--param storageDriver='vfs' \ #enable this for Openshift
   --showlog</code></pre>
@@ -930,6 +931,13 @@ metadata:
     tekton.dev/pipeline: greeter-app-build
 spec:
   serviceAccountName: build-bot
+  params:
+    - name: app-profile
+      value: quarkus
+    # enable this for OpenShift
+    #    - name: storageDriver
+    #      value: vfs
+    -
   pipelineRef:
     name: greeter-app-build
   workspaces:

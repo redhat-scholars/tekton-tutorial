@@ -1566,9 +1566,9 @@ clusterrolebinding.rbac.authorization.k8s.io/kn-deployer-binding created</code><
   --namespace=workspace-auth-demo \
   --serviceaccount=kn-deployer-account \
   --param context-dir='quarkus' \
+  #--param storageDriver='vfs' \ #enable this for Openshift
   --workspace name=maven-settings,config=maven-settings \
   --workspace name=source,claimName=tekton-tutorial-sources \
-  --use-param-defaults \
   --showlog</code></pre>
 </div>
 </div>
@@ -1590,6 +1590,9 @@ spec:
   params:
     - name: context-dir
       value: quarkus
+# enable this for OpenShift
+#    - name: storageDriver
+#      value: vfs
   workspaces: <i class="conum" data-value="2"></i><b>(2)</b>
     - name: maven-settings
       configmap:
