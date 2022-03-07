@@ -530,9 +530,9 @@ tkn pipeline start greeter-app-deploy \
   --namespace={chapter-namespace} \
   --serviceaccount=kn-deployer-account \
   --param context-dir='quarkus' \
+  #--param storageDriver='vfs' \ #enable this for Openshift
   --workspace name=maven-settings,config=maven-settings \
   --workspace name=source,claimName=tekton-tutorial-sources \
-  --use-param-defaults \
   --showlog
 ----
 --

@@ -417,6 +417,7 @@ tkn pipeline start greeter-app-build \
   --serviceaccount=build-bot \
   --workspace name=maven-settings,config=maven-settings \
   --workspace name=source,claimName=tekton-tutorial-sources \
+  --param app-profile='quarkus' \
   --param image-name=$CONTAINER_REGISTRY_SERVER/$CONTAINER_REGISTRY_USER/tekton-tutorial-greeter  \
   #--param storageDriver='vfs' \ #enable this for Openshift
   --showlog
