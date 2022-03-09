@@ -14,6 +14,7 @@ spec:
         image-registry.openshift-image-registry.svc:5000/workspace-auth-demo/tekton-tutorial-greeter
       name: image-name
       type: string
+      default: image-registry.openshift-image-registry.svc:5000/workspace-auth-demo/tekton-tutorial-greeter
     - description: >-
         The application framework to use, value can be either quarkus or
         springboot
@@ -34,7 +35,7 @@ spec:
     - name: storageDriver
       type: string
       description: Use storage driver type vfs if you are running on OpenShift.
-      default: overlay
+      default: vfs
   tasks:
     - name: clone-sources
       params:
@@ -102,7 +103,7 @@ spec:
       runAfter:
         - build-java-app
       taskRef:
-        kind: Task
+        kind: ClusterTask
         name: buildah
       workspaces:
         - name: source

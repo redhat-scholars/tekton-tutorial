@@ -12,6 +12,7 @@ spec:
         The fully qualified image name. If you are running on Minikube please
         use example.com/tekton-tutorial/greeter On OpenShift, use
         image-registry.openshift-image-registry.svc:5000/workspace-auth-demo/tekton-tutorial-greeter
+      default: image-registry.openshift-image-registry.svc:5000/workspace-auth-demo/tekton-tutorial-greeter
       name: image-name #<.>
       type: string
     - description: >-
@@ -34,7 +35,7 @@ spec:
     - name: storageDriver
       type: string
       description: Use storage driver type vfs if you are running on OpenShift.
-      default: overlay
+      default: vfs
   workspaces:
     - name: source #<.>
     - name: maven-settings #<.>
@@ -105,7 +106,7 @@ spec:
       runAfter:
         - build-java-app
       taskRef:
-        kind: Task
+        kind: ClusterTask
         name: buildah
       workspaces:
         - name: source

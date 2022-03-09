@@ -44,9 +44,9 @@ spec:
     - name: storageDriver
       type: string
       description: Use storage driver type vfs if you are running on OpenShift.
-      default: overlay
+      default: vfs
   steps:
-    - image: 'gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/git-init:v0.15.2'
+    - image: 'gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/git-init:v0.21.0'
       name: clone
       resources: {}
       script: |
@@ -88,8 +88,8 @@ spec:
       image: quay.io/buildah/stable
       script: |
         #!/usr/bin/env bash
-        buildah --storage-driver=$STORAGE_DRIVER bud --layers -t $DESTINATION_IMAGE $CONTEXT_DIR 
-        buildah --storage-driver=$STORAGE_DRIVER push $DESTINATION_IMAGE docker://$DESTINATION_IMAGE
+        buildah --storage-driver=$STORAGE_DRIVER --tls-verify=$(params.tlsVerify) bud --layers -t $DESTINATION_IMAGE $CONTEXT_DIR 
+        buildah --storage-driver=$STORAGE_DRIVER --tls-verify=$(params.tlsVerify) push $DESTINATION_IMAGE docker://$DESTINATION_IMAGE
       env:
         - name: DESTINATION_IMAGE
           value: "$(params.destinationImage)"

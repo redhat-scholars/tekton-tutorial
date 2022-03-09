@@ -82,7 +82,7 @@ Next, we should patch the core dns configuration of minikube and we can use the 
 kubectl apply -f https://raw.githubusercontent.com/kameshsampath/minikube-helpers/master/registry/node-etc-hosts-update.yaml
 kubectl apply -f https://raw.githubusercontent.com/kameshsampath/minikube-helpers/master/registry/registry-aliases-sa.yaml
 kubectl apply -f https://raw.githubusercontent.com/kameshsampath/minikube-helpers/master/registry/registry-aliases-sa-crb.yaml
-kubectl apply -f https://raw.githubusercontent.com/kameshsampath/minikube-helpers/master/registry/patch-coredns-job.yaml
+kubectl apply -f kubernetes/patch-coredns-job.yaml
 ----
 
 The images build with the example.org, example.com, test.com and test.org will then be pushed and pulled from local internal registry, which was enable using minkube `registry` addon.

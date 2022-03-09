@@ -1,6 +1,6 @@
 The following section details on how to install OpenShift Pipelines(Tekton on OpenShift).
 
-== Login as Cluster Admin
+** Login as Cluster Admin
 
 Login to OpenShift console using the cluster admin credentials. Follow the https://docs.openshift.com/container-platform/{openshift-version}/pipelines/installing-pipelines.html[OpenShift Documentation^] to have OpenShift Pipelines installed in your OpenShift cluster.
 

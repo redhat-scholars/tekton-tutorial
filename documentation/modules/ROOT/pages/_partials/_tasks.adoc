@@ -1,3 +1,4 @@
+WARNING: Currently, there is an incompatibility between Tekton pipelines webhook and Minikube. Please expect no logs when running tkn commands .
 
 At the end of this chapter you will be able to :
 
@@ -38,7 +39,7 @@ This field is supported by the alpha version of Tekton API and should be avoided
 
 NOTE: The <<tekton-task-run>> could override the parameter values, if no parameter value is passed then the **default** value will be used.
 
-The parameters that were part of the menu:spec[inputs > params] can be used in the steps using the notation `$(<variable-name>)`.
+The parameters that were part of the menu:spec[params] can be used in the steps using the notation `$(<variable-name>)`.
 
 [[tekton-task-clone]]
 === Clone Source Code
@@ -166,6 +167,15 @@ The command might ask your to confirm any default values, in this task we have a
 ----
 
 Be sure press kbd:[Enter] to start the TaskRun after providing inputs to the prompts.
+
+Also, when prompted the name for the workspace, type `source`:
+
+[.console-output]
+[source,bash]
+----
+Please give specifications for the workspace: source 
+? Name for the workspace : source
+----
 
 ====
 
@@ -304,7 +314,7 @@ The reason that there are no Tasks found us that, we have not created any `Clust
 [.console-input]
 [source,bash]
 ----
-tkn task start source-lister --showlog --inputresource='source=git-source'
+tkn task start source-lister --showlog
 ----
 
 The command should fail with following output:
@@ -632,6 +642,7 @@ Make sure we are in the `{tutorial-namespace}`:
 [.console-input]
 [source,bash,subs="+macros,+attributes"]
 ----
+kubectl config set-context --current --namespace=tektontutorial
 kubectl config view --minify | grep namespace
 ----
 
@@ -830,6 +841,21 @@ SVC_URL=$(minikube -p {tutorial-namespace} -n {tutorial-namespace} service demo-
 OpenShift::
 +
 --
+[.console-input]
+[source,bash,subs="+macros,attributes+"]
+----
+kubectl apply -n {tutorial-namespace} -f $TUTORIAL_HOME/kubernetes/demo-greeter.yaml
+----
+
+Wait for the `demo-greeter` to be up and replace the image:
+
+[.console-input]
+[source,bash,subs="+macros,attributes+"]
+----
+oc set image deploy/demo-greeter *='image-registry.openshift-image-registry.svc:5000/tektontutorial/tekton-tutorial-greeter
+----
+
+And now let's expose the service via a route:
 [.console-input]
 [source,bash,subs="+macros,attributes+"]
 ----

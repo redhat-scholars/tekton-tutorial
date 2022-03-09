@@ -1,6 +1,8 @@
 include::_attributes.adoc[]
 :chapter-namespace: workspace-auth-demo
 
+WARNING: Currently, there is an incompatibility between Tekton pipelines webhook and Minikube. Please expect no logs when running tkn commands .
+
 At the end of this chapter you will be able to :
 
 * Use Tekton Authentication Secrets
@@ -50,10 +52,10 @@ Create the Kubernetes secret that can hold your GitHub.com credentials:
 [.console-input]
 [source,bash,subs="+macros,+attributes"]
 ----
-kubectl create secret -n workspace-auth-demo generic github-pat-secret \
-    --type kubernetes.io/basic-auth \
-    --from-literal username=$GITHUB_USERNAME \
-    --from-literal password=$TEKTON_TUTORIAL_GITHUB_PAT
+kubectl create secret generic github-pat-secret \
+    --type=kubernetes.io/basic-auth \
+    --from-literal=username=$GITHUB_USERNAME \
+    --from-literal=password=$TEKTON_TUTORIAL_GITHUB_PAT
 ----
 
 [.console-output]
@@ -284,11 +286,11 @@ Set the requried environment variables to be used when creating the container-re
 [.console-input]
 [source,bash,subs="+macros,+attributes"]
 ----
-export CONTAINER_REGISTRY_SERVER='https://quay.io' #<.>
+export CONTAINER_REGISTRY_SERVER='quay.io' #<.>
 export CONTAINER_REGISTRY_USER='<your registry user>'
 export CONTAINER_REGISTRY_PASSWORD='<your registry user password>'
 ----
-<.> The container registry server URL, for Quay.io its https://quay.io and for DockerHub it is https://index.docker.io/v2/
+<.> The container registry server URL, for Quay.io its quay.io and for DockerHub it is https://index.docker.io/v2/
 
 [#tekton-push-registry-secret]
 === Create Container Registry Secret
@@ -419,7 +421,6 @@ tkn pipeline start greeter-app-build \
   --workspace name=source,claimName=tekton-tutorial-sources \
   --param app-profile='quarkus' \
   --param image-name=$CONTAINER_REGISTRY_SERVER/$CONTAINER_REGISTRY_USER/tekton-tutorial-greeter  \
-  #--param storageDriver='vfs' \ #enable this for Openshift
   --showlog
 ----
 --

@@ -1,3 +1,5 @@
+WARNING: Currently, there is an incompatibility between Tekton pipelines webhook and Minikube. Please expect no logs when running tkn commands .
+
 At the end of this chapter you will be able to :
 
 * Understand what is a https://github.com/tektoncd/pipeline/blob/master/docs/pipelines.md[Pipeline] ?
@@ -40,7 +42,7 @@ Since there is no `kubectl` task available in https://github.com/tektoncd/catalo
 [source,bash,subs="+macros,attributes+"]
 ----
 kubectl create -n {tutorial-namespace} \
-  -f https://raw.githubusercontent.com/tektoncd/catalog/master/task/openshift-client/0.1/openshift-client.yaml
+  -f https://raw.githubusercontent.com/tektoncd/catalog/master/task/openshift-client/0.2/openshift-client.yaml
 ----
 
 Check the created tasks using the command:
@@ -171,11 +173,9 @@ OpenShift::
 [.console-input]
 [source,bash,subs="+macros,attributes+"]
 ----
-tkn pipeline start -n {tutorial-namespace} svc-deploy \
+tkn pipeline start -n tektontutorial svc-deploy \
   --param contextDir='springboot' \#<.>
-  --param destinationImage='image-registry.openshift-image-registry.svc:5000/tektontutorial/tekton-tutorial-greeter'\ #<.>
-  --param storageDriver='vfs' \
-  #--serviceaccount='pipeline' \#<.>
+  --param destinationImage='image-registry.openshift-image-registry.svc:5000/tektontutorial/tekton-tutorial-greeter' \#<.>
   --showlog#<.>
 ----
 --

@@ -17,7 +17,7 @@ spec:
     - name: storageDriver
       type: string
       description: Use storage driver type vfs if you are running on OpenShift.
-      default: overlay
+      default: vfs
   workspaces:
     - name: source #<.>
     - name: maven-settings #<.>
