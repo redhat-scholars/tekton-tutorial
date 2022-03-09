@@ -30,7 +30,7 @@ spec:
     - description: The precise URL that was fetched by this Task.
       name: url
   steps:
-    - image: 'gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/git-init:v0.15.2'
+    - image: 'gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/git-init:v0.21.0'
       name: clone
       resources: {}
       script: |
