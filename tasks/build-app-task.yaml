@@ -38,7 +38,7 @@ spec:
       description: Use storage driver type vfs if you are running on OpenShift.
       default: overlay
   steps:
-    - image: 'gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/git-init:v0.15.2'
+    - image: 'gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/git-init:v0.21.0'
       name: clone
       resources: {}
       script: |
