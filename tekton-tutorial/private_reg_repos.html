@@ -387,6 +387,18 @@
 <h1 class="page">Using Private Repositories and Registries</h1>
 <div id="preamble">
 <div class="sectionbody">
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+Currently, there is an incompatibility between Tekton pipelines webhook and Minikube. Please expect no logs when running tkn commands .
+</td>
+</tr>
+</table>
+</div>
 <div class="paragraph">
 <p>At the end of this chapter you will be able to :</p>
 </div>
@@ -483,10 +495,10 @@ export TEKTON_TUTORIAL_GITHUB_PAT='&lt;your github.com username personal accesst
 </div>
 <div class="listingblock console-input">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl create secret -n workspace-auth-demo generic github-pat-secret \
-    --type kubernetes.io/basic-auth \
-    --from-literal username=$GITHUB_USERNAME \
-    --from-literal password=$TEKTON_TUTORIAL_GITHUB_PAT</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl create secret generic github-pat-secret \
+    --type=kubernetes.io/basic-auth \
+    --from-literal=username=$GITHUB_USERNAME \
+    --from-literal=password=$TEKTON_TUTORIAL_GITHUB_PAT</code></pre>
 </div>
 </div>
 <div class="listingblock console-output">
@@ -761,7 +773,7 @@ spec:
 </div>
 <div class="listingblock console-input">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">export CONTAINER_REGISTRY_SERVER='https://quay.io' <i class="conum" data-value="1"></i><b>(1)</b>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">export CONTAINER_REGISTRY_SERVER='quay.io' <i class="conum" data-value="1"></i><b>(1)</b>
 export CONTAINER_REGISTRY_USER='&lt;your registry user&gt;'
 export CONTAINER_REGISTRY_PASSWORD='&lt;your registry user password&gt;'</code></pre>
 </div>
@@ -770,7 +782,7 @@ export CONTAINER_REGISTRY_PASSWORD='&lt;your registry user password&gt;'</code><
 <table>
 <tr>
 <td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>The container registry server URL, for Quay.io its <a href="https://quay.io" class="bare">https://quay.io</a> and for DockerHub it is <a href="https://index.docker.io/v2/" class="bare">https://index.docker.io/v2/</a></td>
+<td>The container registry server URL, for Quay.io its quay.io and for DockerHub it is <a href="https://index.docker.io/v2/" class="bare">https://index.docker.io/v2/</a></td>
 </tr>
 </table>
 </div>
@@ -912,7 +924,6 @@ Using a service account and adding it to a security policy is the safe way to ru
   --workspace name=source,claimName=tekton-tutorial-sources \
   --param app-profile='quarkus' \
   --param image-name=$CONTAINER_REGISTRY_SERVER/$CONTAINER_REGISTRY_USER/tekton-tutorial-greeter  \
-  #--param storageDriver='vfs' \ #enable this for Openshift
   --showlog</code></pre>
 </div>
 </div>

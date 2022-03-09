@@ -635,7 +635,7 @@
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl apply -f <a href="https://raw.githubusercontent.com/kameshsampath/minikube-helpers/master/registry/node-etc-hosts-update.yaml" class="bare">https://raw.githubusercontent.com/kameshsampath/minikube-helpers/master/registry/node-etc-hosts-update.yaml</a>
 kubectl apply -f <a href="https://raw.githubusercontent.com/kameshsampath/minikube-helpers/master/registry/registry-aliases-sa.yaml" class="bare">https://raw.githubusercontent.com/kameshsampath/minikube-helpers/master/registry/registry-aliases-sa.yaml</a>
 kubectl apply -f <a href="https://raw.githubusercontent.com/kameshsampath/minikube-helpers/master/registry/registry-aliases-sa-crb.yaml" class="bare">https://raw.githubusercontent.com/kameshsampath/minikube-helpers/master/registry/registry-aliases-sa-crb.yaml</a>
-kubectl apply -f <a href="https://raw.githubusercontent.com/kameshsampath/minikube-helpers/master/registry/patch-coredns-job.yaml" class="bare">https://raw.githubusercontent.com/kameshsampath/minikube-helpers/master/registry/patch-coredns-job.yaml</a></code></pre>
+kubectl apply -f kubernetes/patch-coredns-job.yaml</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -753,8 +753,12 @@ kubectl config set-context --current --namespace=tektontutorial</code></pre>
 <div class="paragraph">
 <p>The following section details on how to install OpenShift Pipelines(Tekton on OpenShift).</p>
 </div>
-<div class="paragraph">
-<p>== Login as Cluster Admin</p>
+<div class="ulist">
+<ul>
+<li>
+<p>Login as Cluster Admin</p>
+</li>
+</ul>
 </div>
 <div class="paragraph">
 <p>Login to OpenShift console using the cluster admin credentials. Follow the <a href="https://docs.openshift.com/container-platform/4.8/pipelines/installing-pipelines.html" target="_blank" rel="noopener">OpenShift Documentation</a> to have OpenShift Pipelines installed in your OpenShift cluster.</p>

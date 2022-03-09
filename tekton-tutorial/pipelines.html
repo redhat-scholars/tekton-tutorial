@@ -387,6 +387,18 @@
 <h1 class="page">Pipelines</h1>
 <div id="preamble">
 <div class="sectionbody">
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+Currently, there is an incompatibility between Tekton pipelines webhook and Minikube. Please expect no logs when running tkn commands .
+</td>
+</tr>
+</table>
+</div>
 <div class="paragraph">
 <p>At the end of this chapter you will be able to :</p>
 </div>
@@ -459,7 +471,7 @@ source-lister                 22 minutes ago</code></pre>
 <div class="listingblock console-input">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl create -n tektontutorial \
-  -f <a href="https://raw.githubusercontent.com/tektoncd/catalog/master/task/openshift-client/0.1/openshift-client.yaml" class="bare">https://raw.githubusercontent.com/tektoncd/catalog/master/task/openshift-client/0.1/openshift-client.yaml</a></code></pre>
+  -f <a href="https://raw.githubusercontent.com/tektoncd/catalog/master/task/openshift-client/0.2/openshift-client.yaml" class="bare">https://raw.githubusercontent.com/tektoncd/catalog/master/task/openshift-client/0.2/openshift-client.yaml</a></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -706,10 +718,8 @@ OpenShift Pipelines creates and uses the <code>pipeline</code> SA by default.
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">tkn pipeline start -n tektontutorial svc-deploy \
   --param contextDir='springboot' \<i class="conum" data-value="1"></i><b>(1)</b>
-  --param destinationImage='image-registry.openshift-image-registry.svc:5000/tektontutorial/tekton-tutorial-greeter'\ <i class="conum" data-value="2"></i><b>(2)</b>
-  --param storageDriver='vfs' \
-  #--serviceaccount='pipeline' \<i class="conum" data-value="3"></i><b>(3)</b>
-  --showlog<i class="conum" data-value="4"></i><b>(4)</b></code></pre>
+  --param destinationImage='image-registry.openshift-image-registry.svc:5000/tektontutorial/tekton-tutorial-greeter' \<i class="conum" data-value="2"></i><b>(2)</b>
+  --showlog<i class="conum" data-value="3"></i><b>(3)</b></code></pre>
 </div>
 </div>
 </div>

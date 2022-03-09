@@ -431,7 +431,7 @@ kubectl config set-context --current --namespace triggers-demo</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>As part of this exercise we will need to install the following external tasks to be installed in the namespace:</p>
+<p>As part of this exercise we will need to install the following external tasks and cluster tasks to be installed in the namespace:</p>
 </div>
 <div class="ulist">
 <ul>
@@ -442,7 +442,7 @@ kubectl config set-context --current --namespace triggers-demo</code></pre>
 <p><a href="https://github.com/tektoncd/catalog/tree/master/task/maven/0.1">maven</a></p>
 </li>
 <li>
-<p><a href="https://github.com/tektoncd/catalog/tree/master/task/buildah/0.1">buildah</a></p>
+<p><a href="https://raw.githubusercontent.com/openshift/tektoncd-pipeline-operator/master/deploy/resources/addons/02-clustertasks/buildah/buildah-task.yaml">buildah</a></p>
 </li>
 <li>
 <p><a href="https://github.com/tektoncd/catalog/tree/master/task/kn/0.1">knative client(kn)</a></p>
@@ -454,7 +454,7 @@ kubectl config set-context --current --namespace triggers-demo</code></pre>
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl apply -n triggers-demo \
   -f <a href="https://raw.githubusercontent.com/tektoncd/catalog/master/task/git-clone/0.1/git-clone.yaml" class="bare">https://raw.githubusercontent.com/tektoncd/catalog/master/task/git-clone/0.1/git-clone.yaml</a> \
   -f <a href="https://raw.githubusercontent.com/tektoncd/catalog/master/task/maven/0.1/maven.yaml" class="bare">https://raw.githubusercontent.com/tektoncd/catalog/master/task/maven/0.1/maven.yaml</a> \
-  -f <a href="https://raw.githubusercontent.com/tektoncd/catalog/master/task/buildah/0.1/buildah.yaml" class="bare">https://raw.githubusercontent.com/tektoncd/catalog/master/task/buildah/0.1/buildah.yaml</a> \
+  -f <a href="https://raw.githubusercontent.com/openshift/tektoncd-pipeline-operator/master/deploy/resources/addons/02-clustertasks/buildah/buildah-task.yaml" class="bare">https://raw.githubusercontent.com/openshift/tektoncd-pipeline-operator/master/deploy/resources/addons/02-clustertasks/buildah/buildah-task.yaml</a> \
   -f <a href="https://raw.githubusercontent.com/tektoncd/catalog/master/task/kn/0.1/kn.yaml" class="bare">https://raw.githubusercontent.com/tektoncd/catalog/master/task/kn/0.1/kn.yaml</a> \
   -f <a href="https://github.com/redhat-scholars/tekton-tutorial/blob/master/workspaces/list-directory-task.yaml">$TUTORIAL_HOME/workspaces/list-directory-task.yaml</a></code></pre>
 </div>

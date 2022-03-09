@@ -387,6 +387,18 @@
 <h1 class="page">Tasks</h1>
 <div id="preamble">
 <div class="sectionbody">
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+Currently, there is an incompatibility between Tekton pipelines webhook and Minikube. Please expect no logs when running tkn commands .
+</td>
+</tr>
+</table>
+</div>
 <div class="paragraph">
 <p>At the end of this chapter you will be able to :</p>
 </div>
@@ -513,7 +525,7 @@ The <a href="#tekton-task-run">TaskRun</a> could override the parameter values, 
 </table>
 </div>
 <div class="paragraph">
-<p>The parameters that were part of the <span class="menuseq"><b class="menu">spec</b>&#160;<i class="fa fa-angle-right caret"></i> <b class="submenu">inputs</b>&#160;<i class="fa fa-angle-right caret"></i> <b class="menuitem">params</b></span> can be used in the steps using the notation <code>$(&lt;variable-name&gt;)</code>.</p>
+<p>The parameters that were part of the <span class="menuseq"><b class="menu">spec</b>&#160;<i class="fa fa-angle-right caret"></i> <b class="menuitem">params</b></span> can be used in the steps using the notation <code>$(&lt;variable-name&gt;)</code>.</p>
 </div>
 <div class="sect2">
 <h3 id="tekton-task-clone"><a class="anchor" href="#tekton-task-clone"></a>Clone Source Code</h3>
@@ -722,6 +734,15 @@ Namespace:   tektontutorial
 <div class="paragraph">
 <p>Be sure press <kbd>Enter</kbd> to start the TaskRun after providing inputs to the prompts.</p>
 </div>
+<div class="paragraph">
+<p>Also, when prompted the name for the workspace, type <code>source</code>:</p>
+</div>
+<div class="listingblock console-output">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">Please give specifications for the workspace: source
+? Name for the workspace : source</code></pre>
+</div>
+</div>
 </td>
 </tr>
 </table>
@@ -882,7 +903,7 @@ kubectl config set-context --current --namespace clustertask-demo</code></pre>
 </div>
 <div class="listingblock console-input">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">tkn task start source-lister --showlog --inputresource='source=git-source'</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">tkn task start source-lister --showlog</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1344,7 +1365,7 @@ spec:
     - name: storageDriver
       type: string
       description: Use storage driver type vfs if you are running on OpenShift.
-      default: overlay
+      default: vfs
   steps:
     - image: 'gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/git-init:v0.15.2'
       name: clone
@@ -1388,8 +1409,8 @@ spec:
       image: quay.io/buildah/stable
       script: |
         #!/usr/bin/env bash
-        buildah --storage-driver=$STORAGE_DRIVER bud --layers -t $DESTINATION_IMAGE $CONTEXT_DIR
-        buildah --storage-driver=$STORAGE_DRIVER push $DESTINATION_IMAGE docker://$DESTINATION_IMAGE
+        buildah --storage-driver=$STORAGE_DRIVER --tls-verify=$(params.tlsVerify) bud --layers -t $DESTINATION_IMAGE $CONTEXT_DIR
+        buildah --storage-driver=$STORAGE_DRIVER --tls-verify=$(params.tlsVerify) push $DESTINATION_IMAGE docker://$DESTINATION_IMAGE
       env:
         - name: DESTINATION_IMAGE
           value: "$(params.destinationImage)"
@@ -1418,7 +1439,8 @@ spec:
 </div>
 <div class="listingblock console-input">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl config view --minify | grep namespace</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl config set-context --current --namespace=tektontutorial
+kubectl config view --minify | grep namespace</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1684,6 +1706,22 @@ step-build-and-push-image</code></pre>
 <div class="tab-pane" aria-labelledby="tabset2_openshift">
 <div class="listingblock console-input">
 <div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl apply -n tektontutorial -f $TUTORIAL_HOME/kubernetes/demo-greeter.yaml</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Wait for the <code>demo-greeter</code> to be up and replace the image:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc set image deploy/demo-greeter *='image-registry.openshift-image-registry.svc:5000/tektontutorial/tekton-tutorial-greeter</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>And now let&#8217;s expose the service via a route:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc expose svc -n tektontutorial demo-greeter</code></pre>
 </div>
 </div>
@@ -1776,9 +1814,9 @@ spec:
     - name: storageDriver
       type: string
       description: Use storage driver type vfs if you are running on OpenShift.
-      default: overlay
+      default: vfs
   steps:
-    - image: 'gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/git-init:v0.15.2'
+    - image: 'gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/git-init:v0.21.0'
       name: clone
       resources: {}
       script: |
@@ -1820,8 +1858,8 @@ spec:
       image: quay.io/buildah/stable
       script: |
         #!/usr/bin/env bash
-        buildah --storage-driver=$STORAGE_DRIVER bud --layers -t $DESTINATION_IMAGE $CONTEXT_DIR
-        buildah --storage-driver=$STORAGE_DRIVER push $DESTINATION_IMAGE docker://$DESTINATION_IMAGE
+        buildah --storage-driver=$STORAGE_DRIVER --tls-verify=$(params.tlsVerify) bud --layers -t $DESTINATION_IMAGE $CONTEXT_DIR
+        buildah --storage-driver=$STORAGE_DRIVER --tls-verify=$(params.tlsVerify) push $DESTINATION_IMAGE docker://$DESTINATION_IMAGE
       env:
         - name: DESTINATION_IMAGE
           value: "$(params.destinationImage)"

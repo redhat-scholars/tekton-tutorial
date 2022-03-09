@@ -387,6 +387,18 @@
 <h1 class="page">Workspaces</h1>
 <div id="preamble">
 <div class="sectionbody">
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+Currently, there is an incompatibility between Tekton pipelines webhook and Minikube. Please expect no logs when running tkn commands .
+</td>
+</tr>
+</table>
+</div>
 <div class="paragraph">
 <p>At the end of this chapter you will be able to :</p>
 </div>
@@ -426,10 +438,10 @@
 <h2 id="_why_workspace"><a class="anchor" href="#_why_workspace"></a>Why Workspace ?</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>In many partical usecases of Pipelines it becomes cricual for you to share the filsystem with between Tasks and between Steps. The filesystem could be typically hold a clone github repostiory, a ConfigMap or a secret.</p>
+<p>In many partical usecases of Pipelines it becomes crucial for you to share the filesystem between Tasks and between Steps. The filesystem could typically hold a clone github repostiory, a ConfigMap or a secret.</p>
 </div>
 <div class="paragraph">
-<p>Tekton <code>workspace</code> a technique by which the Task step and Pipeline task can share a common filesystem. This helps Pipelines to pick up changes form one task to another task in the Pipeline workflow.</p>
+<p>A Task step and Pipeline task can share a common filesystem via a Tekton <code>workspace</code>. This helps Pipelines to pick up changes form one task to another task in the Pipeline workflow.</p>
 </div>
 </div>
 </div>
@@ -467,7 +479,7 @@ kubectl config set-context --current --namespace workspace-auth-demo</code></pre
 </div>
 </div>
 <div class="paragraph">
-<p>As part of this exercise we will need to install the following external tasks to be installed in the namespace:</p>
+<p>As part of this exercise we will need to install the following external tasks and cluster tasks to be installed in the namespace:</p>
 </div>
 <div class="ulist">
 <ul>
@@ -478,7 +490,7 @@ kubectl config set-context --current --namespace workspace-auth-demo</code></pre
 <p><a href="https://github.com/tektoncd/catalog/tree/master/task/maven/0.1">maven</a></p>
 </li>
 <li>
-<p><a href="https://github.com/tektoncd/catalog/tree/master/task/buildah/0.1">buildah</a></p>
+<p><a href="https://raw.githubusercontent.com/openshift/tektoncd-pipeline-operator/master/deploy/resources/addons/02-clustertasks/buildah/buildah-task.yaml">buildah</a></p>
 </li>
 <li>
 <p><a href="https://github.com/tektoncd/catalog/tree/master/task/kn/0.1">knative client(kn)</a></p>
@@ -490,7 +502,7 @@ kubectl config set-context --current --namespace workspace-auth-demo</code></pre
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl apply -n workspace-auth-demo \
   -f <a href="https://raw.githubusercontent.com/tektoncd/catalog/master/task/git-clone/0.1/git-clone.yaml" class="bare">https://raw.githubusercontent.com/tektoncd/catalog/master/task/git-clone/0.1/git-clone.yaml</a> \
   -f <a href="https://raw.githubusercontent.com/tektoncd/catalog/master/task/maven/0.1/maven.yaml" class="bare">https://raw.githubusercontent.com/tektoncd/catalog/master/task/maven/0.1/maven.yaml</a> \
-  -f <a href="https://raw.githubusercontent.com/tektoncd/catalog/master/task/buildah/0.1/buildah.yaml" class="bare">https://raw.githubusercontent.com/tektoncd/catalog/master/task/buildah/0.1/buildah.yaml</a> \
+  -f <a href="https://raw.githubusercontent.com/openshift/tektoncd-pipeline-operator/master/deploy/resources/addons/02-clustertasks/buildah/buildah-task.yaml" class="bare">https://raw.githubusercontent.com/openshift/tektoncd-pipeline-operator/master/deploy/resources/addons/02-clustertasks/buildah/buildah-task.yaml</a> \
   -f <a href="https://raw.githubusercontent.com/tektoncd/catalog/master/task/kn/0.1/kn.yaml" class="bare">https://raw.githubusercontent.com/tektoncd/catalog/master/task/kn/0.1/kn.yaml</a> \
   -f <a href="https://github.com/redhat-scholars/tekton-tutorial/blob/master/workspaces/list-directory-task.yaml">$TUTORIAL_HOME/workspaces/list-directory-task.yaml</a></code></pre>
 </div>
@@ -1373,6 +1385,7 @@ spec:
         The fully qualified image name. If you are running on Minikube please
         use example.com/tekton-tutorial/greeter On OpenShift, use
         image-registry.openshift-image-registry.svc:5000/workspace-auth-demo/tekton-tutorial-greeter
+      default: image-registry.openshift-image-registry.svc:5000/workspace-auth-demo/tekton-tutorial-greeter
       name: image-name <i class="conum" data-value="1"></i><b>(1)</b>
       type: string
     - description: &gt;-
@@ -1395,7 +1408,7 @@ spec:
     - name: storageDriver
       type: string
       description: Use storage driver type vfs if you are running on OpenShift.
-      default: overlay
+      default: vfs
   workspaces:
     - name: source <i class="conum" data-value="2"></i><b>(2)</b>
     - name: maven-settings <i class="conum" data-value="3"></i><b>(3)</b>
@@ -1466,7 +1479,7 @@ spec:
       runAfter:
         - build-java-app
       taskRef:
-        kind: Task
+        kind: ClusterTask
         name: buildah
       workspaces:
         - name: source
@@ -1504,7 +1517,7 @@ spec:
 </tr>
 <tr>
 <td><i class="conum" data-value="4"></i><b>4</b></td>
-<td>The <code>buildah</code> build image task returns a output, the built Image digest via <a href="https://github.com/tektoncd/catalog/blob/master/task/buildah/0.1/buildah.yaml#L53-L55">IMAGE_DIGEST</a>. We use the that as part of the <code>--image</code> parameter to <code>kn</code> Task</td>
+<td>The <code>buildah</code> build image task returns a output. We use the that as part of the <code>--image</code> parameter to <code>kn</code> Task</td>
 </tr>
 </table>
 </div>
@@ -1566,7 +1579,6 @@ clusterrolebinding.rbac.authorization.k8s.io/kn-deployer-binding created</code><
   --namespace=workspace-auth-demo \
   --serviceaccount=kn-deployer-account \
   --param context-dir='quarkus' \
-  #--param storageDriver='vfs' \ #enable this for Openshift
   --workspace name=maven-settings,config=maven-settings \
   --workspace name=source,claimName=tekton-tutorial-sources \
   --showlog</code></pre>
