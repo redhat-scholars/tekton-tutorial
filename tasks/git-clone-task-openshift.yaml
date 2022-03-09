@@ -1,0 +1,68 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: git-source
+spec:
+  workspaces:
+    - name: source
+      description: The git repo will be cloned onto the volume backing this workspace
+  params:
+    - name: url
+      default: https://github.com/redhat-scholars/tekton-tutorial-greeter
+    - name: revision
+      default: master
+    - name: subdirectory
+      default: ""
+    - name: sslVerify
+      description: defines if http.sslVerify should be set to true or false in the global git config
+      type: string
+      default: "false"
+  results:
+    - description: The precise commit SHA that was fetched by this Task.
+      name: commit
+    - description: The precise URL that was fetched by this Task.
+      name: url
+  steps:
+    - name: clone
+      image: registry.redhat.io/openshift-pipelines/pipelines-git-init-rhel8@sha256:da1aedf0b17f2b9dd2a46edc93ff1c0582989414b902a28cd79bad8a035c9ea4
+      env:
+        - name: PARAM_URL
+          value: $(params.url)
+        - name: PARAM_REVISION
+          value: $(params.revision)
+        - name: PARAM_SUBDIRECTORY
+          value: $(params.subdirectory)
+        - name: PARAM_SSL_VERIFY
+          value: $(params.sslVerify)
+        - name: WORKSPACE_OUTPUT_PATH
+          value: $(workspaces.source.path)
+      script: |
+        CHECKOUT_DIR="${WORKSPACE_OUTPUT_PATH}/${PARAM_SUBDIRECTORY}"
+        cleandir() {
+          # Delete any existing contents of the repo directory if it exists.
+          #
+          # We don't just "rm -rf $CHECKOUT_DIR" because $CHECKOUT_DIR might be "/"
+          # or the root of a mounted volume.
+          if [[ -d "$CHECKOUT_DIR" ]] ; then
+            # Delete non-hidden files and directories
+            rm -rf "$CHECKOUT_DIR"/*
+            # Delete files and directories starting with . but excluding ..
+            rm -rf "$CHECKOUT_DIR"/.[!.]*
+            # Delete files and directories starting with .. plus any other character
+            rm -rf "$CHECKOUT_DIR"/..?*
+          fi
+        }
+        /ko-app/git-init \
+          -url "${PARAM_URL}" \
+          -revision "${PARAM_REVISION}" \
+          -path "$CHECKOUT_DIR" \
+          -sslVerify="${PARAM_SSL_VERIFY}" 
+        cd "$CHECKOUT_DIR"
+        ls "$CHECKOUT_DIR"
+        RESULT_SHA="$(git rev-parse HEAD)"
+        if [ "${EXIT_CODE}" != 0 ] ; then
+          exit "${EXIT_CODE}"
+        fi
+
+        printf "%s" "${RESULT_SHA}" > "$(results.commit.path)"
+        printf "%s" "${PARAM_URL}" > "$(results.url.path)"

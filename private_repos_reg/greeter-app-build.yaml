@@ -4,11 +4,20 @@ metadata:
   name: greeter-app-build
 spec:
   description: >-
-    The Pipline to build and push the Java App from https://github.com/redhat-scholars/tekton-secretworld private repository to an external container registry
+    The Pipeline to build and push the Java App from https://github.com/redhat-scholars/tekton-secretworld private repository to an external container registry
   params:
     - name: image-name #<.>
       description: The fully qualified image name e.g example.com/tekton-tutorial/greeter
-      default: quay.io/rhdevelopers/tekton-tutorial-greeter
+      default: quay.io/anasandbox/tekton-tutorial-greeter
+    - name: app-profile
+      description: >-
+        The application profile to use for building the application. In this example it should be either:
+          * quarkus
+          * springboot
+    - name: storageDriver
+      type: string
+      description: Use storage driver type vfs if you are running on OpenShift.
+      default: vfs
   workspaces:
     - name: source #<.>
     - name: maven-settings #<.>
@@ -18,7 +27,7 @@ spec:
         name: maven
       params:
         - name: GOALS
-          value: ['-B', '-DskipTests', 'clean', 'package']
+          value: ['-pl', '$(params.app-profile)','-B', '-DskipTests', 'clean', 'package']
       workspaces:
         - name: maven-settings
           workspace: maven-settings
@@ -30,8 +39,15 @@ spec:
       runAfter:
         - build-java-app
       params:
+        - name: CONTEXT
+          value: '$(params.app-profile)'
         - name: IMAGE
           value: '$(params.image-name)'
+        # needed for OpenShift buildah run as vfs is the default storage driver
+        - name: STORAGE_DRIVER
+          value: "$(params.storageDriver)"
+        - name: TLSVERIFY
+          value: 'false'
       workspaces:
         - name: source
           workspace: source

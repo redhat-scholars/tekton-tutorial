@@ -1,4 +1,4 @@
-WARNING: This chapter build is in progress, expect to change and not working as expected
+WARNING: Currently, there is an incompatibility between Tekton pipelines webhook and Minikube. Please expect no logs when running tkn commands .
 
 At the end of this chapter you will be able to :
 
@@ -13,9 +13,9 @@ include::partial$tekton-nav-to-folder.adoc[tags="folder-all,workspaces"]
 
 == Why Workspace ?
 
-In many partical usecases of Pipelines it becomes cricual for you to share the filsystem with between Tasks and between Steps. The filesystem could be typically hold a clone github repostiory, a ConfigMap or a secret. 
+In many partical usecases of Pipelines it becomes crucial for you to share the filesystem between Tasks and between Steps. The filesystem could typically hold a clone github repostiory, a ConfigMap or a secret. 
 
-Tekton `workspace` a technique by which the Task step and Pipeline task can share a common filesystem. This helps Pipelines to pick up changes form one task to another task in the Pipeline workflow.
+A Task step and Pipeline task can share a common filesystem via a Tekton `workspace`. This helps Pipelines to pick up changes form one task to another task in the Pipeline workflow.
 
 [#ws-overview]
 == Overview
@@ -61,7 +61,7 @@ Let us run the `git-clone` Task with the `TaskRun` definition as shown below:
 apiVersion: tekton.dev/v1beta1
 kind: TaskRun
 metadata:
-  genrateName: git-clone- #<.>
+  generateName: git-clone- #<.>
   labels: #<.>
     tekton.dev/task: git-clone
 spec:
@@ -471,10 +471,11 @@ Let us now apply what we learned with workspace to build and deploy the applicat
 ----
 include::ROOT:example$greeter-app-deploy.yaml[]
 ----
+
 <.> The parameters for the Pipeline
 <.> A workpace named `source`, we will map it to the PVC`tekton-tutorial-sources`  in PipelineRun in upcoming section
 <.> A workapce named `maven-settings`, we will map it to ConfigMap `maven-settings` in the PipelineRun in upcming section
-<.> The `buildah` build image task returns a output, the built Image digest via https://github.com/tektoncd/catalog/blob/master/task/buildah/0.1/buildah.yaml#L53-L55[IMAGE_DIGEST]. We use the that as part of the `--image` parameter to `kn` Task
+<.> The `buildah` build image task returns a output. We use the that as part of the `--image` parameter to `kn` Task
 
 [#ws-create-pipeline]
 === Create the Pipeline
@@ -500,8 +501,7 @@ We need to create the Service Account(SA) that is authorized to Knative Service 
 ----
 curl -sSL \
   https://raw.githubusercontent.com/tektoncd/catalog/master/task/kn/0.1/support/kn-deployer.yaml \
-  | yq w - -d0 metadata.namespace {chapter-namespace} \
-  | yq w - -d2 subjects.[0].namespace {chapter-namespace} \
+  | yq '.metadata.namespace="{chapter-namespace}"' \
   | kubectl apply -f -
 ----
 
@@ -532,7 +532,6 @@ tkn pipeline start greeter-app-deploy \
   --param context-dir='quarkus' \
   --workspace name=maven-settings,config=maven-settings \
   --workspace name=source,claimName=tekton-tutorial-sources \
-  --use-param-defaults \
   --showlog
 ----
 --
@@ -561,7 +560,7 @@ include::ROOT:partial$logs-view.adoc[tags='pr']
 --
 ====
 
-A successfull Pipelinerun should have the `greeter` application up and running as shown:
+A successful Pipelinerun should have the `greeter` application up and running as shown:
 
 [.console-input]
 [source,bash,subs="+macros,+attributes"]

@@ -1,16 +1,8 @@
----
 apiVersion: tekton.dev/v1beta1
 kind: Task
 metadata:
   name: build-app
 spec:
-  stepTemplate:
-    #    securityContext:
-    #      runAsUser: 0
-    #      privileged: true
-    volumeMounts:
-      - name: varlibc
-        mountPath: /var/lib/containers
   workspaces:
     - name: source
       description: The git repo will be cloned onto the volume backing this workspace
@@ -41,12 +33,8 @@ spec:
       description: defines if http.sslVerify should be set to true or false in the global git config
       type: string
       default: "false"
-    - name: storageDriver
-      type: string
-      description: Use storage driver type vfs if you are running on OpenShift.
-      default: vfs
   steps:
-    - image: 'gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/git-init:v0.21.0'
+    - image: 'registry.redhat.io/openshift-pipelines/pipelines-git-init-rhel8@sha256:da1aedf0b17f2b9dd2a46edc93ff1c0582989414b902a28cd79bad8a035c9ea4'
       name: clone
       resources: {}
       script: |
@@ -88,15 +76,16 @@ spec:
       image: quay.io/buildah/stable
       script: |
         #!/usr/bin/env bash
-        buildah --storage-driver=$STORAGE_DRIVER --tls-verify=$(params.tlsVerify) bud --layers -t $DESTINATION_IMAGE $CONTEXT_DIR 
-        buildah --storage-driver=$STORAGE_DRIVER --tls-verify=$(params.tlsVerify) push $DESTINATION_IMAGE docker://$DESTINATION_IMAGE
+        buildah --storage-driver=vfs bud --layers -t $DESTINATION_IMAGE $CONTEXT_DIR 
+        buildah --storage-driver=vfs push $DESTINATION_IMAGE docker://$DESTINATION_IMAGE
       env:
         - name: DESTINATION_IMAGE
           value: "$(params.destinationImage)"
         - name: CONTEXT_DIR
           value: "/workspace/source/$(params.contextDir)"
-        - name: STORAGE_DRIVER
-          value: "$(params.storageDriver)"
+      volumeMounts:
+        - name: varlibc
+          mountPath: /var/lib/containers
   volumes:
     - name: varlibc
       emptyDir: {}

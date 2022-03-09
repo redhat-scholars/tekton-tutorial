@@ -6,39 +6,35 @@ spec:
   params:
     - name: contextDir
       description: the context directory from where to build the application
-  resources:
-    - name: appSource
-      type: git
-    - name: appImage
-      type: image
+    - name: destinationImage
+      description: the fully qualified image name
+    - name: storageDriver
+      description: Use storage driver type vfs if you are running on OpenShift.
+      type: string
+      default: overlay
+  workspaces:
+    - name: workspace
   tasks:
     - name: build-java-app
       taskRef:
         name: build-app
+      workspaces:
+        - name: source
+          workspace: workspace
       params:
         - name: contextDir
           value: $(params.contextDir)
-      resources:
-        inputs:
-          - name: source
-            resource: appSource
-        outputs:
-          - name: builtImage
-            resource: appImage
+        - name: destinationImage
+          value: $(params.destinationImage)
+        - name: storageDriver
+          value: $(params.storageDriver)
     - name: deploy-kubernetes-service
       taskRef:
         name: openshift-client
       runAfter:
         - build-java-app
-      resources:
-        inputs:
-          - name: source
-            resource: appSource
       params:
-        - name: ARGS
-          value:
-            - "apply"
-            - "-f"
-            - "/workspace/source/k8s/deployment.yaml"
-            - "-f"
-            - "/workspace/source/k8s/service.yaml"
+        - name: SCRIPT
+          value: |
+            kubectl create deployment greeter --port=8080 --image=$(params.destinationImage)
+            kubectl expose deployment/greeter --port=8080 --target-port=8080 --type=NodePort

@@ -5,22 +5,25 @@ metadata:
   name: build-app
 spec:
   stepTemplate:
-    securityContext:
-      runAsUser: 0
-      privileged: true
+#    securityContext:
+#      runAsUser: 0
+#      privileged: true
     volumeMounts:
       - name: varlibc
         mountPath: /var/lib/containers
+  workspaces:
+    - name: source
+      description: The git repo will be cloned onto the volume backing this workspace
   params:
     - name: contextDir
       description: the context dir within source
-      default: .
+      default: springboot
     - name: mavenMirrorUrl
       description: the maven mirrror url
       default: https://repo.maven.apache.org/maven2/
     - name: destinationImage
       description: the fully qualified image name
-      default: "$(outputs.resources.builtImage.url)"
+      default: ""
     - name: dockerFile
       description: the docker file to used for building the application
       default: Dockerfile
@@ -28,14 +31,47 @@ spec:
       description: tls verify
       type: string
       default: "false"
-  resources:
-    inputs:
-      - name: source
-        type: git
-    outputs:
-      - name: builtImage
-        type: image
+    - name: url
+      default: https://github.com/redhat-scholars/tekton-tutorial-greeter
+    - name: revision
+      default: master
+    - name: subdirectory
+      default: ""
+    - name: sslVerify
+      description: defines if http.sslVerify should be set to true or false in the global git config
+      type: string
+      default: "false"
+    - name: storageDriver
+      type: string
+      description: Use storage driver type vfs if you are running on OpenShift.
+      default: vfs
   steps:
+    - image: 'gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/git-init:v0.21.0'
+      name: clone
+      resources: {}
+      script: |
+        CHECKOUT_DIR="$(workspaces.source.path)/$(params.subdirectory)"
+        cleandir() {
+          # Delete any existing contents of the repo directory if it exists.
+          #
+          # We don't just "rm -rf $CHECKOUT_DIR" because $CHECKOUT_DIR might be "/"
+          # or the root of a mounted volume.
+          if [[ -d "$CHECKOUT_DIR" ]] ; then
+            # Delete non-hidden files and directories
+            rm -rf "$CHECKOUT_DIR"/*
+            # Delete files and directories starting with . but excluding ..
+            rm -rf "$CHECKOUT_DIR"/.[!.]*
+            # Delete files and directories starting with .. plus any other character
+            rm -rf "$CHECKOUT_DIR"/..?*
+          fi
+        }
+        /ko-app/git-init \
+          -url "$(params.url)" \
+          -revision "$(params.revision)" \
+          -path "$CHECKOUT_DIR" \
+          -sslVerify="$(params.sslVerify)" 
+        cd "$CHECKOUT_DIR"
+        RESULT_SHA="$(git rev-parse HEAD)"
     - name: build-sources
       image: docker.io/maven:3.6.3-openjdk-11-slim
       command:
@@ -43,34 +79,24 @@ spec:
       args:
         - -DskipTests
         - clean
-        - package
+        - install
       env:
         - name: user.home
           value: /home/tekton
-      workingDir: "/workspace/source/$(inputs.params.contextDir)"
-    - name: build-image
+      workingDir: "/workspace/source/$(params.contextDir)"
+    - name: build-and-push-image
       image: quay.io/buildah/stable
-      command:
-        - "buildah"
-      args:
-        - "bud"
-        - "--layers"
-        - "-f"
-        - "$(inputs.params.dockerFile)"
-        - "-t"
-        - "$(inputs.params.destinationImage)"
-        - "."
-      workingDir: "/workspace/source/$(inputs.params.contextDir)"
-    - name: push-image
-      image: quay.io/buildah/stable
-      command:
-        - "buildah"
-      args:
-        - "push"
-        - "--tls-verify=$(inputs.params.tlsVerify)"
-        - $(inputs.params.destinationImage)
-        - "docker://$(inputs.params.destinationImage)"
-      workingDir: "/workspace/source/$(inputs.params.contextDir)"
+      script: |
+        #!/usr/bin/env bash
+        buildah --storage-driver=$STORAGE_DRIVER --tls-verify=$(params.tlsVerify) bud --layers -t $DESTINATION_IMAGE $CONTEXT_DIR 
+        buildah --storage-driver=$STORAGE_DRIVER --tls-verify=$(params.tlsVerify) push $DESTINATION_IMAGE docker://$DESTINATION_IMAGE
+      env:
+        - name: DESTINATION_IMAGE
+          value: "$(params.destinationImage)"
+        - name: CONTEXT_DIR
+          value: "/workspace/source/$(params.contextDir)"
+        - name: STORAGE_DRIVER
+          value: "$(params.storageDriver)"
   volumes:
     - name: varlibc
       emptyDir: {}

@@ -4,102 +4,125 @@ metadata:
   name: greeter-app-deploy
 spec:
   description: >-
-    The Pipline to buld and deploy the Hello World Java App https://github.com/redhat-scholars/tekton-tutorial-greeter as Knative Service.
+    The Pipeline to build and deploy the Hello World Java App
+    https://github.com/redhat-scholars/tekton-tutorial-greeter as Knative
+    Service.
   params:
-    - name: image-name #<.>
-      description: The fully qualified image name e.g example.com/tekton-tutorial/greeter
-      default: example.com/tekton-tutorial/greeter
-    - name: context-dir
-      description: >-
-        The application framework to use, value can be either quarkus or springboot
-    - name: kn-service-name
+    - description: >-
+        The fully qualified image name. If you are running on Minikube please
+        use example.com/tekton-tutorial/greeter On OpenShift, use
+        image-registry.openshift-image-registry.svc:5000/workspace-auth-demo/tekton-tutorial-greeter
+      name: image-name
+      type: string
+      default: image-registry.openshift-image-registry.svc:5000/workspace-auth-demo/tekton-tutorial-greeter
+    - description: >-
+        The application framework to use, value can be either quarkus or
+        springboot
+      name: context-dir
+      type: string
+    - default: greeter
       description: The Knative Service name
-      default: greeter
-    - name: github-repo-url
+      name: kn-service-name
+      type: string
+    - default: 'https://github.com/redhat-scholars/tekton-tutorial-greeter'
       description: The GitHub Repo of the Java Application
-      default: https://github.com/redhat-scholars/tekton-tutorial-greeter
-    - name: github-repo-revision
+      name: github-repo-url
+      type: string
+    - default: staging
       description: The GitHub revision to use
-      default: staging
-  workspaces:
-    - name: source #<.>
-    - name: maven-settings #<.>
+      name: github-repo-revision
+      type: string
+    - name: storageDriver
+      type: string
+      description: Use storage driver type vfs if you are running on OpenShift.
+      default: vfs
   tasks:
     - name: clone-sources
-      taskRef:
-        name: git-clone
       params:
         - name: url
           value: $(params.github-repo-url)
         - name: revision
           value: $(params.github-repo-revision)
-        # just to do a fresh clone, as we already have the directory cloned
-        # to reuse it we can exlude this step
         - name: deleteExisting
           value: 'true'
+      taskRef:
+        kind: Task
+        name: git-clone
       workspaces:
         - name: output
           workspace: source
     - name: build-java-test
-      taskRef:
-        name: maven
-      runAfter:
-        - clone-sources
       params:
         - name: GOALS
-          value: ['-pl', '$(params.context-dir)', '-B', 'clean', 'test']
+          value:
+            - '-pl'
+            - $(params.context-dir)
+            - '-B'
+            - clean
+            - test
+      runAfter:
+        - clone-sources
+      taskRef:
+        kind: Task
+        name: maven
       workspaces:
         - name: maven-settings
           workspace: maven-settings
         - name: source
           workspace: source
     - name: build-java-app
-      taskRef:
-        name: maven
-      runAfter:
-        - build-java-test
       params:
         - name: GOALS
           value:
-            [
-              '-pl',
-              '$(params.context-dir)',
-              '-B',
-              '-DskipTests',
-              'clean',
-              'package',
-            ]
+            - '-pl'
+            - $(params.context-dir)
+            - '-B'
+            - '-DskipTests'
+            - clean
+            - package
+      runAfter:
+        - build-java-test
+      taskRef:
+        kind: Task
+        name: maven
       workspaces:
         - name: maven-settings
           workspace: maven-settings
         - name: source
           workspace: source
     - name: build-java-app-image
-      taskRef:
-        name: buildah
-      runAfter:
-        - build-java-app
       params:
         - name: CONTEXT
-          value: '$(params.context-dir)'
+          value: $(params.context-dir)
         - name: IMAGE
-          value: '$(params.image-name)'
-        # since pushing to internal registry we skip TLS verify
+          value: $(params.image-name)
+        - name: STORAGE_DRIVER
+          value: "$(params.storageDriver)"
         - name: TLSVERIFY
           value: 'false'
+      runAfter:
+        - build-java-app
+      taskRef:
+        kind: ClusterTask
+        name: buildah
       workspaces:
         - name: source
           workspace: source
     - name: deploy-kn-service
-      taskRef:
-        name: kn
-      runAfter:
-        - build-java-app-image
       params:
         - name: ARGS
           value:
-            - 'service'
-            - 'create'
-            - '$(params.kn-service-name)'
+            - service
+            - create
+            - $(params.kn-service-name)
             - '--force'
-            - '--image=$(params.image-name)@$(tasks.build-java-app-image.results.IMAGE_DIGEST)' #<.>
+            - >-
+              --image=$(params.image-name)@$(tasks.build-java-app-image.results.IMAGE_DIGEST)
+      runAfter:
+        - build-java-app-image
+      taskRef:
+        kind: Task
+        name: kn
+  workspaces:
+    - name: source
+    - name: maven-settings

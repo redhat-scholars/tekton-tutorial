@@ -16,11 +16,11 @@ ifdef::openshift[]
 All exercises of this chapter will be done a namesapace `{chapter-namespace}`, lets create the project if not done earlier and switch to the `{chapter-namespace}` namespace:
 endif::[]
 
-As part of this exercise we will need to install the following external tasks to be installed in the namespace:
+As part of this exercise we will need to install the following external tasks and cluster tasks to be installed in the namespace:
 
 - https://github.com/tektoncd/catalog/tree/master/task/git-clone/0.1[git-clone]
 - https://github.com/tektoncd/catalog/tree/master/task/maven/0.1[maven]
-- https://github.com/tektoncd/catalog/tree/master/task/buildah/0.1[buildah]
+- https://raw.githubusercontent.com/openshift/tektoncd-pipeline-operator/master/deploy/resources/addons/02-clustertasks/buildah/buildah-task.yaml[buildah]
 - https://github.com/tektoncd/catalog/tree/master/task/kn/0.1[knative client(kn)]
 
 [.console-input]
@@ -29,7 +29,7 @@ As part of this exercise we will need to install the following external tasks to
 kubectl apply -n {chapter-namespace} \
   -f https://raw.githubusercontent.com/tektoncd/catalog/master/task/git-clone/0.1/git-clone.yaml \
   -f https://raw.githubusercontent.com/tektoncd/catalog/master/task/maven/0.1/maven.yaml \
-  -f https://raw.githubusercontent.com/tektoncd/catalog/master/task/buildah/0.1/buildah.yaml \
+  -f https://raw.githubusercontent.com/openshift/tektoncd-pipeline-operator/master/deploy/resources/addons/02-clustertasks/buildah/buildah-task.yaml \
   -f https://raw.githubusercontent.com/tektoncd/catalog/master/task/kn/0.1/kn.yaml \
   -f link:{github-repo}/{workspaces-repo}/list-directory-task.yaml[pass:[$TUTORIAL_HOME]/{workspaces-repo}/list-directory-task.yaml]
 ----
@@ -118,7 +118,7 @@ In OpenShift we can use routes to expose the service if we need to access it fro
 [.console-input]
 [source,bash,subs="+macros,+attributes"]
 ----
-{cli} expose svc -n {chapter-namespace} nexus
+oc expose svc -n {chapter-namespace} nexus
 ----
 ifndef::openshift[]
 --
@@ -148,8 +148,8 @@ You can check the ConfigMap contents using the command:
 [.console-input]
 [source,bash,subs="+macros,+attributes"]
 ----
-{cli} get -n {chapter-namespace} cm maven-settings -oyaml \
-  | yq r - data['settings.xml']
+{cli} get -n {chapter-namespace} cm maven-settings -o yaml \
+    -o jsonpath='{.data}'
 ----
 
 The output of the above command should be same as in link:{github-repo}/{workspaces-repo}/maven-settings.xml[maven-settings.xml^].

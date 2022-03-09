@@ -6,6 +6,13 @@ metadata:
     tekton.dev/pipeline: greeter-app-build
 spec:
   serviceAccountName: build-bot
+  params:
+    - name: app-profile
+      value: quarkus
+    # enable this for OpenShift
+    #    - name: storageDriver
+    #      value: vfs
+    -
   pipelineRef:
     name: greeter-app-build
   workspaces:

@@ -5,11 +5,11 @@
 ** xref:setup.adoc#deploy-tekton[Install Tekton]
 ** xref:setup.adoc#install-tekton-cli[Install Tekton CLI]
 
-* xref:pipeline-resources.adoc[Pipeline Resources]
-** xref:pipeline-resources.adoc#tekton-res-prerequisite[Prerequisites]
-** xref:pipeline-resources.adoc#tekton-res-create[Create Pipeline Resource]
-** xref:pipeline-resources.adoc#tekton-res-deploy[Deploy Pipeline Resource]
-** xref:pipeline-resources.adoc#tkn-see-what-you-have-deployed[See what you have deployed]
+//* xref:pipeline-resources.adoc[Pipeline Resources]
+//** xref:pipeline-resources.adoc#tekton-res-prerequisite[Prerequisites]
+//** xref:pipeline-resources.adoc#tekton-res-create[Create Pipeline Resource]
+//** xref:pipeline-resources.adoc#tekton-res-deploy[Deploy Pipeline Resource]
+//** xref:pipeline-resources.adoc#tkn-see-what-you-have-deployed[See what you have deployed]
 
 * xref:tasks.adoc[Tasks]
 ** xref:tasks.adoc#tekton-tasks][Tasks]

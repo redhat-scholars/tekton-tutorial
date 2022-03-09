@@ -5,11 +5,14 @@ metadata:
   name: cloud-native-app-serverless
   namespace: openshift
   labels:
+    app.kubernetes.io/instance: tekton-tutorial-greeter
+    app.kubernetes.io/name: tekton-tutorial-greeter
     pipeline.openshift.io/runtime: java
+    pipeline.openshift.io/runtime-version: openjdk-11-el7
     pipeline.openshift.io/type: knative
 spec:
   description: >-
-    The Pipline to buld and deploy the Hello World Java App https://github.com/redhat-scholars/tekton-tutorial-greeter as Knative Service.
+    The Pipeline to build and deploy the Hello World Java App https://github.com/redhat-scholars/tekton-tutorial-greeter as Knative Service.
   params:
     - name: IMAGE_NAME
       description: >-
@@ -98,6 +101,9 @@ spec:
           value: '$(params.APP_PROFILE)'
         - name: IMAGE
           value: '$(params.IMAGE_NAME)'
+        # needed for OpenShift buildah run as vfs is the default storage driver
+        - name: STORAGE_DRIVER
+          value: vfs
         # since pushing to internal registry we skip TLS verify
         - name: TLSVERIFY
           value: 'false'

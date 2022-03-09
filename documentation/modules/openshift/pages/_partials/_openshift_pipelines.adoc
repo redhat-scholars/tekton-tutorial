@@ -141,7 +141,7 @@ As we will need the updated version of `kn`, `maven` and `buildah` clustertasks,
 ----
 oc replace \
   -f https://raw.githubusercontent.com/tektoncd/catalog/master/task/buildah/0.1/buildah.yaml --dry-run=client -oyaml \
-  | yq w - kind ClusterTask \
+  | yq '.kind="ClusterTask"' \
   | oc replace -f -
 ----
 
@@ -158,7 +158,7 @@ clustertask.tekton.dev/buildah replaced
 ----
 oc replace \
   -f https://raw.githubusercontent.com/tektoncd/catalog/master/task/maven/0.1/maven.yaml --dry-run=client -oyaml \
-  | yq w - kind ClusterTask \
+  | yq '.kind="ClusterTask"' \
   | oc replace -f -
 ----
 
@@ -175,7 +175,7 @@ clustertask.tekton.dev/maven replaced
 ----
 oc replace \
   -f https://raw.githubusercontent.com/tektoncd/catalog/master/task/kn/0.1/kn.yaml --dry-run=client -oyaml \
-  | yq w - kind ClusterTask \
+  | yq '.kind="ClusterTask"' \
   | oc replace -f -
 ----
 
@@ -225,7 +225,7 @@ Hit btn:[Cancel] button to cancel the deployment. We will do a fresh deployment 
 [#ocp-create-java-ksvc-pipeline-tpl]
 == Create Pipeline Template for Java and Knative Service
 
-As part of this excecise we will deploy a Pipeline Template, that will allow us to deploy the a Java Knative Service application using ODC.
+As part of this exercise we will deploy a Pipeline Template, that will allow us to deploy the a Java Knative Service application using ODC.
 
 .link:{github-repo}/openshift/cloud-native-app-serverless-pipeline.yaml[Java and Knative Pipeline Template]
 [source,yaml,subs="macros+,+attributes,+quotes"]

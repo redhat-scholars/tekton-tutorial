@@ -11,6 +11,9 @@ spec:
   params:
     - name: context-dir
       value: quarkus
+  # enable this for OpenShift
+#    - name: storageDriver
+#      value: vfs
   workspaces:
     - name: maven-settings
       configmap:

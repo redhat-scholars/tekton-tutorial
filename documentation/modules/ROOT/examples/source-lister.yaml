@@ -1,18 +1,68 @@
----
 apiVersion: tekton.dev/v1beta1
 kind: Task
 metadata:
   name: source-lister
+  namespace: tektontutorial
 spec:
   params:
-    - name: contextDir
-      description: "The context directory within the repository for sources"
-      default: quarkus
-  resources:
-    inputs:
-      - name: source
-        type: git
+    - default: 'https://github.com/redhat-scholars/tekton-tutorial-greeter'
+      name: url
+      type: string
+    - default: master
+      name: revision
+      type: string
+    - default: ''
+      name: subdirectory
+      type: string
+    - default: quarkus
+      description: The context directory within the repository for sources
+      name: contextDir
+      type: string
+    - default: 'false'
+      description: >-
+        defines if http.sslVerify should be set to true or false in the global
+        git config
+      name: sslVerify
+      type: string
+  results:
+    - description: The precise commit SHA that was fetched by this Task.
+      name: commit
+    - description: The precise URL that was fetched by this Task.
+      name: url
   steps:
+    - image: 'gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/git-init:v0.15.2'
+      name: clone
+      resources: {}
+      script: |
+        CHECKOUT_DIR="$(workspaces.source.path)/$(params.subdirectory)"
+        cleandir() {
+          # Delete any existing contents of the repo directory if it exists.
+          #
+          # We don't just "rm -rf $CHECKOUT_DIR" because $CHECKOUT_DIR might be "/"
+          # or the root of a mounted volume.
+          if [[ -d "$CHECKOUT_DIR" ]] ; then
+            # Delete non-hidden files and directories
+            rm -rf "$CHECKOUT_DIR"/*
+            # Delete files and directories starting with . but excluding ..
+            rm -rf "$CHECKOUT_DIR"/.[!.]*
+            # Delete files and directories starting with .. plus any other character
+            rm -rf "$CHECKOUT_DIR"/..?*
+          fi
+        }
+        /ko-app/git-init \
+          -url "$(params.url)" \
+          -revision "$(params.revision)" \
+          -path "$CHECKOUT_DIR" \
+          -sslVerify="$(params.sslVerify)" 
+        cd "$CHECKOUT_DIR"
+        RESULT_SHA="$(git rev-parse HEAD)"
+        printf "%s" "${RESULT_SHA}" > "$(results.commit.path)"
+        printf "%s" "${PARAM_URL}" > "$(results.url.path)"
     - name: ls-build-sources
+      command: ["ls", "-ltr", "/workspace/source/$(params.contextDir)"]
       image: busybox
-      command: ["ls", "-ltr", "/workspace/source/$(inputs.params.contextDir)"]
+      resources: {}
+      workingDir: /workspace/source/$(params.contextDir)
+  workspaces:
+    - description: The git repo will be cloned onto the volume backing this workspace
+      name: source
