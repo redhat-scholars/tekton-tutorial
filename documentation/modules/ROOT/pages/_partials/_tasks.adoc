@@ -603,7 +603,9 @@ The following section explains the three Task `Steps`. The <<tekton-task-deploy>
 [source,yaml,subs="+macros,attributes+"]
 ----
 - name: build-and-push-image
-  image: quay.io/buildah/stable
+  image: quay.io/lordofthejars/buildah
+  # minikube
+  # image: quay.io/buildah/stable
   script: |
         #!/usr/bin/env bash
         buildah --storage-driver=$STORAGE_DRIVER bud --layers -t $DESTINATION_IMAGE $CONTEXT_DIR 
