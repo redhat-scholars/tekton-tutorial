@@ -1288,7 +1288,9 @@ The resulted linux container image will be pushed to the container registry.</p>
 <div class="title"><a href="https://github.com/redhat-scholars/tekton-tutorial/blob/master/tasks/build-app-task.yaml#L44-L62" target="_blank" rel="noopener">step-build-and-push-image</a></div>
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">- name: build-and-push-image
-  image: quay.io/buildah/stable
+  image: quay.io/lordofthejars/buildah
+  # minikube
+  # image: quay.io/buildah/stable
   script: |
         #!/usr/bin/env bash
         buildah --storage-driver=$STORAGE_DRIVER bud --layers -t $DESTINATION_IMAGE $CONTEXT_DIR
