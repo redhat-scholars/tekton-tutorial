@@ -15,7 +15,7 @@ include::partial$tekton-nav-to-folder.adoc[tags="folder-all,workspaces"]
 
 In many partical usecases of Pipelines it becomes crucial for you to share the filesystem between Tasks and between Steps. The filesystem could typically hold a clone github repostiory, a ConfigMap or a secret. 
 
-A Task step and Pipeline task can share a common filesystem via a Tekton `workspace`. This helps Pipelines to pick up changes form one task to another task in the Pipeline workflow.
+A Task step and Pipeline task can share a common filesystem via a Tekton `workspace`. This helps Pipelines to pick up changes from one task to another task in the Pipeline workflow.
 
 [#ws-overview]
 == Overview
