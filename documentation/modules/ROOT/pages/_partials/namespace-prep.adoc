@@ -13,7 +13,7 @@ kubectl config set-context --current --namespace {chapter-namespace}
 ----
 
 ifdef::openshift[]
-All exercises of this chapter will be done a namesapace `{chapter-namespace}`, lets create the project if not done earlier and switch to the `{chapter-namespace}` namespace:
+All exercises of this chapter will be done in a namespace `{chapter-namespace}`, lets create the project if not done earlier and switch to the `{chapter-namespace}` namespace:
 endif::[]
 
 As part of this exercise we will need to install the following external tasks and cluster tasks to be installed in the namespace:
