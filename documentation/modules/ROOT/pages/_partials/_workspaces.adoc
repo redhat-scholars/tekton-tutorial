@@ -473,8 +473,8 @@ include::ROOT:example$greeter-app-deploy.yaml[]
 ----
 
 <.> The parameters for the Pipeline
-<.> A workpace named `source`, we will map it to the PVC`tekton-tutorial-sources`  in PipelineRun in upcoming section
-<.> A workapce named `maven-settings`, we will map it to ConfigMap `maven-settings` in the PipelineRun in upcming section
+<.> A workspace named `source`, we will map it to the PVC`tekton-tutorial-sources`  in PipelineRun in upcoming section
+<.> A workspace named `maven-settings`, we will map it to ConfigMap `maven-settings` in the PipelineRun in upcoming section
 <.> The `buildah` build image task returns a output. We use the that as part of the `--image` parameter to `kn` Task
 
 [#ws-create-pipeline]
