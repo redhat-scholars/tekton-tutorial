@@ -288,7 +288,7 @@ If all went well the list directory should show the directory listing of {tutori
 
 - What is a workspace
 - How to bind a workspace to a TaskRun using PVC
-- How to share the workaapce across multiple TaskRuns 
+- How to share the workspace across multiple TaskRuns
 
 [#ws-use-cm]
 == Using ConfigMap as Workspace
