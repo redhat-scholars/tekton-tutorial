@@ -15,7 +15,7 @@ include::partial$tekton-nav-to-folder.adoc[tags="folder-all,workspaces"]
 
 In many partical usecases of Pipelines it becomes crucial for you to share the filesystem between Tasks and between Steps. The filesystem could typically hold a clone github repostiory, a ConfigMap or a secret. 
 
-A Task step and Pipeline task can share a common filesystem via a Tekton `workspace`. This helps Pipelines to pick up changes form one task to another task in the Pipeline workflow.
+A Task step and Pipeline task can share a common filesystem via a Tekton `workspace`. This helps Pipelines to pick up changes from one task to another task in the Pipeline workflow.
 
 [#ws-overview]
 == Overview
@@ -288,7 +288,7 @@ If all went well the list directory should show the directory listing of {tutori
 
 - What is a workspace
 - How to bind a workspace to a TaskRun using PVC
-- How to share the workaapce across multiple TaskRuns 
+- How to share the workspace across multiple TaskRuns
 
 [#ws-use-cm]
 == Using ConfigMap as Workspace
@@ -473,8 +473,8 @@ include::ROOT:example$greeter-app-deploy.yaml[]
 ----
 
 <.> The parameters for the Pipeline
-<.> A workpace named `source`, we will map it to the PVC`tekton-tutorial-sources`  in PipelineRun in upcoming section
-<.> A workapce named `maven-settings`, we will map it to ConfigMap `maven-settings` in the PipelineRun in upcming section
+<.> A workspace named `source`, we will map it to the PVC`tekton-tutorial-sources`  in PipelineRun in upcoming section
+<.> A workspace named `maven-settings`, we will map it to ConfigMap `maven-settings` in the PipelineRun in upcoming section
 <.> The `buildah` build image task returns a output. We use the that as part of the `--image` parameter to `kn` Task
 
 [#ws-create-pipeline]
