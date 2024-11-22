@@ -441,7 +441,7 @@ Currently, there is an incompatibility between Tekton pipelines webhook and Mini
 <p>In many partical usecases of Pipelines it becomes crucial for you to share the filesystem between Tasks and between Steps. The filesystem could typically hold a clone github repostiory, a ConfigMap or a secret.</p>
 </div>
 <div class="paragraph">
-<p>A Task step and Pipeline task can share a common filesystem via a Tekton <code>workspace</code>. This helps Pipelines to pick up changes form one task to another task in the Pipeline workflow.</p>
+<p>A Task step and Pipeline task can share a common filesystem via a Tekton <code>workspace</code>. This helps Pipelines to pick up changes from one task to another task in the Pipeline workflow.</p>
 </div>
 </div>
 </div>
@@ -1129,7 +1129,7 @@ spec:
 <p>How to bind a workspace to a TaskRun using PVC</p>
 </li>
 <li>
-<p>How to share the workaapce across multiple TaskRuns</p>
+<p>How to share the workspace across multiple TaskRuns</p>
 </li>
 </ul>
 </div>
@@ -1509,11 +1509,11 @@ spec:
 </tr>
 <tr>
 <td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>A workpace named <code>source</code>, we will map it to the PVC`tekton-tutorial-sources`  in PipelineRun in upcoming section</td>
+<td>A workspace named <code>source</code>, we will map it to the PVC`tekton-tutorial-sources`  in PipelineRun in upcoming section</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="3"></i><b>3</b></td>
-<td>A workapce named <code>maven-settings</code>, we will map it to ConfigMap <code>maven-settings</code> in the PipelineRun in upcming section</td>
+<td>A workspace named <code>maven-settings</code>, we will map it to ConfigMap <code>maven-settings</code> in the PipelineRun in upcoming section</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="4"></i><b>4</b></td>
